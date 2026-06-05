@@ -1,0 +1,20 @@
+/* 临床研究样本量计算案例教程 - 自定义样式 */
+
+.hero-banner {
+  text-align: center;
+  padding: 3rem 1rem;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #2c3e50, #3498db);
+  color: white;
+  border-radius: 8px;
+}
+
+.hero-banner h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero-banner .subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}

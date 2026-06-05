@@ -1,0 +1,45 @@
+project:
+  type: book
+
+book:
+  title: "临床研究样本量计算案例教程"
+  author: "Zeng Zhiyu"
+  date: "2025"
+  date-format: "YYYY"
+  chapters:
+    - index.qmd
+    - S0_preface.qmd
+    - "S1 1Mean.qmd"
+    - "S2 1Proportion.qmd"
+    - "S3 2Means.qmd"
+    - "S4 2Proportions.qmd"
+    - "S5 noninferiorMeans.qmd"
+    - "S6 noninferiorProportions.qmd"
+    - "S7 SurvivalAnalysis.qmd"
+    - "S8 crossover.qmd"
+    - "S9 cluster.qmd"
+    - "S10 诊断试验.qmd"
+    - "S11 观察性研究.qmd"
+    - "S12 GS.qmd"
+    - "S13 SSR.qmd"
+    - "S14 Multiplicityfactorial.qmd"
+    - "S15 simulation.qmd"
+
+  appendices:
+    - "S16 Appendix.qmd"
+
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    code-link: true
+    highlight-style: github
+    css: styles.css
+
+lang: zh

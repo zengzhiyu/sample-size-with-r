@@ -1,0 +1,133 @@
+# 样本量模拟计算
+
+Testing at each analysis can be performed using the Miettinen and Nurminen ([Miettinen and Nurminen 1985](https://keaven.github.io/gsd-tech-manual/references.html#ref-MandN)) method.
+
+\# Show that power is 90% using simulation
+
+Z \<- [simBinomial](https://keaven.github.io/gsDesign/reference/varBinomial.html)(
+
+nsim = 100000,
+
+p1 = 0.15,
+
+p2 = 0.1,
+
+n1 = 1836 / 2,
+
+n2 = 1836 / 2
+
+)
+
+[mean](https://rdrr.io/r/base/mean.html)(Z \>= [qnorm](https://rdrr.io/r/stats/Normal.html)(0.975))
+
+#\> \[1\] 0.90258
+
+Under the null hypothesis, we have:
+
+\# Show that Type I error is 2.5%
+
+Z \<- [simBinomial](https://keaven.github.io/gsDesign/reference/varBinomial.html)(
+
+nsim = 100000,
+
+p1 = 0.125,
+
+p2 = 0.125,
+
+n1 = 1836 / 2,
+
+n2 = 1836 / 2
+
+)
+
+[mean](https://rdrr.io/r/base/mean.html)(Z \>= [qnorm](https://rdrr.io/r/stats/Normal.html)(0.975))
+
+#\> \[1\] 0.02416
+
+[1  Introduction -- gsDesign Technical Manual](https://keaven.github.io/gsd-tech-manual/intro.html)
+
+[**library**](https://rdrr.io/r/base/library.html)([simtrial](https://merck.github.io/simtrial/))
+
+[**library**](https://rdrr.io/r/base/library.html)([dplyr](https://dplyr.tidyverse.org/))
+
+xx \<- simfix(
+
+nsim = 1000,
+
+sampleSize = 12362,
+
+targetEvents = 617,
+
+totalDuration = 6,
+
+enrollRates = tibble::[tibble](https://tibble.tidyverse.org/reference/tibble.html)(
+
+duration = 2,
+
+rate = 12362 / 2
+
+),
+
+failRates = tibble::[tibble](https://tibble.tidyverse.org/reference/tibble.html)(
+
+Stratum = \"All\",
+
+duration = 6,
+
+failRate = -[log](https://rdrr.io/r/base/Log.html)(1 - 0.015),
+
+hr = 1,
+
+dropoutRate = -[log](https://rdrr.io/r/base/Log.html)(0.85)
+
+),
+
+timingType = 3
+
+)
+
+xx [%\>%](https://magrittr.tidyverse.org/reference/pipe.html)
+
+[mutate](https://dplyr.tidyverse.org/reference/mutate.html)(se = [sqrt](https://rdrr.io/r/base/MathFun.html)(4 / Events)) [%\>%](https://magrittr.tidyverse.org/reference/pipe.html)
+
+[summarize](https://dplyr.tidyverse.org/reference/summarise.html)(
+
+Events = [mean](https://rdrr.io/r/base/mean.html)(Events),
+
+Duration = [mean](https://rdrr.io/r/base/mean.html)(Duration),
+
+Power = [mean](https://rdrr.io/r/base/mean.html)(lnhr + [qnorm](https://rdrr.io/r/stats/Normal.html)(0.975) \* se \< [log](https://rdrr.io/r/base/Log.html)(1.3))
+
+)
+
+#\> Events Duration Power
+
+#\> 617.53 6.000395 0.907
+
+例2-9 脉冲电场消融（PFA）治疗房颤的PULSED AF研究^1^，用了计算机模拟的方法计算样本量。主要有效性终点为12个月消融成功率，阵发性房颤组的目标值50%，预期值68%，持续性房颤组的目标值40%，预期值54%，检验效能90%，单侧α=0.025，每组各需90例和150例患者；主要安全性终点为无严重不良事件率，目标值13%，预期值5%，检验效能90%，单侧α=0.025，每组需138例患者。最终研究的样本量确定为阵发性房颤和持续性房颤各150例。
+
+该例采用了计算机模拟的方法估计样本量，正态近似法计算的结果为针对有效性终点，阵发性房颤组77例，持续性房颤组例131例，针对安全性终点每组138例；而确切最小值分别为：81，139，138；确切保守法分别为86，139，147。
+
+library(gsDesign)
+
+nBinomial1Sample(
+
+p0 = 0.9,
+
+p1 = 0.95,
+
+alpha = 0.025,
+
+beta = NULL,
+
+n = 200:250,
+
+outtype = 1,
+
+conservative = FALSE
+
+)
+
+**References:**
+
+1\. Verma A, Haines DE, Boersma LV, et al. Pulsed Field Ablation for the Treatment of Atrial Fibrillation: PULSED AF Pivotal Trial. CIRCULATION 2023.

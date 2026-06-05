@@ -1,0 +1,56 @@
+{
+  "index.qmd": {
+    "index.html": "89ac865d"
+  },
+  "S0_preface.qmd": {
+    "S0_preface.html": "07a8f760"
+  },
+  "S1 1Mean.qmd": {
+    "S1 1Mean.html": "13b54d71"
+  },
+  "S2 1Proportion.qmd": {
+    "S2 1Proportion.html": "9ae9715e"
+  },
+  "S3 2Means.qmd": {
+    "S3 2Means.html": "cd781529"
+  },
+  "S4 2Proportions.qmd": {
+    "S4 2Proportions.html": "696332c2"
+  },
+  "S5 noninferiorMeans.qmd": {
+    "S5 noninferiorMeans.html": "e49ac8b8"
+  },
+  "S6 noninferiorProportions.qmd": {
+    "S6 noninferiorProportions.html": "00516da5"
+  },
+  "S7 SurvivalAnalysis.qmd": {
+    "S7 SurvivalAnalysis.html": "3705f42a"
+  },
+  "S8 crossover.qmd": {
+    "S8 crossover.html": "7d5f4fb1"
+  },
+  "S9 cluster.qmd": {
+    "S9 cluster.html": "79c2e27f"
+  },
+  "S10 诊断试验.qmd": {
+    "S10 诊断试验.html": "f4ae675b"
+  },
+  "S11 观察性研究.qmd": {
+    "S11 观察性研究.html": "35e6ba45"
+  },
+  "S12 GS.qmd": {
+    "S12 GS.html": "23eacd99"
+  },
+  "S13 SSR.qmd": {
+    "S13 SSR.html": "35337102"
+  },
+  "S14 Multiplicityfactorial.qmd": {
+    "S14 Multiplicityfactorial.html": "7e710c11"
+  },
+  "S15 simulation.qmd": {
+    "S15 simulation.html": "5f7fae45"
+  },
+  "S16 Appendix.qmd": {
+    "S16 Appendix.html": "7e6decfc"
+  }
+}
