@@ -1,19 +1,11 @@
 ---
-title: "临床研究样本量计算案例教程"
+title: "R语言临床研究样本量计算案例教程"
 author:
   - "Zeng Zhiyu"
   - "Li Qing"
   - "Liu Qing"
 date: "2025"
 number-sections: false
-format:
-  html:
-    include-before-body:
-      - text: |
-          <div class="hero-banner">
-            <h1>临床研究样本量计算案例教程</h1>
-            <p class="subtitle">以 R 语言为核心的实用样本量计算指南 · ver 0.1</p>
-          </div>
 ---
 
 ## 关于本书 {.unnumbered}

@@ -2,7 +2,7 @@ project:
   type: book
 
 book:
-  title: "临床研究样本量计算案例教程"
+  title: "R语言临床研究样本量计算案例教程"
   author: "Zeng Zhiyu"
   date: "2025"
   date-format: "YYYY"
