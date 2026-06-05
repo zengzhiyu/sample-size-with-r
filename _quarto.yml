@@ -4,7 +4,7 @@ project:
 book:
   title: "R语言临床研究样本量计算案例教程"
   author: "Zeng Zhiyu"
-  date: "2025"
+  date: "2025 · ver 0.1"
   date-format: "YYYY"
   chapters:
     - index.qmd

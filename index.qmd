@@ -4,7 +4,7 @@ author:
   - "Zeng Zhiyu"
   - "Li Qing"
   - "Liu Qing"
-date: "2025"
+date: "2025 · ver 0.1"
 number-sections: false
 ---
 
