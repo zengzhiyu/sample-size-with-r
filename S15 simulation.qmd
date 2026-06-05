@@ -1,4 +1,4 @@
-# 样本量模拟计算
+# 16. 样本量模拟计算
 
 Testing at each analysis can be performed using the Miettinen and Nurminen ([Miettinen and Nurminen 1985](https://keaven.github.io/gsd-tech-manual/references.html#ref-MandN)) method.
 

@@ -5,6 +5,7 @@ author:
   - "Li Qing"
   - "Liu Qing"
 date: "2025"
+number-sections: false
 format:
   html:
     include-before-body:
