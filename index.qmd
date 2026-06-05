@@ -4,8 +4,13 @@ author:
   - "Zeng Zhiyu"
   - "Li Qing"
   - "Liu Qing"
-date: "2025 · ver 0.1"
+date: "2025"
 number-sections: false
+format:
+  html:
+    include-before-body:
+      - text: |
+          <div class="book-version">ver 0.1</div>
 ---
 
 ## 关于本书 {.unnumbered}
