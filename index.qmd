@@ -12,7 +12,7 @@ format:
       - text: |
           <div class="hero-banner">
             <h1>临床研究样本量计算案例教程</h1>
-            <p class="subtitle">以 R 语言为核心的实用样本量计算指南</p>
+            <p class="subtitle">以 R 语言为核心的实用样本量计算指南 · ver 0.1</p>
           </div>
 ---
 
