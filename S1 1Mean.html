@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2. 单组均数的样本量计算 – R语言临床研究样本量计算案例教程</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./S2 1Proportion.html" rel="next">
+<link href="./S0_preface.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-6b6957c917596b414ec0b78690761e87.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-e9b94c5c92cfde000641fbcd395a1216.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./S1 1Mean.html"><span class="chapter-title">2. 单组均数的样本量计算</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">R语言临床研究样本量计算案例教程</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R语言临床研究样本量计算案例教程</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S0_preface.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">1. 前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S1 1Mean.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">2. 单组均数的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S2 1Proportion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">3. 单组率的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S3 2Means.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">4. 两组均数的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S4 2Proportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">5. 两组率的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S5 noninferiorMeans.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">6. 两组均数比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S6 noninferiorProportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">7. 两组率比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S7 SurvivalAnalysis.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">8. 生存分析的研究设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S8 crossover.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">9. 交叉设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S9 cluster.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">10. 整群随机研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S10 诊断试验.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">11. 诊断试验</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S11 观察性研究.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 观察性研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S12 GS.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 成组序贯设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S13 SSR.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">13. 样本量重新估计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S14 Multiplicityfactorial.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">14. 多重性与析因设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S15 simulation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">15. 样本量模拟计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S16 WinRatio.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">16. Win Ratio 样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">附录</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S17 Appendix.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">附录</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#单组目标值法" id="toc-单组目标值法" class="nav-link active" data-scroll-target="#单组目标值法">单组目标值法</a></li>
+  <li><a href="#单样本均数与总体均数的比较" id="toc-单样本均数与总体均数的比较" class="nav-link" data-scroll-target="#单样本均数与总体均数的比较">单样本均数与总体均数的比较</a></li>
+  <li><a href="#配对设计" id="toc-配对设计" class="nav-link" data-scroll-target="#配对设计">配对设计</a></li>
+  <li><a href="#讨论" id="toc-讨论" class="nav-link" data-scroll-target="#讨论">讨论</a>
+  <ul class="collapse">
+  <li><a href="#检验效能的计算" id="toc-检验效能的计算" class="nav-link" data-scroll-target="#检验效能的计算">检验效能的计算</a></li>
+  <li><a href="#自身前后对照" id="toc-自身前后对照" class="nav-link" data-scroll-target="#自身前后对照">自身前后对照</a></li>
+  <li><a href="#目标值的含义" id="toc-目标值的含义" class="nav-link" data-scroll-target="#目标值的含义">目标值的含义</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-title">2. 单组均数的样本量计算</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> 代码</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>单组（arm，在医疗器械临床研究中多翻译为”组”，而在药物临床试验中常翻译成”臂”，如单臂研究）均数的研究包括均数的单组目标值法、单样本均数与总体均数比较以及配对设计等。</p>
+<p>单组均数的研究设计在本质上都是单样本均数与总体均数的比较，根据预估的样本均值和设定的总体均值或目标值计算样本量。配对设计时样本量计算的结果为对子数。</p>
+<p>单样本均数与总体均数比较的样本量计算公式如下<sup>1-4</sup>：</p>
+<p><span id="_Ref187480325" class="anchor"></span>公式 1‑1 <span class="math inline">\(n = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}}{{(\frac{\delta}{\sigma})}^{2}}\)</span></p>
+<p>其中<span class="math inline">\(\delta\)</span>为样本均数与总体均数的差值，即预期值与目标值的差异μ<sub>T</sub>-μ<sub>0</sub>；<span class="math inline">\(\sigma\)</span>为总体标准差，Z为设定的概率（如I类错误水平α和II类错误水平β）所对应的标准化正态分布的分位数，大家熟知的α为双侧0.05时，Z<sub>(1-0.05/2)</sub>=1.96；β为0.2（即检验的效能或把握度为0.8）时，Z<sub>(1-0..2)</sub>为0.84。从公式可以看出，影响样本量的是样本均数与总体均数的差值以及总体标准差，确切地说样本量与<span class="math inline">\(\frac{\delta}{\sigma}\)</span>的平方成反比，而与样本均数或总体均数各自的具体数值并不直接相关，这个<span class="math inline">\(\frac{\delta}{\sigma}\)</span>在样本量计算领域里常成为效应量。单组均数的研究设计通常采用单侧检验，因此一些统计学书刊上的公式表达为<span class="math inline">\(Z_{1 - \alpha}\)</span>。另外由于对称性，<span class="math inline">\(Z_{1 - \alpha}\)</span>=<span class="math inline">\(- Z_{\alpha}\)</span>，平方后两者相等，因而也有些统计书刊直接采用了<span class="math inline">\(Z_{\alpha}\)</span>或<span class="math inline">\(Z_{\alpha/2}\)</span>的表达方式。本书的样本量计算统一默认为双侧α=0.05，因此采用了<span class="math inline">\(Z_{1 - \alpha/2}\)</span>的表达方式，读者在实际应用时应稍加留意。常见的Z值见<a href="#_Ref186359846">表 1‑1</a>。</p>
+<table class="caption-top table">
+<caption><span id="_Ref186359846" class="anchor"></span>表 1‑1 常见Z值表</caption>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">P</th>
+<th style="text-align: left;"><span class="math display">\[Z_{1 - P/2}\]</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0.005</td>
+<td style="text-align: left;">2.576</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">0.01</td>
+<td style="text-align: left;">2.326</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">0.025</td>
+<td style="text-align: left;">1.960</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">0.05</td>
+<td style="text-align: left;">1.645</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">0.1</td>
+<td style="text-align: left;">1.282</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">0.2</td>
+<td style="text-align: left;">0.842</td>
+</tr>
+</tbody>
+</table>
+<p><a href="#_Ref187480325">公式 1‑1</a>是基于正态分布且总体方差已知情形的推导，亦称Z检验法。对小样本研究或总体方差未知时，宜进行基于t分布的计算，但该法需要进行迭代，无显性公式。好在基于t分布的样本量计算比较稳健，通常在上述公式计算的基础上增加2-3例即可<sup>5</sup>，或者可应用下列校正公式<sup>2</sup>：</p>
+<p>公式 1‑2 <span class="math inline">\(n = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}}{{(\frac{\delta}{\sigma})}^{2}} + \frac{1}{2}Z_{1 - \alpha/2}^{2}\)</span></p>
+<p>利用R语言计算及作图，可清晰地看到样本量随<span class="math inline">\(\frac{\delta}{\sigma}\)</span>的增加而迅速减少（<a href="#_Ref186360017">图 1‑1</a>，<a href="#_Ref186360036">表 1‑2</a>）。</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S1_1Mean/image1.png" style="width:5.76806in;height:4.32639in" class="figure-img"></p>
+<figcaption><span id="_Ref186360017" class="anchor"></span>图 1‑1 样本量随<span class="math inline">\(\frac{\delta}{\sigma}\)</span>增加而迅速减少（α=0.025单侧）</figcaption>
+</figure>
+</div>
+<table class="caption-top table">
+<caption><span id="_Ref186360036" class="anchor"></span>表 1‑2 不同<span class="math inline">\(\frac{\delta}{\sigma}\)</span>、α及β组合下的样本量</caption>
+<colgroup>
+<col style="width: 32%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th rowspan="2" style="text-align: right;"><span class="math display">\[\frac{\delta}{\sigma}\]</span></th>
+<th colspan="2" style="text-align: right;">α=0.025单侧</th>
+<th colspan="2" style="text-align: right;">α=0.05单侧</th>
+</tr>
+<tr class="even">
+<th style="text-align: right;">β=0.2</th>
+<th style="text-align: right;">β=0.1</th>
+<th style="text-align: right;">β=0.2</th>
+<th style="text-align: right;">β=0.1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">787</td>
+<td style="text-align: right;">1053</td>
+<td style="text-align: right;">620</td>
+<td style="text-align: right;">858</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.11</td>
+<td style="text-align: right;">651</td>
+<td style="text-align: right;">871</td>
+<td style="text-align: right;">513</td>
+<td style="text-align: right;">710</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">547</td>
+<td style="text-align: right;">732</td>
+<td style="text-align: right;">431</td>
+<td style="text-align: right;">597</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">467</td>
+<td style="text-align: right;">624</td>
+<td style="text-align: right;">368</td>
+<td style="text-align: right;">509</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">403</td>
+<td style="text-align: right;">539</td>
+<td style="text-align: right;">317</td>
+<td style="text-align: right;">439</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">351</td>
+<td style="text-align: right;">469</td>
+<td style="text-align: right;">277</td>
+<td style="text-align: right;">382</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.16</td>
+<td style="text-align: right;">309</td>
+<td style="text-align: right;">413</td>
+<td style="text-align: right;">243</td>
+<td style="text-align: right;">336</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.17</td>
+<td style="text-align: right;">274</td>
+<td style="text-align: right;">366</td>
+<td style="text-align: right;">216</td>
+<td style="text-align: right;">298</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.18</td>
+<td style="text-align: right;">245</td>
+<td style="text-align: right;">327</td>
+<td style="text-align: right;">193</td>
+<td style="text-align: right;">266</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">293</td>
+<td style="text-align: right;">173</td>
+<td style="text-align: right;">239</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">199</td>
+<td style="text-align: right;">265</td>
+<td style="text-align: right;">156</td>
+<td style="text-align: right;">216</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.21</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">241</td>
+<td style="text-align: right;">142</td>
+<td style="text-align: right;">196</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">165</td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">130</td>
+<td style="text-align: right;">179</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">151</td>
+<td style="text-align: right;">201</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">164</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.24</td>
+<td style="text-align: right;">139</td>
+<td style="text-align: right;">185</td>
+<td style="text-align: right;">109</td>
+<td style="text-align: right;">151</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">128</td>
+<td style="text-align: right;">171</td>
+<td style="text-align: right;">101</td>
+<td style="text-align: right;">139</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">158</td>
+<td style="text-align: right;">93</td>
+<td style="text-align: right;">129</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">147</td>
+<td style="text-align: right;">87</td>
+<td style="text-align: right;">119</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.28</td>
+<td style="text-align: right;">103</td>
+<td style="text-align: right;">136</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">111</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">96</td>
+<td style="text-align: right;">127</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">104</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">71</td>
+<td style="text-align: right;">97</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;">112</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">91</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">79</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">86</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">81</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.34</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">93</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">76</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">72</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.36</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">68</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">79</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.38</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">61</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.39</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">58</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">68</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">55</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.41</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">53</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.42</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">50</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">48</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">46</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">42</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.47</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">41</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">39</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">38</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">36</td>
+</tr>
+</tbody>
+</table>
+<section id="单组目标值法" class="level2">
+<h2 class="anchored" data-anchor-id="单组目标值法">单组目标值法</h2>
+<p><span id="_Ref138313753" class="anchor"></span>例 1‑1 PLATINUM QCA研究<sup>6</sup>评价某冠状动脉支架的临床表现，主要有效性终点为随访9个月时的管腔丢失，目标值0.44mm，预期值0.18±0.50 mm，将其单侧95%置信区间上限与目标值比较，则60例样本可提供99%的检验效能。</p>
+<p>该例采用了单侧95%置信区间，相当于双侧α=0.1，因此Excel表里的α填写了0.1，正态近似法的结果为59，t-校正后为60。</p>
+<p><img src="media/S1_1Mean/image2.png" style="width:3.30139in;height:1.25625in"></p>
+<p>PASS软件Z检验法的结果也是59，操作时依次点击Means, One Mean, Z-Test (Inequality), One-Sample Z-Test。</p>
+<p><img src="media/S1_1Mean/image3.png" style="width:4.06299in;height:2.8937in"></p>
+<p><img src="media/S1_1Mean/image4.png" style="width:5.76806in;height:1.58194in"></p>
+<p>PASS软件t检验的结果同样是60，操作时依次点击Means, One Mean, T-Test (Inequality), One-Sample T-Test。</p>
+<p><img src="media/S1_1Mean/image5.png" style="width:4.40945in;height:3.06693in"></p>
+<p><img src="media/S1_1Mean/image6.png" style="width:5.76806in;height:1.59444in"></p>
+<p>R语言pwrss包Z检验法的结果为59，t检验法的结果为60。</p>
+<p>Z检验法：</p>
+<p>library(pwrss)</p>
+<p>pwrss.z.mean(mu = 0.18, sd = 0.5, mu0 = 0.44, alpha = 0.1, power = 0.99)</p>
+<p>结果输出：</p>
+<pre><code>##  A Mean against a Constant (z Test) 
+##  H0: mu = mu0 
+##  HA: mu != mu0 
+##  ------------------------------ 
+##   Statistical power = 0.99 
+##   n = 59 
+##  ------------------------------ 
+##  Alternative = "not equal" 
+##  Non-centrality parameter = -3.971 
+##  Type I error rate = 0.1 
+##  Type II error rate = 0.01</code></pre>
+<p>t检验法：</p>
+<p>library(pwrss)</p>
+<p>pwrss.t.mean(mu = 0.18, sd = 0.5, mu0 = 0.44, alpha = 0.1, power = 0.99)</p>
+<p>结果输出：</p>
+<pre><code>##  A Mean against a Constant (t Test) 
+##  H0: mu = mu0 
+##  HA: mu != mu0 
+##  ------------------------------ 
+##   Statistical power = 0.99 
+##   n = 60 
+##  ------------------------------ 
+##  Alternative = "not equal" 
+##  Non-centrality parameter = -4.028 
+##  Degrees of freedom = 59 
+##  Type I error rate = 0.1 
+##  Type II error rate = 0.01</code></pre>
+<p>该研究实际入组了100例患者，支架晚期管腔丢失为0.17±0.25 mm，P&lt;0.001，研究达成。</p>
+</section>
+<section id="单样本均数与总体均数的比较" class="level2">
+<h2 class="anchored" data-anchor-id="单样本均数与总体均数的比较">单样本均数与总体均数的比较</h2>
+<p>例 1‑2 <sup>7</sup>为了解高海拔作业工人的心率是否高于一般人群，已知标准差为9.9次/分，心率差异5次/分有临床意义，设α=0.05（单侧），β=0.1，则样本量为36。该例声称采用了正态近似校正法。</p>
+<p>Excel表t-校正法计算结果为35，PASS软件t检验法的结果为35，R语言pwrss包t检验法结果也是35。</p>
+<p>library(pwrss)</p>
+<p>pwrss.t.mean(mu = 5, sd = 9.9, mu0 = 0, alpha = 0.1, power = 0.9)</p>
+<p><span id="_Ref140611292" class="anchor"></span>例 1‑3 医学8年制教材《医学统计学》第3版介绍了一个例子<sup>8</sup>，某医师试验某种升白细胞的疗效，预实验用药前后白细胞差值的标准差为2.5X10<sup>9</sup>/L，要求治疗后白细胞上升1 X10<sup>9</sup>/L为有效，取α=0.05（单侧），β=0.1，则t检验法需56例患者。</p>
+<p>Excel表t-校正法计算结果为55，PASS软件t检验法的结果为55，R语言pwrss包t检验法的结果也是55。</p>
+<p>library(pwrss)</p>
+<p>pwrss.t.mean(mu = 1, sd = 2.5, mu0 = 0, alpha = 0.1, power = 0.9)</p>
+</section>
+<section id="配对设计" class="level2">
+<h2 class="anchored" data-anchor-id="配对设计">配对设计</h2>
+<p>（同源配对与异源配对，前后配对）</p>
+<p>例 1‑4 医学本科教材《医学统计学》第6版介绍了一个例子<sup>1</sup>，研究维生素E缺乏时对肝中维生素A含量的影响。将大鼠配对后分为两组，分别喂以正常饲料和维生素E缺乏饲料。如果肝中维生素A含量差异为700IU/g时认为有意义，已知标准差为500IU/g，取α=0.05，β=0.05，则需8对大鼠。该例声称采用了正态近似法。</p>
+<p>该例按公式1-1计算的实际结果为8.02。Excel表正态近似法计算结果为9，PASS软件Z检验法结果为9，R语言pwrss包Z检验法的结果也是9。</p>
+<p>library(pwrss)</p>
+<p>pwrss.z.mean(mu = 700, sd = 550, mu0 = 0, alpha = 0.05, power = 0.95)</p>
+</section>
+<section id="讨论" class="level2">
+<h2 class="anchored" data-anchor-id="讨论">讨论</h2>
+<p>R语言pwr包可以做一些基本的样本量计算，如本章<a href="#_Ref138313753">例 1‑1</a>，pwr包的正态近似法与t检验法的结果分别为：</p>
+<p>library(pwr)</p>
+<p>pwr.norm.test(d = (0.18-0.44)/0.5, sig.level = 0.05, power = 0.99,</p>
+<p>alternative = "less")</p>
+<p>结果输出：</p>
+<pre><code>## 
+##      Mean power calculation for normal distribution with known variance 
+## 
+##               d = -0.52
+##               n = 58.32264
+##       sig.level = 0.05
+##           power = 0.99
+##     alternative = less</code></pre>
+<p>library(pwr)</p>
+<p>pwr.t.test(d = (0.18-0.44)/0.5, sig.level = 0.05, power = 0.99,</p>
+<p>type = "one.sample", alternative = "less")</p>
+<p>结果输出：</p>
+<pre><code>## 
+##      One-sample t test power calculation 
+## 
+##               n = 59.70845
+##               d = -0.52
+##       sig.level = 0.05
+##           power = 0.99
+##     alternative = less</code></pre>
+<p>这里的d是Cohen's d，即标准化的效应量，对应的是本章开头部分样本量计算公式里的<span class="math inline">\(\frac{\delta}{\sigma}\)</span>。</p>
+<section id="检验效能的计算" class="level3">
+<h3 class="anchored" data-anchor-id="检验效能的计算">检验效能的计算</h3>
+<p>本章<a href="#_Ref138313753">例 1‑1</a> PASS软件计算结果里给出了实际的检验效能，比如t检验法样本量60可提供的实际检验效能为0.99026，R语言也可以提供。</p>
+<p>library(pwr)</p>
+<p>pwr.t.test(d = (0.18-0.44)/0.5, sig.level = 0.05, n = 60,</p>
+<p>type = "one.sample", alternative = "less")</p>
+<p>结果输出：</p>
+<pre><code>## 
+##      One-sample t test power calculation 
+## 
+##               n = 60
+##               d = -0.52
+##       sig.level = 0.05
+##           power = 0.9902613
+##     alternative = less</code></pre>
+<p>或者，</p>
+<p>library(pwrss)</p>
+<p>pwrss.t.mean(mu = 0.18, sd = 0.5, mu0 = 0.44, alpha = 0.1, n = 60)</p>
+<p>结果输出：</p>
+<pre><code>##  A Mean against a Constant (t Test) 
+##  H0: mu = mu0 
+##  HA: mu != mu0 
+##  ------------------------------ 
+##   Statistical power = 0.99 
+##   n = 60 
+##  ------------------------------ 
+##  Alternative = "not equal" 
+##  Non-centrality parameter = -4.028 
+##  Degrees of freedom = 59 
+##  Type I error rate = 0.1 
+##  Type II error rate = 0.01</code></pre>
+</section>
+<section id="自身前后对照" class="level3">
+<h3 class="anchored" data-anchor-id="自身前后对照">自身前后对照</h3>
+<p>本章<a href="#_Ref140611292">例 1‑3</a>是一个自身前后对照的案例，该例在原书中列于样本均数与已知总体均数比较（或配对设计均数比较）之下，也偶有将其归为前后配对的。但需要注意的是在案例的情形下，前后对照并不是一个良好的研究设计，因为治疗以外的因素，比如患者疾病的恢复或进展也会引起前后测量的差异。通常应当再设立一组对照，将治疗组的前后差值与对照组的前后差值进行比较。其实，许多单组目标值设计的研究都存在这个问题，随机对照试验的论证力度显然更强。</p>
+</section>
+<section id="目标值的含义" class="level3">
+<h3 class="anchored" data-anchor-id="目标值的含义">目标值的含义</h3>
+<p>美国食品药品监督管理局（FDA, Food and Drug Administration）2013年发布的《医疗器械关键性临床研究的设计考虑指导原则》<sup>9</sup>提出了客观性能标准（Objective performance criteria，OPC）和性能目标（Performance goal，PG）两个概念，对OPC的定义是：来自临床研究和/或登记研究历史数据的一个数值指标， FDA可据此对安全性或有效性终点进行二分类（通过／失败）的评价与比较。该指导原则指出OPC通常来自监管机构、专业学会或标准组织等，其证据等级高于PG。但这种分类在临床试验的实践中并没有严格的区分，从统计学角度来看这两者用于样本量计算时没有任何差异。另外，该指导原则将单组目标值法限定在了二分类数据。</p>
+<p>我国国家药品监督管理局（药监局）2018年发布的《医疗器械临床试验设计指导原则》<sup>10</sup>指出目标值是专业领域内公认的某类医疗器械的有效性/安全性评价指标所应达到的最低标准，在分类上沿用了FDA的观点，包括客观性能标准和性能目标两种。</p>
+<p>国内临床研究实践中常将OPC和PG通称为目标值，不再细分。中国临床试验生物统计学组2017年发表的《单组目标值临床试验的统计学考虑》<sup>11</sup>认为目标值是指专业领域内公认的某医疗器械的有效性／安全性／性能评价指标所应达到的标准。</p>
+<p>以上这些目标值的定义都值得商榷。FDA的定义描述了目标值的功用，但避开了说明这个数值指标是什么。这个数值指标具体是什么确实不容易说清楚，中国临床试验生物统计学组定义的”应达到的标准”似不够准确，而药监局的定义认为是”最低标准”，实际上当单组研究的结果正好达到该数值时，研究肯定是无法通过假设检验的。我们以高优指标（数值越大越好，比如成功率）为例说明，单组目标值法要求研究结果的双侧95%置信区间的下限（或者单侧97.5%置信区间下限）大于该目标值，所以研究结果正好为目标值时，其置信区间的下限就小于目标值了，研究无法通过，除非样本量为无穷大。因此临床医生有时候会感觉研究设定的目标值太低了，比如2017年美国心律协会等学会发布的《心房颤动导管和外科消融专家共识》<sup>12</sup>建议阵发性房颤导管消融一年成功率的目标值为50%，持续性房颤为40%，其实是要求研究结果的置信区间的下限高于这个值。从单组目标值法样本量计算公式来看，期望值与目标值差异越大，所需样本量越小；如果想以接近目标值的较低的成功率通过检验，需要的样本量是巨大的。</p>
+<p>设置一个较低的目标值和一个较高的期望值有助于减少样本量，但前者需要有临床意义，后者应考虑研究达成的可能性。我们将在下一章讨论目标值的制定。</p>
+<p><strong>References:</strong></p>
+<p>1. 李康, 贺佳. 医学统计学. 6版 ed.&nbsp;北京: 人民卫生出版社; 2013.</p>
+<p>2. 颜艳, 王彤. 医学统计学. 5版 ed.&nbsp;北京: 人民卫生出版社; 2020.</p>
+<p>3. 李卫. 医疗器械临床试验统计方法. 2版 ed.&nbsp;北京: 科学出版社; 2016.</p>
+<p>4. Chow S, Shao J, Wang H, Lokhnygina Y. Sample Size Calculations in Clinical Research. Third Edition ed: CRC Press; 2018.</p>
+<p>5. 陈峰. 医学统计学. 4版 ed.&nbsp;北京: 人民卫生出版社; 2024.</p>
+<p>6. Meredith IT, Whitbourn R, Scott D, et al.&nbsp;PLATINUM QCA: a prospective, multicentre study assessing clinical, angiographic, and intravascular ultrasound outcomes with the novel platinum chromium thin-strut PROMUS Element everolimus-eluting stent in de novo coronary stenoses. EUROINTERVENTION 2011;7:84-90.</p>
+<p>7. 杨土保. 医学科学研究与设计. 2版 ed.&nbsp;北京: 人民卫生出版社; 2013.</p>
+<p>8. 颜虹, 徐勇勇. 医学统计学. 3版 ed.&nbsp;北京: 人民卫生出版社; 2015.</p>
+<p>9. FDA. Design Considerations for Pivotal Clinical Investigations for Medical Devices Guidance for Industry, Clinical Investigators, Institutional Review Boards and Food and Drug Administration Staff; 2013.</p>
+<p>10. 国家药品监督管理局. 医疗器械临床试验设计指导原则; 2018.</p>
+<p>11. 李卫, 赵耐青. 单组目标值临床试验的统计学考虑. 中国卫生统计 2017;34:505-8.</p>
+<p>12. Calkins H, Hindricks G, Cappato R, et al.&nbsp;2017 HRS/EHRA/ECAS/APHRS/SOLAECE expert consensus statement on catheter and surgical ablation of atrial fibrillation: Executive summary. HEART RHYTHM 2017;14:e445-94.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./S0_preface.html" class="pagination-link" aria-label="1. 前言">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">1. 前言</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./S2 1Proportion.html" class="pagination-link" aria-label="3. 单组率的样本量计算">
+        <span class="nav-page-text"><span class="chapter-title">3. 单组率的样本量计算</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">源代码</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># 2. 单组均数的样本量计算</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>单组（arm，在医疗器械临床研究中多翻译为"组"，而在药物临床试验中常翻译成"臂"，如单臂研究）均数的研究包括均数的单组目标值法、单样本均数与总体均数比较以及配对设计等。</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>单组均数的研究设计在本质上都是单样本均数与总体均数的比较，根据预估的样本均值和设定的总体均值或目标值计算样本量。配对设计时样本量计算的结果为对子数。</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>单样本均数与总体均数比较的样本量计算公式如下^1-4^：</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>[]{#_Ref187480325 .anchor}公式 1‑1 $n = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}}{{(\frac{\delta}{\sigma})}^{2}}$</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>其中$\delta$为样本均数与总体均数的差值，即预期值与目标值的差异μ~T~-μ~0~；$\sigma$为总体标准差，Z为设定的概率（如I类错误水平α和II类错误水平β）所对应的标准化正态分布的分位数，大家熟知的α为双侧0.05时，Z~(1-0.05/2)~=1.96；β为0.2（即检验的效能或把握度为0.8）时，Z~(1-0..2)~为0.84。从公式可以看出，影响样本量的是样本均数与总体均数的差值以及总体标准差，确切地说样本量与$\frac{\delta}{\sigma}$的平方成反比，而与样本均数或总体均数各自的具体数值并不直接相关，这个$\frac{\delta}{\sigma}$在样本量计算领域里常成为效应量。单组均数的研究设计通常采用单侧检验，因此一些统计学书刊上的公式表达为$Z_{1 - \alpha}$。另外由于对称性，$Z_{1 - \alpha}$=$- Z_{\alpha}$，平方后两者相等，因而也有些统计书刊直接采用了$Z_{\alpha}$或$Z_{\alpha/2}$的表达方式。本书的样本量计算统一默认为双侧α=0.05，因此采用了$Z_{1 - \alpha/2}$的表达方式，读者在实际应用时应稍加留意。常见的Z值见<span class="co">[</span><span class="ot">表 1‑1</span><span class="co">](#_Ref186359846)</span>。</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  --------------------------------</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  P              $$Z_{1 - P/2}$$</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  -------------- -----------------</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  0.005          2.576</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  0.01           2.326</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  0.025          1.960</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  0.05           1.645</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  0.1            1.282</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  0.2            0.842</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  --------------------------------</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  : []{#_Ref186359846 .anchor}表 1‑1 常见Z值表</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">公式 1‑1</span><span class="co">](#_Ref187480325)</span>是基于正态分布且总体方差已知情形的推导，亦称Z检验法。对小样本研究或总体方差未知时，宜进行基于t分布的计算，但该法需要进行迭代，无显性公式。好在基于t分布的样本量计算比较稳健，通常在上述公式计算的基础上增加2-3例即可^5^，或者可应用下列校正公式^2^：</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>公式 1‑2 $n = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}}{{(\frac{\delta}{\sigma})}^{2}} + \frac{1}{2}Z_{1 - \alpha/2}^{2}$</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>利用R语言计算及作图，可清晰地看到样本量随$\frac{\delta}{\sigma}$的增加而迅速减少（<span class="co">[</span><span class="ot">图 1‑1</span><span class="co">](#_Ref186360017)</span>，<span class="co">[</span><span class="ot">表 1‑2</span><span class="co">](#_Ref186360036)</span>）。</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>![[]{#_Ref186360017 .anchor}图 1‑1 样本量随$\frac{\delta}{\sigma}$增加而迅速减少（α=0.025单侧）](media/S1_1Mean/image1.png){width="5.768055555555556in" height="4.326388888888889in"}</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>+---------------------------+---------------------------+---------------------------+</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $$\frac{\delta}{\sigma}$$ <span class="pp">|</span> α=0.025单侧               <span class="pp">|</span> α=0.05单侧                <span class="pp">|</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>                           +-------------+-------------+-------------+-------------+</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>                           <span class="pp">|</span> β=0.2       <span class="pp">|</span> β=0.1       <span class="pp">|</span> β=0.2       <span class="pp">|</span> β=0.1       <span class="pp">|</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>+========================<span class="al">==:+============:+============:+============:+==</span>==========:+</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.10                      <span class="pp">|</span> 787         <span class="pp">|</span> 1053        <span class="pp">|</span> 620         <span class="pp">|</span> 858         <span class="pp">|</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.11                      <span class="pp">|</span> 651         <span class="pp">|</span> 871         <span class="pp">|</span> 513         <span class="pp">|</span> 710         <span class="pp">|</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.12                      <span class="pp">|</span> 547         <span class="pp">|</span> 732         <span class="pp">|</span> 431         <span class="pp">|</span> 597         <span class="pp">|</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.13                      <span class="pp">|</span> 467         <span class="pp">|</span> 624         <span class="pp">|</span> 368         <span class="pp">|</span> 509         <span class="pp">|</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.14                      <span class="pp">|</span> 403         <span class="pp">|</span> 539         <span class="pp">|</span> 317         <span class="pp">|</span> 439         <span class="pp">|</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.15                      <span class="pp">|</span> 351         <span class="pp">|</span> 469         <span class="pp">|</span> 277         <span class="pp">|</span> 382         <span class="pp">|</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.16                      <span class="pp">|</span> 309         <span class="pp">|</span> 413         <span class="pp">|</span> 243         <span class="pp">|</span> 336         <span class="pp">|</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.17                      <span class="pp">|</span> 274         <span class="pp">|</span> 366         <span class="pp">|</span> 216         <span class="pp">|</span> 298         <span class="pp">|</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.18                      <span class="pp">|</span> 245         <span class="pp">|</span> 327         <span class="pp">|</span> 193         <span class="pp">|</span> 266         <span class="pp">|</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.19                      <span class="pp">|</span> 220         <span class="pp">|</span> 293         <span class="pp">|</span> 173         <span class="pp">|</span> 239         <span class="pp">|</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.20                      <span class="pp">|</span> 199         <span class="pp">|</span> 265         <span class="pp">|</span> 156         <span class="pp">|</span> 216         <span class="pp">|</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.21                      <span class="pp">|</span> 180         <span class="pp">|</span> 241         <span class="pp">|</span> 142         <span class="pp">|</span> 196         <span class="pp">|</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.22                      <span class="pp">|</span> 165         <span class="pp">|</span> 220         <span class="pp">|</span> 130         <span class="pp">|</span> 179         <span class="pp">|</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.23                      <span class="pp">|</span> 151         <span class="pp">|</span> 201         <span class="pp">|</span> 119         <span class="pp">|</span> 164         <span class="pp">|</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.24                      <span class="pp">|</span> 139         <span class="pp">|</span> 185         <span class="pp">|</span> 109         <span class="pp">|</span> 151         <span class="pp">|</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.25                      <span class="pp">|</span> 128         <span class="pp">|</span> 171         <span class="pp">|</span> 101         <span class="pp">|</span> 139         <span class="pp">|</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.26                      <span class="pp">|</span> 119         <span class="pp">|</span> 158         <span class="pp">|</span> 93          <span class="pp">|</span> 129         <span class="pp">|</span></span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.27                      <span class="pp">|</span> 110         <span class="pp">|</span> 147         <span class="pp">|</span> 87          <span class="pp">|</span> 119         <span class="pp">|</span></span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.28                      <span class="pp">|</span> 103         <span class="pp">|</span> 136         <span class="pp">|</span> 81          <span class="pp">|</span> 111         <span class="pp">|</span></span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.29                      <span class="pp">|</span> 96          <span class="pp">|</span> 127         <span class="pp">|</span> 75          <span class="pp">|</span> 104         <span class="pp">|</span></span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.30                      <span class="pp">|</span> 90          <span class="pp">|</span> 119         <span class="pp">|</span> 71          <span class="pp">|</span> 97          <span class="pp">|</span></span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.31                      <span class="pp">|</span> 84          <span class="pp">|</span> 112         <span class="pp">|</span> 66          <span class="pp">|</span> 91          <span class="pp">|</span></span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.32                      <span class="pp">|</span> 79          <span class="pp">|</span> 105         <span class="pp">|</span> 62          <span class="pp">|</span> 86          <span class="pp">|</span></span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.33                      <span class="pp">|</span> 75          <span class="pp">|</span> 99          <span class="pp">|</span> 59          <span class="pp">|</span> 81          <span class="pp">|</span></span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.34                      <span class="pp">|</span> 70          <span class="pp">|</span> 93          <span class="pp">|</span> 55          <span class="pp">|</span> 76          <span class="pp">|</span></span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.35                      <span class="pp">|</span> 67          <span class="pp">|</span> 88          <span class="pp">|</span> 52          <span class="pp">|</span> 72          <span class="pp">|</span></span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.36                      <span class="pp">|</span> 63          <span class="pp">|</span> 84          <span class="pp">|</span> 50          <span class="pp">|</span> 68          <span class="pp">|</span></span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.37                      <span class="pp">|</span> 60          <span class="pp">|</span> 79          <span class="pp">|</span> 47          <span class="pp">|</span> 64          <span class="pp">|</span></span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.38                      <span class="pp">|</span> 57          <span class="pp">|</span> 75          <span class="pp">|</span> 45          <span class="pp">|</span> 61          <span class="pp">|</span></span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.39                      <span class="pp">|</span> 54          <span class="pp">|</span> 72          <span class="pp">|</span> 43          <span class="pp">|</span> 58          <span class="pp">|</span></span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.40                      <span class="pp">|</span> 52          <span class="pp">|</span> 68          <span class="pp">|</span> 41          <span class="pp">|</span> 55          <span class="pp">|</span></span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.41                      <span class="pp">|</span> 49          <span class="pp">|</span> 65          <span class="pp">|</span> 39          <span class="pp">|</span> 53          <span class="pp">|</span></span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.42                      <span class="pp">|</span> 47          <span class="pp">|</span> 62          <span class="pp">|</span> 37          <span class="pp">|</span> 50          <span class="pp">|</span></span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.43                      <span class="pp">|</span> 45          <span class="pp">|</span> 59          <span class="pp">|</span> 35          <span class="pp">|</span> 48          <span class="pp">|</span></span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.44                      <span class="pp">|</span> 43          <span class="pp">|</span> 57          <span class="pp">|</span> 34          <span class="pp">|</span> 46          <span class="pp">|</span></span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.45                      <span class="pp">|</span> 41          <span class="pp">|</span> 54          <span class="pp">|</span> 32          <span class="pp">|</span> 44          <span class="pp">|</span></span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.46                      <span class="pp">|</span> 40          <span class="pp">|</span> 52          <span class="pp">|</span> 31          <span class="pp">|</span> 42          <span class="pp">|</span></span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.47                      <span class="pp">|</span> 38          <span class="pp">|</span> 50          <span class="pp">|</span> 30          <span class="pp">|</span> 41          <span class="pp">|</span></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.48                      <span class="pp">|</span> 37          <span class="pp">|</span> 48          <span class="pp">|</span> 29          <span class="pp">|</span> 39          <span class="pp">|</span></span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.49                      <span class="pp">|</span> 35          <span class="pp">|</span> 46          <span class="pp">|</span> 28          <span class="pp">|</span> 38          <span class="pp">|</span></span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.50                      <span class="pp">|</span> 34          <span class="pp">|</span> 44          <span class="pp">|</span> 27          <span class="pp">|</span> 36          <span class="pp">|</span></span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a>: []{#_Ref186360036 .anchor}表 1‑2 不同$\frac{\delta}{\sigma}$、α及β组合下的样本量</span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a><span class="fu">## 单组目标值法</span></span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a>[]{#_Ref138313753 .anchor}例 1‑1 PLATINUM QCA研究^6^评价某冠状动脉支架的临床表现，主要有效性终点为随访9个月时的管腔丢失，目标值0.44mm，预期值0.18±0.50 mm，将其单侧95%置信区间上限与目标值比较，则60例样本可提供99%的检验效能。</span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a>该例采用了单侧95%置信区间，相当于双侧α=0.1，因此Excel表里的α填写了0.1，正态近似法的结果为59，t-校正后为60。</span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S1_1Mean/image2.png)</span>{width="3.301388888888889in" height="1.25625in"}</span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a>PASS软件Z检验法的结果也是59，操作时依次点击Means, One Mean, Z-Test (Inequality), One-Sample Z-Test。</span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-139"><a href="#cb7-139" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S1_1Mean/image3.png)</span>{width="4.062992125984252in" height="2.893700787401575in"}</span>
+<span id="cb7-140"><a href="#cb7-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S1_1Mean/image4.png)</span>{width="5.768055555555556in" height="1.5819444444444444in"}</span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a>PASS软件t检验的结果同样是60，操作时依次点击Means, One Mean, T-Test (Inequality), One-Sample T-Test。</span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S1_1Mean/image5.png)</span>{width="4.409448818897638in" height="3.0669291338582676in"}</span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S1_1Mean/image6.png)</span>{width="5.768055555555556in" height="1.5944444444444446in"}</span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a>R语言pwrss包Z检验法的结果为59，t检验法的结果为60。</span>
+<span id="cb7-150"><a href="#cb7-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-151"><a href="#cb7-151" aria-hidden="true" tabindex="-1"></a>Z检验法：</span>
+<span id="cb7-152"><a href="#cb7-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-153"><a href="#cb7-153" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb7-154"><a href="#cb7-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-155"><a href="#cb7-155" aria-hidden="true" tabindex="-1"></a>pwrss.z.mean(mu = 0.18, sd = 0.5, mu0 = 0.44, alpha = 0.1, power = 0.99)</span>
+<span id="cb7-156"><a href="#cb7-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-157"><a href="#cb7-157" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb7-158"><a href="#cb7-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-159"><a href="#cb7-159" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  A Mean against a Constant (z Test) </span></span>
+<span id="cb7-160"><a href="#cb7-160" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  H0: mu = mu0 </span></span>
+<span id="cb7-161"><a href="#cb7-161" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  HA: mu != mu0 </span></span>
+<span id="cb7-162"><a href="#cb7-162" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  ------------------------------ </span></span>
+<span id="cb7-163"><a href="#cb7-163" aria-hidden="true" tabindex="-1"></a><span class="in">    ##   Statistical power = 0.99 </span></span>
+<span id="cb7-164"><a href="#cb7-164" aria-hidden="true" tabindex="-1"></a><span class="in">    ##   n = 59 </span></span>
+<span id="cb7-165"><a href="#cb7-165" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  ------------------------------ </span></span>
+<span id="cb7-166"><a href="#cb7-166" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Alternative = "not equal" </span></span>
+<span id="cb7-167"><a href="#cb7-167" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Non-centrality parameter = -3.971 </span></span>
+<span id="cb7-168"><a href="#cb7-168" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Type I error rate = 0.1 </span></span>
+<span id="cb7-169"><a href="#cb7-169" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Type II error rate = 0.01</span></span>
+<span id="cb7-170"><a href="#cb7-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-171"><a href="#cb7-171" aria-hidden="true" tabindex="-1"></a>t检验法：</span>
+<span id="cb7-172"><a href="#cb7-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-173"><a href="#cb7-173" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb7-174"><a href="#cb7-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-175"><a href="#cb7-175" aria-hidden="true" tabindex="-1"></a>pwrss.t.mean(mu = 0.18, sd = 0.5, mu0 = 0.44, alpha = 0.1, power = 0.99)</span>
+<span id="cb7-176"><a href="#cb7-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-177"><a href="#cb7-177" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb7-178"><a href="#cb7-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-179"><a href="#cb7-179" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  A Mean against a Constant (t Test) </span></span>
+<span id="cb7-180"><a href="#cb7-180" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  H0: mu = mu0 </span></span>
+<span id="cb7-181"><a href="#cb7-181" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  HA: mu != mu0 </span></span>
+<span id="cb7-182"><a href="#cb7-182" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  ------------------------------ </span></span>
+<span id="cb7-183"><a href="#cb7-183" aria-hidden="true" tabindex="-1"></a><span class="in">    ##   Statistical power = 0.99 </span></span>
+<span id="cb7-184"><a href="#cb7-184" aria-hidden="true" tabindex="-1"></a><span class="in">    ##   n = 60 </span></span>
+<span id="cb7-185"><a href="#cb7-185" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  ------------------------------ </span></span>
+<span id="cb7-186"><a href="#cb7-186" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Alternative = "not equal" </span></span>
+<span id="cb7-187"><a href="#cb7-187" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Non-centrality parameter = -4.028 </span></span>
+<span id="cb7-188"><a href="#cb7-188" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Degrees of freedom = 59 </span></span>
+<span id="cb7-189"><a href="#cb7-189" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Type I error rate = 0.1 </span></span>
+<span id="cb7-190"><a href="#cb7-190" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Type II error rate = 0.01</span></span>
+<span id="cb7-191"><a href="#cb7-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-192"><a href="#cb7-192" aria-hidden="true" tabindex="-1"></a>该研究实际入组了100例患者，支架晚期管腔丢失为0.17±0.25 mm，P<span class="sc">\&lt;</span>0.001，研究达成。</span>
+<span id="cb7-193"><a href="#cb7-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-194"><a href="#cb7-194" aria-hidden="true" tabindex="-1"></a><span class="fu">## 单样本均数与总体均数的比较</span></span>
+<span id="cb7-195"><a href="#cb7-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-196"><a href="#cb7-196" aria-hidden="true" tabindex="-1"></a>例 1‑2 ^7^为了解高海拔作业工人的心率是否高于一般人群，已知标准差为9.9次/分，心率差异5次/分有临床意义，设α=0.05（单侧），β=0.1，则样本量为36。该例声称采用了正态近似校正法。</span>
+<span id="cb7-197"><a href="#cb7-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-198"><a href="#cb7-198" aria-hidden="true" tabindex="-1"></a>Excel表t-校正法计算结果为35，PASS软件t检验法的结果为35，R语言pwrss包t检验法结果也是35。</span>
+<span id="cb7-199"><a href="#cb7-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-200"><a href="#cb7-200" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb7-201"><a href="#cb7-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-202"><a href="#cb7-202" aria-hidden="true" tabindex="-1"></a>pwrss.t.mean(mu = 5, sd = 9.9, mu0 = 0, alpha = 0.1, power = 0.9)</span>
+<span id="cb7-203"><a href="#cb7-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-204"><a href="#cb7-204" aria-hidden="true" tabindex="-1"></a>[]{#_Ref140611292 .anchor}例 1‑3 医学8年制教材《医学统计学》第3版介绍了一个例子^8^，某医师试验某种升白细胞的疗效，预实验用药前后白细胞差值的标准差为2.5X10^9^/L，要求治疗后白细胞上升1 X10^9^/L为有效，取α=0.05（单侧），β=0.1，则t检验法需56例患者。</span>
+<span id="cb7-205"><a href="#cb7-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-206"><a href="#cb7-206" aria-hidden="true" tabindex="-1"></a>Excel表t-校正法计算结果为55，PASS软件t检验法的结果为55，R语言pwrss包t检验法的结果也是55。</span>
+<span id="cb7-207"><a href="#cb7-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-208"><a href="#cb7-208" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb7-209"><a href="#cb7-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-210"><a href="#cb7-210" aria-hidden="true" tabindex="-1"></a>pwrss.t.mean(mu = 1, sd = 2.5, mu0 = 0, alpha = 0.1, power = 0.9)</span>
+<span id="cb7-211"><a href="#cb7-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-212"><a href="#cb7-212" aria-hidden="true" tabindex="-1"></a><span class="fu">## 配对设计</span></span>
+<span id="cb7-213"><a href="#cb7-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-214"><a href="#cb7-214" aria-hidden="true" tabindex="-1"></a>（同源配对与异源配对，前后配对）</span>
+<span id="cb7-215"><a href="#cb7-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-216"><a href="#cb7-216" aria-hidden="true" tabindex="-1"></a>例 1‑4 医学本科教材《医学统计学》第6版介绍了一个例子^1^，研究维生素E缺乏时对肝中维生素A含量的影响。将大鼠配对后分为两组，分别喂以正常饲料和维生素E缺乏饲料。如果肝中维生素A含量差异为700IU/g时认为有意义，已知标准差为500IU/g，取α=0.05，β=0.05，则需8对大鼠。该例声称采用了正态近似法。</span>
+<span id="cb7-217"><a href="#cb7-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-218"><a href="#cb7-218" aria-hidden="true" tabindex="-1"></a>该例按公式1-1计算的实际结果为8.02。Excel表正态近似法计算结果为9，PASS软件Z检验法结果为9，R语言pwrss包Z检验法的结果也是9。</span>
+<span id="cb7-219"><a href="#cb7-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-220"><a href="#cb7-220" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb7-221"><a href="#cb7-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-222"><a href="#cb7-222" aria-hidden="true" tabindex="-1"></a>pwrss.z.mean(mu = 700, sd = 550, mu0 = 0, alpha = 0.05, power = 0.95)</span>
+<span id="cb7-223"><a href="#cb7-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-224"><a href="#cb7-224" aria-hidden="true" tabindex="-1"></a><span class="fu">## 讨论</span></span>
+<span id="cb7-225"><a href="#cb7-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-226"><a href="#cb7-226" aria-hidden="true" tabindex="-1"></a>R语言pwr包可以做一些基本的样本量计算，如本章<span class="co">[</span><span class="ot">例 1‑1</span><span class="co">](#_Ref138313753)</span>，pwr包的正态近似法与t检验法的结果分别为：</span>
+<span id="cb7-227"><a href="#cb7-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-228"><a href="#cb7-228" aria-hidden="true" tabindex="-1"></a>library(pwr)</span>
+<span id="cb7-229"><a href="#cb7-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-230"><a href="#cb7-230" aria-hidden="true" tabindex="-1"></a>pwr.norm.test(d = (0.18-0.44)/0.5, sig.level = 0.05, power = 0.99,</span>
+<span id="cb7-231"><a href="#cb7-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-232"><a href="#cb7-232" aria-hidden="true" tabindex="-1"></a>alternative = \"less\")</span>
+<span id="cb7-233"><a href="#cb7-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-234"><a href="#cb7-234" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb7-235"><a href="#cb7-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-236"><a href="#cb7-236" aria-hidden="true" tabindex="-1"></a><span class="in">    ## </span></span>
+<span id="cb7-237"><a href="#cb7-237" aria-hidden="true" tabindex="-1"></a><span class="in">    ##      Mean power calculation for normal distribution with known variance </span></span>
+<span id="cb7-238"><a href="#cb7-238" aria-hidden="true" tabindex="-1"></a><span class="in">    ## </span></span>
+<span id="cb7-239"><a href="#cb7-239" aria-hidden="true" tabindex="-1"></a><span class="in">    ##               d = -0.52</span></span>
+<span id="cb7-240"><a href="#cb7-240" aria-hidden="true" tabindex="-1"></a><span class="in">    ##               n = 58.32264</span></span>
+<span id="cb7-241"><a href="#cb7-241" aria-hidden="true" tabindex="-1"></a><span class="in">    ##       sig.level = 0.05</span></span>
+<span id="cb7-242"><a href="#cb7-242" aria-hidden="true" tabindex="-1"></a><span class="in">    ##           power = 0.99</span></span>
+<span id="cb7-243"><a href="#cb7-243" aria-hidden="true" tabindex="-1"></a><span class="in">    ##     alternative = less</span></span>
+<span id="cb7-244"><a href="#cb7-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-245"><a href="#cb7-245" aria-hidden="true" tabindex="-1"></a>library(pwr)</span>
+<span id="cb7-246"><a href="#cb7-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-247"><a href="#cb7-247" aria-hidden="true" tabindex="-1"></a>pwr.t.test(d = (0.18-0.44)/0.5, sig.level = 0.05, power = 0.99,</span>
+<span id="cb7-248"><a href="#cb7-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-249"><a href="#cb7-249" aria-hidden="true" tabindex="-1"></a>type = \"one.sample\", alternative = \"less\")</span>
+<span id="cb7-250"><a href="#cb7-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-251"><a href="#cb7-251" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb7-252"><a href="#cb7-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-253"><a href="#cb7-253" aria-hidden="true" tabindex="-1"></a><span class="in">    ## </span></span>
+<span id="cb7-254"><a href="#cb7-254" aria-hidden="true" tabindex="-1"></a><span class="in">    ##      One-sample t test power calculation </span></span>
+<span id="cb7-255"><a href="#cb7-255" aria-hidden="true" tabindex="-1"></a><span class="in">    ## </span></span>
+<span id="cb7-256"><a href="#cb7-256" aria-hidden="true" tabindex="-1"></a><span class="in">    ##               n = 59.70845</span></span>
+<span id="cb7-257"><a href="#cb7-257" aria-hidden="true" tabindex="-1"></a><span class="in">    ##               d = -0.52</span></span>
+<span id="cb7-258"><a href="#cb7-258" aria-hidden="true" tabindex="-1"></a><span class="in">    ##       sig.level = 0.05</span></span>
+<span id="cb7-259"><a href="#cb7-259" aria-hidden="true" tabindex="-1"></a><span class="in">    ##           power = 0.99</span></span>
+<span id="cb7-260"><a href="#cb7-260" aria-hidden="true" tabindex="-1"></a><span class="in">    ##     alternative = less</span></span>
+<span id="cb7-261"><a href="#cb7-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-262"><a href="#cb7-262" aria-hidden="true" tabindex="-1"></a>这里的d是Cohen\'s d，即标准化的效应量，对应的是本章开头部分样本量计算公式里的$\frac{\delta}{\sigma}$。</span>
+<span id="cb7-263"><a href="#cb7-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-264"><a href="#cb7-264" aria-hidden="true" tabindex="-1"></a><span class="fu">### 检验效能的计算</span></span>
+<span id="cb7-265"><a href="#cb7-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-266"><a href="#cb7-266" aria-hidden="true" tabindex="-1"></a>本章<span class="co">[</span><span class="ot">例 1‑1</span><span class="co">](#_Ref138313753)</span> PASS软件计算结果里给出了实际的检验效能，比如t检验法样本量60可提供的实际检验效能为0.99026，R语言也可以提供。</span>
+<span id="cb7-267"><a href="#cb7-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-268"><a href="#cb7-268" aria-hidden="true" tabindex="-1"></a>library(pwr)</span>
+<span id="cb7-269"><a href="#cb7-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-270"><a href="#cb7-270" aria-hidden="true" tabindex="-1"></a>pwr.t.test(d = (0.18-0.44)/0.5, sig.level = 0.05, n = 60,</span>
+<span id="cb7-271"><a href="#cb7-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-272"><a href="#cb7-272" aria-hidden="true" tabindex="-1"></a>type = \"one.sample\", alternative = \"less\")</span>
+<span id="cb7-273"><a href="#cb7-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-274"><a href="#cb7-274" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb7-275"><a href="#cb7-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-276"><a href="#cb7-276" aria-hidden="true" tabindex="-1"></a><span class="in">    ## </span></span>
+<span id="cb7-277"><a href="#cb7-277" aria-hidden="true" tabindex="-1"></a><span class="in">    ##      One-sample t test power calculation </span></span>
+<span id="cb7-278"><a href="#cb7-278" aria-hidden="true" tabindex="-1"></a><span class="in">    ## </span></span>
+<span id="cb7-279"><a href="#cb7-279" aria-hidden="true" tabindex="-1"></a><span class="in">    ##               n = 60</span></span>
+<span id="cb7-280"><a href="#cb7-280" aria-hidden="true" tabindex="-1"></a><span class="in">    ##               d = -0.52</span></span>
+<span id="cb7-281"><a href="#cb7-281" aria-hidden="true" tabindex="-1"></a><span class="in">    ##       sig.level = 0.05</span></span>
+<span id="cb7-282"><a href="#cb7-282" aria-hidden="true" tabindex="-1"></a><span class="in">    ##           power = 0.9902613</span></span>
+<span id="cb7-283"><a href="#cb7-283" aria-hidden="true" tabindex="-1"></a><span class="in">    ##     alternative = less</span></span>
+<span id="cb7-284"><a href="#cb7-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-285"><a href="#cb7-285" aria-hidden="true" tabindex="-1"></a>或者，</span>
+<span id="cb7-286"><a href="#cb7-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-287"><a href="#cb7-287" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb7-288"><a href="#cb7-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-289"><a href="#cb7-289" aria-hidden="true" tabindex="-1"></a>pwrss.t.mean(mu = 0.18, sd = 0.5, mu0 = 0.44, alpha = 0.1, n = 60)</span>
+<span id="cb7-290"><a href="#cb7-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-291"><a href="#cb7-291" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb7-292"><a href="#cb7-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-293"><a href="#cb7-293" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  A Mean against a Constant (t Test) </span></span>
+<span id="cb7-294"><a href="#cb7-294" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  H0: mu = mu0 </span></span>
+<span id="cb7-295"><a href="#cb7-295" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  HA: mu != mu0 </span></span>
+<span id="cb7-296"><a href="#cb7-296" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  ------------------------------ </span></span>
+<span id="cb7-297"><a href="#cb7-297" aria-hidden="true" tabindex="-1"></a><span class="in">    ##   Statistical power = 0.99 </span></span>
+<span id="cb7-298"><a href="#cb7-298" aria-hidden="true" tabindex="-1"></a><span class="in">    ##   n = 60 </span></span>
+<span id="cb7-299"><a href="#cb7-299" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  ------------------------------ </span></span>
+<span id="cb7-300"><a href="#cb7-300" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Alternative = "not equal" </span></span>
+<span id="cb7-301"><a href="#cb7-301" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Non-centrality parameter = -4.028 </span></span>
+<span id="cb7-302"><a href="#cb7-302" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Degrees of freedom = 59 </span></span>
+<span id="cb7-303"><a href="#cb7-303" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Type I error rate = 0.1 </span></span>
+<span id="cb7-304"><a href="#cb7-304" aria-hidden="true" tabindex="-1"></a><span class="in">    ##  Type II error rate = 0.01</span></span>
+<span id="cb7-305"><a href="#cb7-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-306"><a href="#cb7-306" aria-hidden="true" tabindex="-1"></a><span class="fu">### 自身前后对照</span></span>
+<span id="cb7-307"><a href="#cb7-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-308"><a href="#cb7-308" aria-hidden="true" tabindex="-1"></a>本章<span class="co">[</span><span class="ot">例 1‑3</span><span class="co">](#_Ref140611292)</span>是一个自身前后对照的案例，该例在原书中列于样本均数与已知总体均数比较（或配对设计均数比较）之下，也偶有将其归为前后配对的。但需要注意的是在案例的情形下，前后对照并不是一个良好的研究设计，因为治疗以外的因素，比如患者疾病的恢复或进展也会引起前后测量的差异。通常应当再设立一组对照，将治疗组的前后差值与对照组的前后差值进行比较。其实，许多单组目标值设计的研究都存在这个问题，随机对照试验的论证力度显然更强。</span>
+<span id="cb7-309"><a href="#cb7-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-310"><a href="#cb7-310" aria-hidden="true" tabindex="-1"></a><span class="fu">### 目标值的含义</span></span>
+<span id="cb7-311"><a href="#cb7-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-312"><a href="#cb7-312" aria-hidden="true" tabindex="-1"></a>美国食品药品监督管理局（FDA, Food and Drug Administration）2013年发布的《医疗器械关键性临床研究的设计考虑指导原则》^9^提出了客观性能标准（Objective performance criteria，OPC）和性能目标（Performance goal，PG）两个概念，对OPC的定义是：来自临床研究和/或登记研究历史数据的一个数值指标， FDA可据此对安全性或有效性终点进行二分类（通过／失败）的评价与比较。该指导原则指出OPC通常来自监管机构、专业学会或标准组织等，其证据等级高于PG。但这种分类在临床试验的实践中并没有严格的区分，从统计学角度来看这两者用于样本量计算时没有任何差异。另外，该指导原则将单组目标值法限定在了二分类数据。</span>
+<span id="cb7-313"><a href="#cb7-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-314"><a href="#cb7-314" aria-hidden="true" tabindex="-1"></a>我国国家药品监督管理局（药监局）2018年发布的《医疗器械临床试验设计指导原则》^10^指出目标值是专业领域内公认的某类医疗器械的有效性/安全性评价指标所应达到的最低标准，在分类上沿用了FDA的观点，包括客观性能标准和性能目标两种。</span>
+<span id="cb7-315"><a href="#cb7-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-316"><a href="#cb7-316" aria-hidden="true" tabindex="-1"></a>国内临床研究实践中常将OPC和PG通称为目标值，不再细分。中国临床试验生物统计学组2017年发表的《单组目标值临床试验的统计学考虑》^11^认为目标值是指专业领域内公认的某医疗器械的有效性／安全性／性能评价指标所应达到的标准。</span>
+<span id="cb7-317"><a href="#cb7-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-318"><a href="#cb7-318" aria-hidden="true" tabindex="-1"></a>以上这些目标值的定义都值得商榷。FDA的定义描述了目标值的功用，但避开了说明这个数值指标是什么。这个数值指标具体是什么确实不容易说清楚，中国临床试验生物统计学组定义的"应达到的标准"似不够准确，而药监局的定义认为是"最低标准"，实际上当单组研究的结果正好达到该数值时，研究肯定是无法通过假设检验的。我们以高优指标（数值越大越好，比如成功率）为例说明，单组目标值法要求研究结果的双侧95%置信区间的下限（或者单侧97.5%置信区间下限）大于该目标值，所以研究结果正好为目标值时，其置信区间的下限就小于目标值了，研究无法通过，除非样本量为无穷大。因此临床医生有时候会感觉研究设定的目标值太低了，比如2017年美国心律协会等学会发布的《心房颤动导管和外科消融专家共识》^12^建议阵发性房颤导管消融一年成功率的目标值为50%，持续性房颤为40%，其实是要求研究结果的置信区间的下限高于这个值。从单组目标值法样本量计算公式来看，期望值与目标值差异越大，所需样本量越小；如果想以接近目标值的较低的成功率通过检验，需要的样本量是巨大的。</span>
+<span id="cb7-319"><a href="#cb7-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-320"><a href="#cb7-320" aria-hidden="true" tabindex="-1"></a>设置一个较低的目标值和一个较高的期望值有助于减少样本量，但前者需要有临床意义，后者应考虑研究达成的可能性。我们将在下一章讨论目标值的制定。</span>
+<span id="cb7-321"><a href="#cb7-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-322"><a href="#cb7-322" aria-hidden="true" tabindex="-1"></a>**References:**</span>
+<span id="cb7-323"><a href="#cb7-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-324"><a href="#cb7-324" aria-hidden="true" tabindex="-1"></a>1<span class="sc">\.</span> 李康, 贺佳. 医学统计学. 6版 ed. 北京: 人民卫生出版社; 2013.</span>
+<span id="cb7-325"><a href="#cb7-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-326"><a href="#cb7-326" aria-hidden="true" tabindex="-1"></a>2<span class="sc">\.</span> 颜艳, 王彤. 医学统计学. 5版 ed. 北京: 人民卫生出版社; 2020.</span>
+<span id="cb7-327"><a href="#cb7-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-328"><a href="#cb7-328" aria-hidden="true" tabindex="-1"></a>3<span class="sc">\.</span> 李卫. 医疗器械临床试验统计方法. 2版 ed. 北京: 科学出版社; 2016.</span>
+<span id="cb7-329"><a href="#cb7-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-330"><a href="#cb7-330" aria-hidden="true" tabindex="-1"></a>4<span class="sc">\.</span> Chow S, Shao J, Wang H, Lokhnygina Y. Sample Size Calculations in Clinical Research. Third Edition ed: CRC Press; 2018.</span>
+<span id="cb7-331"><a href="#cb7-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-332"><a href="#cb7-332" aria-hidden="true" tabindex="-1"></a>5<span class="sc">\.</span> 陈峰. 医学统计学. 4版 ed. 北京: 人民卫生出版社; 2024.</span>
+<span id="cb7-333"><a href="#cb7-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-334"><a href="#cb7-334" aria-hidden="true" tabindex="-1"></a>6<span class="sc">\.</span> Meredith IT, Whitbourn R, Scott D, et al. PLATINUM QCA: a prospective, multicentre study assessing clinical, angiographic, and intravascular ultrasound outcomes with the novel platinum chromium thin-strut PROMUS Element everolimus-eluting stent in de novo coronary stenoses. EUROINTERVENTION 2011;7:84-90.</span>
+<span id="cb7-335"><a href="#cb7-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-336"><a href="#cb7-336" aria-hidden="true" tabindex="-1"></a>7<span class="sc">\.</span> 杨土保. 医学科学研究与设计. 2版 ed. 北京: 人民卫生出版社; 2013.</span>
+<span id="cb7-337"><a href="#cb7-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-338"><a href="#cb7-338" aria-hidden="true" tabindex="-1"></a>8<span class="sc">\.</span> 颜虹, 徐勇勇. 医学统计学. 3版 ed. 北京: 人民卫生出版社; 2015.</span>
+<span id="cb7-339"><a href="#cb7-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-340"><a href="#cb7-340" aria-hidden="true" tabindex="-1"></a>9<span class="sc">\.</span> FDA. Design Considerations for Pivotal Clinical Investigations for Medical Devices Guidance for Industry, Clinical Investigators, Institutional Review Boards and Food and Drug Administration Staff; 2013.</span>
+<span id="cb7-341"><a href="#cb7-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-342"><a href="#cb7-342" aria-hidden="true" tabindex="-1"></a>10<span class="sc">\.</span> 国家药品监督管理局. 医疗器械临床试验设计指导原则; 2018.</span>
+<span id="cb7-343"><a href="#cb7-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-344"><a href="#cb7-344" aria-hidden="true" tabindex="-1"></a>11<span class="sc">\.</span> 李卫, 赵耐青. 单组目标值临床试验的统计学考虑. 中国卫生统计 2017;34:505-8.</span>
+<span id="cb7-345"><a href="#cb7-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-346"><a href="#cb7-346" aria-hidden="true" tabindex="-1"></a>12<span class="sc">\.</span> Calkins H, Hindricks G, Cappato R, et al. 2017 HRS/EHRA/ECAS/APHRS/SOLAECE expert consensus statement on catheter and surgical ablation of atrial fibrillation: Executive summary. HEART RHYTHM 2017;14:e445-94.</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

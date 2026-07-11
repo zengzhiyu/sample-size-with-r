@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4. 两组均数的比较 – R语言临床研究样本量计算案例教程</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./S4 2Proportions.html" rel="next">
+<link href="./S2 1Proportion.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-6b6957c917596b414ec0b78690761e87.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-e9b94c5c92cfde000641fbcd395a1216.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./S3 2Means.html"><span class="chapter-title">4. 两组均数的比较</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">R语言临床研究样本量计算案例教程</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R语言临床研究样本量计算案例教程</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S0_preface.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">1. 前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S1 1Mean.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">2. 单组均数的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S2 1Proportion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">3. 单组率的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S3 2Means.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">4. 两组均数的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S4 2Proportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">5. 两组率的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S5 noninferiorMeans.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">6. 两组均数比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S6 noninferiorProportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">7. 两组率比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S7 SurvivalAnalysis.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">8. 生存分析的研究设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S8 crossover.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">9. 交叉设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S9 cluster.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">10. 整群随机研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S10 诊断试验.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">11. 诊断试验</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S11 观察性研究.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 观察性研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S12 GS.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 成组序贯设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S13 SSR.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">13. 样本量重新估计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S14 Multiplicityfactorial.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">14. 多重性与析因设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S15 simulation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">15. 样本量模拟计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S16 WinRatio.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">16. Win Ratio 样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">附录</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S17 Appendix.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">附录</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#t检验法" id="toc-t检验法" class="nav-link active" data-scroll-target="#t检验法">t检验法</a></li>
+  <li><a href="#wilcoxon检验法" id="toc-wilcoxon检验法" class="nav-link" data-scroll-target="#wilcoxon检验法">Wilcoxon检验法</a></li>
+  <li><a href="#讨论" id="toc-讨论" class="nav-link" data-scroll-target="#讨论">讨论</a>
+  <ul class="collapse">
+  <li><a href="#绝对差值和相对差值" id="toc-绝对差值和相对差值" class="nav-link" data-scroll-target="#绝对差值和相对差值">绝对差值和相对差值</a></li>
+  <li><a href="#样本量计算与统计分析的一致性" id="toc-样本量计算与统计分析的一致性" class="nav-link" data-scroll-target="#样本量计算与统计分析的一致性">样本量计算与统计分析的一致性</a></li>
+  <li><a href="#基线和协变量" id="toc-基线和协变量" class="nav-link" data-scroll-target="#基线和协变量">基线和协变量</a></li>
+  <li><a href="#脱落和交叉" id="toc-脱落和交叉" class="nav-link" data-scroll-target="#脱落和交叉">脱落和交叉</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-title">4. 两组均数的比较</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> 代码</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>定量数据在临床研究中广泛存在，比如年龄、身高、体重、血压、血糖等，常见的统计量如均数、标准差等也广为熟知。两组均数的比较常见于临床的早期阶段，或者用作替代终点以及使用量表的情况。</p>
+<p>两组均数比较的样本量计算公式<sup>1-6</sup>如下：</p>
+<p><span class="math inline">\(n_{C} = n_{T} = \frac{{2\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)}^{2}}{{(\frac{\delta}{\sigma})}^{2}}\)</span>（3-1）</p>
+<p>公式中C代表对照组，T代表试验组，δ为两组均数之差μ<sub>T</sub>-μ<sub>C</sub>，σ为标准差。这是基于正态分布且总体标准差已知时的Z检验法的样本量计算公式。当总体标准差未知或样本量较小时应当使用t检验法，此时样本量计算需迭代，没有显性公式。T检验法的样本量计算可使用软件，或者校正公式<sup>2</sup>：</p>
+<p><span class="math inline">\(n_{C} = n_{T} = \frac{{2\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)}^{2}}{{(\frac{\delta}{\sigma})}^{2}} + \frac{1}{4}Z_{1 - \alpha/2}^{2}\)</span>（3-2）</p>
+<p>从校正公式即可看出基于t检验法的样本量计算比基于Z检验法的样本量计算的结果相差并不大，因此也可以在基于Z检验法的样本量计算结果上总例数增加2~3例<sup>7</sup>。可以将Z检验法视为t检验法的特例。</p>
+<p>如果两组方差不等，样本量计算公式的形式同公式3-1与3-2，只是需要带入合并方差：</p>
+<p><span class="math inline">\(\sigma^{2} = {(\sigma}_{C}^{2} + \sigma_{T}^{2})/2\)</span>（3-3）</p>
+<p>也有建议取较大的方差带入计算<sup>7</sup>。</p>
+<p>两组例数不等时，假设试验组与对照组按r:1分配，则样本量计算公式为<sup>1,&nbsp;6</sup>：</p>
+<p><span class="math inline">\(n_{C} = \frac{\left( z_{1 - \alpha/2} + z_{1 - \beta} \right)^{2}(1 + 1 \slash r)}{{(\delta/\sigma)}^{2}}\)</span>（3-4）</p>
+<p><span class="math display">\[n_{T} = n_{C}r\]</span></p>
+<p>当两组方差及例数都不相等时同公式3-4，其中：</p>
+<p><span class="math inline">\(\sigma^{2} = \frac{\sigma_{C}^{2} + \sigma_{T}^{2}/r}{1 + 1/r}\)</span>（3-5）</p>
+<p>或者<sup>6</sup>：</p>
+<p><span class="math inline">\(n = \frac{\left( z_{1 - \alpha/2} + z_{1 - \beta} \right)^{2}\left( {(\sigma}_{C}^{2} + \sigma_{T}^{2} \slash r \right)}{\delta^{2}}\)</span> （3-6）</p>
+<p>如果需要校正<sup>8</sup>：</p>
+<p><span class="math inline">\(n_{C} = \frac{\left( z_{1 - \alpha/2} + z_{1 - \beta} \right)^{2}(1 + 1 \slash r)}{{(\delta/\sigma)}^{2}} + \frac{Z_{1 - \alpha/2}^{2}}{2(1 + r)}\)</span>（3-7）</p>
+<p>由以上公式可以看出，样本量与两组均数的差值及标准差有关，准确地说是样本量与δ/σ的平方成反比，而与每组均数的具体值并不直接相关。临床常见参数组合下的t检验法样本量见<a href="#_Ref186376310">图 3‑1</a>，<a href="#_Ref186376317">表 3‑1</a>。</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S3_2Means/image1.png" style="width:5.76806in;height:4.77083in" class="figure-img"></p>
+<figcaption><span id="_Ref186376310" class="anchor"></span>图 3‑1 两组均数比较的样本量与δ/σ的关系（α=0.05双侧）</figcaption>
+</figure>
+</div>
+<table class="caption-top table">
+<caption><span id="_Ref186376317" class="anchor"></span>表 3‑1 两组均数比较不同<span class="math inline">\(\frac{\delta}{\sigma}\)</span>、α及β组合下的样本量</caption>
+<colgroup>
+<col style="width: 32%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th rowspan="2" style="text-align: right;"><span class="math display">\[\frac{\delta}{\sigma}\]</span></th>
+<th colspan="2" style="text-align: right;">α=0.05双侧</th>
+<th colspan="2" style="text-align: right;">α=0.05单侧</th>
+</tr>
+<tr class="even">
+<th style="text-align: right;">β=0.2</th>
+<th style="text-align: right;">β=0.1</th>
+<th style="text-align: right;">β=0.2</th>
+<th style="text-align: right;">β=0.1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">787</td>
+<td style="text-align: right;">1053</td>
+<td style="text-align: right;">620</td>
+<td style="text-align: right;">858</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">505</td>
+<td style="text-align: right;">675</td>
+<td style="text-align: right;">398</td>
+<td style="text-align: right;">550</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">351</td>
+<td style="text-align: right;">469</td>
+<td style="text-align: right;">277</td>
+<td style="text-align: right;">382</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">259</td>
+<td style="text-align: right;">346</td>
+<td style="text-align: right;">204</td>
+<td style="text-align: right;">281</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">199</td>
+<td style="text-align: right;">265</td>
+<td style="text-align: right;">156</td>
+<td style="text-align: right;">216</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">157</td>
+<td style="text-align: right;">210</td>
+<td style="text-align: right;">124</td>
+<td style="text-align: right;">171</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">128</td>
+<td style="text-align: right;">171</td>
+<td style="text-align: right;">101</td>
+<td style="text-align: right;">139</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">106</td>
+<td style="text-align: right;">141</td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;">115</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.60</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">71</td>
+<td style="text-align: right;">97</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.65</td>
+<td style="text-align: right;">77</td>
+<td style="text-align: right;">102</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">83</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.70</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">72</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">77</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">63</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">68</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">55</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">49</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">44</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">40</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">36</td>
+</tr>
+</tbody>
+</table>
+<section id="t检验法" class="level2">
+<h2 class="anchored" data-anchor-id="t检验法">t检验法</h2>
+<p><span id="_Ref138326543" class="anchor"></span>例 3‑1 LBBP-RESYNC是来自于我国的研究<sup>9</sup>，在接受心脏再同步治疗（CRT）的患者中比较了左束支起搏（LBBP）与传统的双室起搏（BiVP）治疗心衰的疗效，主要终点为6个月时左室射血分数（LVEF）的改善。据既往数据，预期LBBP-CRT组可提高LVEF 18%，BiVP-CRT组提高13%，标准差5%，设定显著性水平0.05，则34例患者可确保80%的检验效能。假设脱落率15%，共需40例患者。</p>
+<p>注意此例研究终点的百分率是定量数据而不是定性数据。Excel表Z检验法计算结果为32例，校正后为34例，考虑脱落为34/(1-15%)=40。前文已述，两组均数比较的样本量计算，关键变量是两组均数差值与标准差的比值<span class="math inline">\(\delta/\sigma\)</span>，因此如果用对照组13，试验组18及标准差5带入Excel表，计算结果完全一致。</p>
+<p><img src="media/S3_2Means/image2.png" style="width:3.46528in;height:1.67361in"></p>
+<p>R语言pwrss包Z检验法结果为32例：</p>
+<p>library(pwrss)</p>
+<p>pwrss.z.2means(mu1 = 0.18, mu2 = 0.13, sd1 = 0.05,</p>
+<p>alpha = 0.05, power = 0.8)</p>
+<p>结果输出：</p>
+<p>Difference between Two Means (Independent Samples z Test)</p>
+<p>H0: mu1 = mu2</p>
+<p>HA: mu1 != mu2</p>
+<p>------------------------------</p>
+<p>Statistical power = 0.8</p>
+<p>n1 = 16</p>
+<p>n2 = 16</p>
+<p>------------------------------</p>
+<p>Alternative = “not equal”</p>
+<p>Non-centrality parameter = 2.802</p>
+<p>Type I error rate = 0.05</p>
+<p>Type II error rate = 0.2</p>
+<p>R语言pwrss包t检验法结果为34例：</p>
+<p>library(pwrss)</p>
+<p>pwrss.t.2means(mu1 = 0.18, mu2 = 0.13, sd1 = 0.05,</p>
+<p>alpha = 0.05, power = 0.8)</p>
+<p>结果输出：</p>
+<p>Difference between Two means</p>
+<p>(Independent Samples t Test)</p>
+<p>H0: mu1 = mu2</p>
+<p>HA: mu1 != mu2</p>
+<p>------------------------------</p>
+<p>Statistical power = 0.8</p>
+<p>n1 = 17</p>
+<p>n2 = 17</p>
+<p>------------------------------</p>
+<p>Alternative = “not equal”</p>
+<p>Degrees of freedom = 32</p>
+<p>Non-centrality parameter = 2.915</p>
+<p>Type I error rate = 0.05</p>
+<p>Type II error rate = 0.2</p>
+<p>PASS软件Z检验法的结果为32，操作时依次点击Means, Two Independent Means, Z-Test (Inequality), Two-Sample Z-Tests Assuming Equal Variance。</p>
+<p><img src="media/S3_2Means/image3.png" style="width:4.30709in;height:3.60236in"></p>
+<p><img src="media/S3_2Means/image4.png" style="width:5.76806in;height:1.6875in"></p>
+<p>PASS软件t检验法的结果为34，操作时依次点击Means, Two Independent Means, T-Test (Inequality), Two-Sample T-Tests Assuming Equal Variance，其参数设置界面与Z检验法完全一致，此处不再重复。</p>
+<p><img src="media/S3_2Means/image5.png" style="width:5.76806in;height:1.85139in"></p>
+<p>该研究实际入组了40例患者，试验组LVEF的改善明显优于对照组（试验组变化21.08± 1.91%，对照组变化15.62 ±1.94%），平均差值5.6%（95%置信区间0.3%-10.9%，P=0.039），研究达成。</p>
+<p><span id="_Ref138326616" class="anchor"></span>例 3‑2 Clarity AD研究<sup>10</sup>评价乐卡尼单抗（Lecanemab）在早期阿尔茨海默病中的疗效。患者随机接受乐卡尼单抗或安慰剂治疗，主要终点为18个月时临床痴呆评分（CDR-SB，0~18分，分值越高表面病情越重）。假设乐卡尼单抗可延缓病情的进展，18个月时CDR-SB的增加比对照组低0.373分（相当于低25%，文章未给出对照组的具体数值，但这不影响样本量的计算），标准差两组均为2.031，检验效能90%，脱落率20%，则总样本量需1566，每组783例。</p>
+<p>Excel表Z检验法的计算结果为每组624例，校正后为625例，考虑落后为625/（1-0.2）=781.3，向上取整为每组782例。</p>
+<p>R语言pwrss包Z检验法的结果为每组624例，t检验法的结果为每组625例。</p>
+<p>library(pwrss)</p>
+<p>pwrss.z.2means(mu1 = 0.373, mu2 = 0, sd1 = 2.031,</p>
+<p>alpha = 0.05, power = 0.9)</p>
+<p>pwrss.t.2means(mu1 = 0.373, mu2 = 0, sd1 = 2.031,</p>
+<p>alpha = 0.05, power = 0.9)</p>
+<p>R语言pwr包t检验的结果为每组624.0196例。</p>
+<p>library(pwr)</p>
+<p>pwr.t.test(d = 0.373/2.031, sig.level = 0.05, power = 0.9)</p>
+<p>PASS软件Z检验法结果为每组624例，t检验法结果也是每组624例。可见样本量较大时，Z检验法的结果与t检验法的结果基本一致。</p>
+<p>研究实际入组了1795例患者，两组基线CDR-SB约为3.2，18个月时调整后的CDR-SB变化在对照组增加了1.66，治疗组增加了1.21（差值-0.45，95%CI -0.67~-0.23，P&lt;0.001）。该研究使乐卡尼单抗于2023年1月获美国FDA加速审批的方式批准。</p>
+<p>接下来看几个两组样本量不等的实例。</p>
+<p>例 3‑3 PLATINUM China<sup>11</sup>研究是某外企在我国开展的一个冠脉支架上市前随机对照试验。新型支架与传统支架按3:1随机分配，主要终点为9个月时支架内管腔丢失。假设传统支架丢失0.35mm，新型支架为0.14mm，标准差都是0.54mm，双侧α=0.05，脱落率20%，则500例患者可提供91%的检验效能。</p>
+<p>Excel表按Z检验法结果为388，t检验校正结果为392，其实这种较大的样本量通常已无需校正。</p>
+<p><img src="media/S3_2Means/image6.png" style="width:3.46528in;height:1.88194in"></p>
+<p>R语言pwrss包Z检验法结果为n1+n2=97+289=386，可以看出对照组为97例，如果试验组按对照组的3倍计算为291，总计为388例。。</p>
+<p>library(pwrss)</p>
+<p>pwrss.z.2means(mu1 = 0.14, mu2 = 0.35, sd1 = 0.54, kappa = 3,</p>
+<p>alpha = 0.05, power = 0.91)</p>
+<p>R语言pwrss包t检验法结果为97+290=387，可以看出对照组为97例，如果试验组按对照组的3倍计算为291，总计为388例。</p>
+<p>library(pwrss)</p>
+<p>pwrss.t.2means(mu1 = 0.14, mu2 = 0.35, sd1 = 0.54, kappa = 3,</p>
+<p>alpha = 0.05, power = 0.91)</p>
+<p>PASS软件Z检验法结果为385例（对照组96例），t检验法结果为387例（对照组97例）。两种方法的参数界面完全一致，此处仅给出t检验法的计算过程。</p>
+<p><img src="media/S3_2Means/image7.png" style="width:4.22537in;height:3.68365in"></p>
+<p><img src="media/S3_2Means/image8.png" style="width:5.67549in;height:1.68348in"></p>
+<p>注意PASS软件在计算两样本均数比较的样本量时对第1组与第2组具体所指并无具体要求，两组可互换，但实际结果仍有细微差异，如第1组代表对照组时的最终结果为388例。</p>
+<p><img src="media/S3_2Means/image9.png" style="width:4.31102in;height:3.81496in"></p>
+<p><img src="media/S3_2Means/image10.png" style="width:5.76806in;height:1.67986in"></p>
+<p>本例是考虑20%的脱落后得到样本量500例的，我们还原一下脱落前样本量400例时可提供的检验效能为91.9%：</p>
+<p>pwrss.t.2means(mu1 = 0.14, mu2 = 0.35, sd1 = 0.54, kappa = 3,</p>
+<p>alpha = 0.05, n2 = 100)</p>
+<p>结果输出：</p>
+<p>Difference between Two means</p>
+<p>(Independent Samples t Test)</p>
+<p>H0: mu1 = mu2</p>
+<p>HA: mu1 != mu2</p>
+<p>------------------------------</p>
+<p>Statistical power = 0.919</p>
+<p>n1 = 300</p>
+<p>n2 = 100</p>
+<p>------------------------------</p>
+<p>Alternative = “not equal”</p>
+<p>Degrees of freedom = 398</p>
+<p>Non-centrality parameter = -3.368</p>
+<p>Type I error rate = 0.05</p>
+<p>Type II error rate = 0.081</p>
+<p>该研究最终入组了500例患者，结果为传统支架组0.40±0.45mm，新型支架组0.11±0.36 mm，P&lt;0.001。同时研究也计算了管腔丢失的相对结果，传统支架组为22.20±16.00%，新型支架组为11.06±13.86%，P&lt;0.001。</p>
+<p>例 3‑4 PEDAP研究<sup>12</sup>评价了某闭环胰岛素泵控制2~6岁儿童I型糖尿病的效果。主要终点为治疗后血糖处于70~180mg/dl的百分比，闭环胰岛素泵与标准治疗比较，2:1分组，假设治疗13周后试验组较对照组可提高主要终点绝对值7.5%，标准差为10%，双侧检验I类错误5%，则90例患者可提供90%的检验效能，考虑到脱落，总样本量增加至102例。</p>
+<p>Excel表Z检验法及校正后都是87例，R语言pwrss包t检验法及PASS软件t检验法结果也都是87例。</p>
+<p>library(pwrss)</p>
+<p>pwrss.t.2means(mu1 = 7.5, mu2 = 0, sd1 = 10, kappa = 2,</p>
+<p>alpha = 0.05, power = 0.9)</p>
+<p>研究入选了102例患者，治疗后血糖控制率试验组从基线56.7±18.0%提高至69.3±11.1%， 对照组从基线54.9±14.7% 提高至55.9±12.6%（调整后两组变化的差值为12.4%，相当于每天3小时左右。95%置信区间9.5~15.3%，P&lt;0.001）。注意此例研究终点的百分率是定量数据而不是定性数据。</p>
+</section>
+<section id="wilcoxon检验法" class="level2">
+<h2 class="anchored" data-anchor-id="wilcoxon检验法">Wilcoxon检验法</h2>
+<p>Machin<sup>13</sup></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S3_2Means/image11.png" style="width:5.76806in;height:5.02153in" class="figure-img"></p>
+<figcaption>A screenshot of a math problem Description automatically generated</figcaption>
+</figure>
+</div>
+<p>如果研究数据不符合正态分布，需要使用非参数方法Wilcoxon检验法。</p>
+<p><span id="_Ref186379791" class="anchor"></span>例 3‑5 STELLAR III期临床试验<sup>14</sup>评价某药物治疗肺动脉高压的疗效。主要终点为治疗24周后6分钟步行距离的变化。双侧检验I类错误0.05，假设组间差异为25米，标准差为50米，则基于Wilcoxon秩和检验，每组121例患者（该数值是基于次要终点的计算结果）可提供约96%的检验效能。假设脱落率15%，总样本量为284。样本量计算使用了nQuery软件。</p>
+<p>我们先看一下每组121例的样本量能够提供的检验效能，R语言pwrss包计算的结果为96.6%。</p>
+<p>library(pwrss)</p>
+<p>pwrss.np.2groups(mu1 = 25, mu2 = 0, sd1 = 50,</p>
+<p>alpha = 0.05, n2 = 121)</p>
+<p>结果输出：</p>
+<p>Non-parametric Difference between Two Groups (Independent samples)</p>
+<p>Mann-Whitney U or Wilcoxon Rank-sum Test</p>
+<p>(a.k.a Wilcoxon-Mann-Whitney Test)</p>
+<p>Method: GUENTHER</p>
+<p>------------------------------</p>
+<p>Statistical power = 0.966</p>
+<p>n1 = 121</p>
+<p>n2 = 121</p>
+<p>------------------------------</p>
+<p>Alternative = “not equal”</p>
+<p>Non-centrality parameter = 3.8</p>
+<p>Degrees of freedom = 229.09</p>
+<p>Type I error rate = 0.05</p>
+<p>Type II error rate = 0.034</p>
+<p>如果将96%的检验效能带入，计算所得的样本量为每组117例。</p>
+<p>library(pwrss)</p>
+<p>pwrss.np.2groups(mu1 = 25, mu2 = 0, sd1 = 50,</p>
+<p>alpha = 0.05, power = 0.96)</p>
+<p>PASS软件以96%的检验效能计算的结果为每组118例，操作时依次点击Means, Two Independent Means, Nonparametric, Mann-Whitney U or Wilcoxon Rank-Sum Tests(Guenther)。</p>
+<p><img src="media/S3_2Means/image12.png" style="width:4.25591in;height:3.54331in"></p>
+<p><img src="media/S3_2Means/image13.png" style="width:5.76806in;height:1.88333in"></p>
+<p>研究实际入选了323例患者，6分钟步行距离治疗组增加了34.4米，对照组增加了1米，Hodges–Lehmann估计的组间差异为40.8米（95%置信区间27.5~54.1米，P&lt;0.001）。</p>
+</section>
+<section id="讨论" class="level2">
+<h2 class="anchored" data-anchor-id="讨论">讨论</h2>
+<ol type="1">
+<li></li>
+<li></li>
+<li><ol type="1">
+<li></li>
+<li></li>
+<li></li>
+</ol></li>
+</ol>
+<section id="绝对差值和相对差值" class="level3">
+<h3 class="anchored" data-anchor-id="绝对差值和相对差值">绝对差值和相对差值</h3>
+<p>均数的差异性比较，可以有绝对差值和相对差值，临床研究中选择绝对差值的似多见一些。比如在起搏治疗心力衰竭的心脏再同步化治疗（CRT）领域，判断CRT治疗有效的指标有很多，对LVEF的要求是绝对值增加5%以上，而对左室收缩期末容量（LVESV）的要求则通常是相对值减少15%以上，偶尔有定义绝对值减少15mL的。<a href="#_Ref138326543">例 3‑1</a>左束支起搏的研究，选择了左室射血分数（LVEF）变化的绝对差值。<a href="#_Ref138326616">例 3‑2</a>药物治疗阿尔茨海默病，研究比较的也是变化的绝对差值。对于该研究，有读者来信质疑研究终点的临床意义，认为主要终点CDR-SB评分的范围为0~18分，临床有意义的变化为1~2分，因此18个月时对照组增加了1.66分，治疗组增加了1.21分，都是有临床意义的恶化，而两组的绝对差值为-0.45，即治疗组的延缓进展可能没有临床意义。在这种情况下，如果绝对差值转换为相对差值可能会更直观些。</p>
+</section>
+<section id="样本量计算与统计分析的一致性" class="level3">
+<h3 class="anchored" data-anchor-id="样本量计算与统计分析的一致性">样本量计算与统计分析的一致性</h3>
+<p>选择样本量计算的方法时有一个基本原则，即研究结束时使用哪个方法进行统计分析，就应该在研究设计时使用那个方法进行样本量计算。比如，统计分析时打算用Wilcoxon秩和检验，在样本量计算就应该使用Wilcoxon秩和检验法；或者在统计分析阶段需要进行数据转换时，在样本量计算时也应当使用数据转换等等。</p>
+<p>但临床研究实际中往往有不同的做法。某研究<sup>15</sup>的主要终点为房间隔穿刺时间，尽管方案里提到如果数据呈正态分布，则统计分析时采用t检验；如果表现为偏态，则使用Wilcoxon秩和检验；但这不是一个值得推荐的做法，应当可以预见到或者根据既往研究事先估计到穿刺时间的非正态分布。<a href="#_Ref186379791">例 3‑5</a>药物治疗肺动脉高压研究，样本量计算时用的Wilcoxon秩和检验法，统计分析阶段使用Hodges-Lehmann方法估计了组间差异，尽管这是基于Wilcoxon的推广。</p>
+<p>样本量计算与统计分析不一致的情况在临床研究实际中并不少见，尽管有些问题并不大，但这种现象仍值得重视，并且应当尽可能避免。我们在<mark>生存数据的章节</mark>还会讨论到样本量计算用简单率的比较而统计分析用Kaplan-Meier率进行log-rank分析的情况。</p>
+</section>
+<section id="基线和协变量" class="level3">
+<h3 class="anchored" data-anchor-id="基线和协变量">基线和协变量</h3>
+<p><a href="#_Ref138326616">例 3‑2</a>药物治疗阿尔茨海默病，样本量计算时为t检验法，统计分析时使用了基线调整后的t检验。一般来说，基线调整可缩窄95%置信区间，提高统计效率。我们在<mark>两组均数比较的非劣效设计一章</mark>中将要介绍的SIMPLICIY HTN-3研究<sup>16</sup>，评价肾动脉消融治疗高血压的效果，主要分析两组t检验结果是阴性的，在作敏感性分析时进行了基线调整及将基线值作为协变量分析，尽管95%置信区间缩窄了，但结果仍然是阴性的。</p>
+<p>如果在样本量计算阶段就考虑协变量效应，有望减少样本量。假设某协变量与终点变量的相关系数为r，则样本量可以调整为<sup>6</sup>：</p>
+<p><span class="math inline">\(n' = n(1 - r^{2})\)</span> （3-8）</p>
+<p>FDA2023年发布的《药物和生物制品随机临床试验中协变量的调整指导原则》<sup>17</sup>指出，在对主要有效性终点分析时不进行协变量的调整是可以接受的。申办方在随机临床试验有效性终点分析时可以进行基线协变量的调整。这样做通常可减少治疗效应估计的变异，从而缩窄置信区间，提高假设检验的效能。</p>
+</section>
+<section id="脱落和交叉" class="level3">
+<h3 class="anchored" data-anchor-id="脱落和交叉">脱落和交叉</h3>
+<p>因各种原因没有观察到患者的研究终点，都可称为脱落（attrition或drop out），包括患者退出、失访、死亡（如果死亡不是终点事件）等。</p>
+<p>假设脱落率是r，通常样本量会调整至：</p>
+<p><span class="math inline">\(n' = n/(1 - r)\)</span>（3-9）</p>
+<p>交叉包括患者从对照组进入试验组或从试验组进入对照组的情况，从进一步细分的话，可以将患者由试验组转入对照组叫做落出（drop out，注意这和上文的drop out含义并不相同，假设发生率为r<sub>o</sub>），由对照组转入试验组叫落进（drop in，假设发生率为r<sub>i</sub>），根据ITT分析原则，这会稀释治疗效果，因此样本量应调整至：</p>
+<p><span class="math inline">\(n' = n/{(1 - r_{o} - r_{i})}^{2}\)</span>（3-10）</p>
+<p>此时样本量将有明显的增加，比如假设落出和落入的比例都是10%，则样本量需增加至原来的1.56倍。因此加强临床研究的质量，提高患者的依从性非常重要。</p>
+<p><strong>References:</strong></p>
+<p>1. 李康, 贺佳. 医学统计学. 6版 ed.&nbsp;北京: 人民卫生出版社; 2013.</p>
+<p>2. 颜艳, 王彤. 医学统计学. 5版 ed.&nbsp;北京: 人民卫生出版社; 2020.</p>
+<p>3. 李卫. 医疗器械临床试验统计方法. 2版 ed.&nbsp;北京: 科学出版社; 2016.</p>
+<p>4. 贺佳, 邓伟, 王素珍. 临床试验设计与统计分析. 2版 ed.&nbsp;北京: 人民卫生出版社; 2022.</p>
+<p>5. 陈峰, 夏结来. 临床试验统计学. 北京: 人民卫生出版社; 2018.</p>
+<p>6. Chow S, Shao J, Wang H, Lokhnygina Y. Sample Size Calculations in Clinical Research. Third Edition ed: CRC Press; 2018.</p>
+<p>7. 颜虹, 徐勇勇. 医学统计学. 3版 ed.&nbsp;北京: 人民卫生出版社; 2015.</p>
+<p>8. Kieser M. Methods and Applications of Sample Size Calculation and Recalculation in Clinical Trials: Springer; 2020.</p>
+<p>9. Wang Y, Zhu H, Hou X, et al.&nbsp;Randomized Trial of Left Bundle Branch vs Biventricular Pacing for Cardiac Resynchronization Therapy. J AM COLL CARDIOL 2022;80:1205-16.</p>
+<p>10. van Dyck CH, Swanson CJ, Aisen P, et al.&nbsp;Lecanemab in Early Alzheimer's Disease. NEW ENGL J MED 2023;388:9-21.</p>
+<p>11. Gao R, Han Y, Yang Y, et al.&nbsp;PLATINUM China: a prospective, randomized investigation of the platinum chromium everolimus-eluting stent in de novo coronary artery lesions. CATHETER CARDIO INTE 2015;85 Suppl 1:716-23.</p>
+<p>12. Wadwa RP, Reed ZW, Buckingham BA, et al.&nbsp;Trial of Hybrid Closed-Loop Control in Young Children with Type 1 Diabetes. NEW ENGL J MED 2023;388:991-1001.</p>
+<p>13. Machin D, Campbell MJ, Tan SB, Tan SH. Sample Sizes for Clinical, Laboratory and Epidemiology Studies. Fourth Edition ed.&nbsp;Pondicherry: Wiley Blackwell; 2018.</p>
+<p>14. Hoeper MM, Badesch DB, Ghofrani HA, et al.&nbsp;Phase 3 Trial of Sotatercept for Treatment of Pulmonary Arterial Hypertension. NEW ENGL J MED 2023;388:1478-90.</p>
+<p>15. Dewland TA, Gerstenfeld EP, Moss JD, et al.&nbsp;Randomized Comparison of a Radiofrequency Wire Versus a Radiofrequency Needle System for Transseptal Puncture. JACC-CLIN ELECTROPHY 2023;9:611-9.</p>
+<p>16. Bhatt DL, Kandzari DE, O'Neill WW, et al.&nbsp;A controlled trial of renal denervation for resistant hypertension. NEW ENGL J MED 2014;370:1393-401.</p>
+<p>17. FDA. Adjusting for Covariates in Randomized Clinical Trials for Drugs and Biological Products Guidance for Industry; 2023.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./S2 1Proportion.html" class="pagination-link" aria-label="3. 单组率的样本量计算">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">3. 单组率的样本量计算</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./S4 2Proportions.html" class="pagination-link" aria-label="5. 两组率的比较">
+        <span class="nav-page-text"><span class="chapter-title">5. 两组率的比较</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">源代码</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># 4. 两组均数的比较</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>定量数据在临床研究中广泛存在，比如年龄、身高、体重、血压、血糖等，常见的统计量如均数、标准差等也广为熟知。两组均数的比较常见于临床的早期阶段，或者用作替代终点以及使用量表的情况。</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>两组均数比较的样本量计算公式^1-6^如下：</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>$n_{C} = n_{T} = \frac{{2\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)}^{2}}{{(\frac{\delta}{\sigma})}^{2}}$（3-1）</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>公式中C代表对照组，T代表试验组，δ为两组均数之差μ~T~-μ~C~，σ为标准差。这是基于正态分布且总体标准差已知时的Z检验法的样本量计算公式。当总体标准差未知或样本量较小时应当使用t检验法，此时样本量计算需迭代，没有显性公式。T检验法的样本量计算可使用软件，或者校正公式^2^：</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>$n_{C} = n_{T} = \frac{{2\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)}^{2}}{{(\frac{\delta}{\sigma})}^{2}} + \frac{1}{4}Z_{1 - \alpha/2}^{2}$（3-2）</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>从校正公式即可看出基于t检验法的样本量计算比基于Z检验法的样本量计算的结果相差并不大，因此也可以在基于Z检验法的样本量计算结果上总例数增加2\~3例^7^。可以将Z检验法视为t检验法的特例。</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>如果两组方差不等，样本量计算公式的形式同公式3-1与3-2，只是需要带入合并方差：</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>$\sigma^{2} = {(\sigma}_{C}^{2} + \sigma_{T}^{2})/2$（3-3）</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>也有建议取较大的方差带入计算^7^。</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>两组例数不等时，假设试验组与对照组按r:1分配，则样本量计算公式为^1,\ 6^：</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>$n_{C} = \frac{\left( z_{1 - \alpha/2} + z_{1 - \beta} \right)^{2}(1 + 1 \slash r)}{{(\delta/\sigma)}^{2}}$（3-4）</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>$$n_{T} = n_{C}r$$</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>当两组方差及例数都不相等时同公式3-4，其中：</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>$\sigma^{2} = \frac{\sigma_{C}^{2} + \sigma_{T}^{2}/r}{1 + 1/r}$（3-5）</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>或者^6^：</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>$n = \frac{\left( z_{1 - \alpha/2} + z_{1 - \beta} \right)^{2}\left( {(\sigma}_{C}^{2} + \sigma_{T}^{2} \slash r \right)}{\delta^{2}}$ （3-6）</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>如果需要校正^8^：</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>$n_{C} = \frac{\left( z_{1 - \alpha/2} + z_{1 - \beta} \right)^{2}(1 + 1 \slash r)}{{(\delta/\sigma)}^{2}} + \frac{Z_{1 - \alpha/2}^{2}}{2(1 + r)}$（3-7）</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>由以上公式可以看出，样本量与两组均数的差值及标准差有关，准确地说是样本量与δ/σ的平方成反比，而与每组均数的具体值并不直接相关。临床常见参数组合下的t检验法样本量见<span class="co">[</span><span class="ot">图 3‑1</span><span class="co">](#_Ref186376310)</span>，<span class="co">[</span><span class="ot">表 3‑1</span><span class="co">](#_Ref186376317)</span>。</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>![[]{#_Ref186376310 .anchor}图 3‑1 两组均数比较的样本量与δ/σ的关系（α=0.05双侧）](media/S3_2Means/image1.png){width="5.768055555555556in" height="4.770833333333333in"}</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>+---------------------------+---------------------------+---------------------------+</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $$\frac{\delta}{\sigma}$$ <span class="pp">|</span> α=0.05双侧                <span class="pp">|</span> α=0.05单侧                <span class="pp">|</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>                           +-------------+-------------+-------------+-------------+</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>                           <span class="pp">|</span> β=0.2       <span class="pp">|</span> β=0.1       <span class="pp">|</span> β=0.2       <span class="pp">|</span> β=0.1       <span class="pp">|</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>+========================<span class="al">==:+============:+============:+============:+==</span>==========:+</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.20                      <span class="pp">|</span> 787         <span class="pp">|</span> 1053        <span class="pp">|</span> 620         <span class="pp">|</span> 858         <span class="pp">|</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.25                      <span class="pp">|</span> 505         <span class="pp">|</span> 675         <span class="pp">|</span> 398         <span class="pp">|</span> 550         <span class="pp">|</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.30                      <span class="pp">|</span> 351         <span class="pp">|</span> 469         <span class="pp">|</span> 277         <span class="pp">|</span> 382         <span class="pp">|</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.35                      <span class="pp">|</span> 259         <span class="pp">|</span> 346         <span class="pp">|</span> 204         <span class="pp">|</span> 281         <span class="pp">|</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.40                      <span class="pp">|</span> 199         <span class="pp">|</span> 265         <span class="pp">|</span> 156         <span class="pp">|</span> 216         <span class="pp">|</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.45                      <span class="pp">|</span> 157         <span class="pp">|</span> 210         <span class="pp">|</span> 124         <span class="pp">|</span> 171         <span class="pp">|</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.50                      <span class="pp">|</span> 128         <span class="pp">|</span> 171         <span class="pp">|</span> 101         <span class="pp">|</span> 139         <span class="pp">|</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.55                      <span class="pp">|</span> 106         <span class="pp">|</span> 141         <span class="pp">|</span> 84          <span class="pp">|</span> 115         <span class="pp">|</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.60                      <span class="pp">|</span> 90          <span class="pp">|</span> 119         <span class="pp">|</span> 71          <span class="pp">|</span> 97          <span class="pp">|</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.65                      <span class="pp">|</span> 77          <span class="pp">|</span> 102         <span class="pp">|</span> 60          <span class="pp">|</span> 83          <span class="pp">|</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.70                      <span class="pp">|</span> 67          <span class="pp">|</span> 88          <span class="pp">|</span> 52          <span class="pp">|</span> 72          <span class="pp">|</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.75                      <span class="pp">|</span> 58          <span class="pp">|</span> 77          <span class="pp">|</span> 46          <span class="pp">|</span> 63          <span class="pp">|</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.80                      <span class="pp">|</span> 52          <span class="pp">|</span> 68          <span class="pp">|</span> 41          <span class="pp">|</span> 55          <span class="pp">|</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.85                      <span class="pp">|</span> 46          <span class="pp">|</span> 61          <span class="pp">|</span> 36          <span class="pp">|</span> 49          <span class="pp">|</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.90                      <span class="pp">|</span> 41          <span class="pp">|</span> 54          <span class="pp">|</span> 32          <span class="pp">|</span> 44          <span class="pp">|</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.95                      <span class="pp">|</span> 37          <span class="pp">|</span> 49          <span class="pp">|</span> 29          <span class="pp">|</span> 40          <span class="pp">|</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 1.00                      <span class="pp">|</span> 34          <span class="pp">|</span> 45          <span class="pp">|</span> 27          <span class="pp">|</span> 36          <span class="pp">|</span></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>+---------------------------+-------------+-------------+-------------+-------------+</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>: []{#_Ref186376317 .anchor}表 3‑1 两组均数比较不同$\frac{\delta}{\sigma}$、α及β组合下的样本量</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="fu">## t检验法</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>[]{#_Ref138326543 .anchor}例 3‑1 LBBP-RESYNC是来自于我国的研究^9^，在接受心脏再同步治疗（CRT）的患者中比较了左束支起搏（LBBP）与传统的双室起搏（BiVP）治疗心衰的疗效，主要终点为6个月时左室射血分数（LVEF）的改善。据既往数据，预期LBBP-CRT组可提高LVEF 18%，BiVP-CRT组提高13%，标准差5%，设定显著性水平0.05，则34例患者可确保80%的检验效能。假设脱落率15%，共需40例患者。</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>注意此例研究终点的百分率是定量数据而不是定性数据。Excel表Z检验法计算结果为32例，校正后为34例，考虑脱落为34/(1-15%)=40。前文已述，两组均数比较的样本量计算，关键变量是两组均数差值与标准差的比值$\delta/\sigma$，因此如果用对照组13，试验组18及标准差5带入Excel表，计算结果完全一致。</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image2.png)</span>{width="3.4652777777777777in" height="1.6736111111111112in"}</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>R语言pwrss包Z检验法结果为32例：</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>pwrss.z.2means(mu1 = 0.18, mu2 = 0.13, sd1 = 0.05,</span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, power = 0.8)</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>Difference between Two Means (Independent Samples z Test)</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>H0: mu1 = mu2</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>HA: mu1 != mu2</span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a><span class="sc">\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-</span>-</span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>Statistical power = 0.8</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>n1 = 16</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>n2 = 16</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a><span class="sc">\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-</span>-</span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>Alternative = "not equal"</span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>Non-centrality parameter = 2.802</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>Type I error rate = 0.05</span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>Type II error rate = 0.2</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a>R语言pwrss包t检验法结果为34例：</span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>pwrss.t.2means(mu1 = 0.18, mu2 = 0.13, sd1 = 0.05,</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, power = 0.8)</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>Difference between Two means</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>(Independent Samples t Test)</span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>H0: mu1 = mu2</span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a>HA: mu1 != mu2</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a><span class="sc">\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-</span>-</span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>Statistical power = 0.8</span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a>n1 = 17</span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>n2 = 17</span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a><span class="sc">\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-</span>-</span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a>Alternative = "not equal"</span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a>Degrees of freedom = 32</span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a>Non-centrality parameter = 2.915</span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a>Type I error rate = 0.05</span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>Type II error rate = 0.2</span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a>PASS软件Z检验法的结果为32，操作时依次点击Means, Two Independent Means, Z-Test (Inequality), Two-Sample Z-Tests Assuming Equal Variance。</span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image3.png)</span>{width="4.307086614173229in" height="3.6023622047244093in"}</span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image4.png)</span>{width="5.768055555555556in" height="1.6875in"}</span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a>PASS软件t检验法的结果为34，操作时依次点击Means, Two Independent Means, T-Test (Inequality), Two-Sample T-Tests Assuming Equal Variance，其参数设置界面与Z检验法完全一致，此处不再重复。</span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image5.png)</span>{width="5.768055555555556in" height="1.851388888888889in"}</span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a>该研究实际入组了40例患者，试验组LVEF的改善明显优于对照组（试验组变化21.08± 1.91%，对照组变化15.62 ±1.94%），平均差值5.6%（95%置信区间0.3%-10.9%，P=0.039），研究达成。</span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a>[]{#_Ref138326616 .anchor}例 3‑2 Clarity AD研究^10^评价乐卡尼单抗（Lecanemab）在早期阿尔茨海默病中的疗效。患者随机接受乐卡尼单抗或安慰剂治疗，主要终点为18个月时临床痴呆评分（CDR-SB，0\~18分，分值越高表面病情越重）。假设乐卡尼单抗可延缓病情的进展，18个月时CDR-SB的增加比对照组低0.373分（相当于低25%，文章未给出对照组的具体数值，但这不影响样本量的计算），标准差两组均为2.031，检验效能90%，脱落率20%，则总样本量需1566，每组783例。</span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a>Excel表Z检验法的计算结果为每组624例，校正后为625例，考虑落后为625/（1-0.2）=781.3，向上取整为每组782例。</span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a>R语言pwrss包Z检验法的结果为每组624例，t检验法的结果为每组625例。</span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a>pwrss.z.2means(mu1 = 0.373, mu2 = 0, sd1 = 2.031,</span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, power = 0.9)</span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a>pwrss.t.2means(mu1 = 0.373, mu2 = 0, sd1 = 2.031,</span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, power = 0.9)</span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a>R语言pwr包t检验的结果为每组624.0196例。</span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a>library(pwr)</span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a>pwr.t.test(d = 0.373/2.031, sig.level = 0.05, power = 0.9)</span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a>PASS软件Z检验法结果为每组624例，t检验法结果也是每组624例。可见样本量较大时，Z检验法的结果与t检验法的结果基本一致。</span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a>研究实际入组了1795例患者，两组基线CDR-SB约为3.2，18个月时调整后的CDR-SB变化在对照组增加了1.66，治疗组增加了1.21（差值-0.45，95%CI -0.67\~-0.23，P<span class="sc">\&lt;</span>0.001）。该研究使乐卡尼单抗于2023年1月获美国FDA加速审批的方式批准。</span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a>接下来看几个两组样本量不等的实例。</span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a>例 3‑3 PLATINUM China^11^研究是某外企在我国开展的一个冠脉支架上市前随机对照试验。新型支架与传统支架按3:1随机分配，主要终点为9个月时支架内管腔丢失。假设传统支架丢失0.35mm，新型支架为0.14mm，标准差都是0.54mm，双侧α=0.05，脱落率20%，则500例患者可提供91%的检验效能。</span>
+<span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a>Excel表按Z检验法结果为388，t检验校正结果为392，其实这种较大的样本量通常已无需校正。</span>
+<span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image6.png)</span>{width="3.4652777777777777in" height="1.8819444444444444in"}</span>
+<span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a>R语言pwrss包Z检验法结果为n1+n2=97+289=386，可以看出对照组为97例，如果试验组按对照组的3倍计算为291，总计为388例。。</span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a>pwrss.z.2means(mu1 = 0.14, mu2 = 0.35, sd1 = 0.54, kappa = 3,</span>
+<span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, power = 0.91)</span>
+<span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a>R语言pwrss包t检验法结果为97+290=387，可以看出对照组为97例，如果试验组按对照组的3倍计算为291，总计为388例。</span>
+<span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a>pwrss.t.2means(mu1 = 0.14, mu2 = 0.35, sd1 = 0.54, kappa = 3,</span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, power = 0.91)</span>
+<span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a>PASS软件Z检验法结果为385例（对照组96例），t检验法结果为387例（对照组97例）。两种方法的参数界面完全一致，此处仅给出t检验法的计算过程。</span>
+<span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image7.png)</span>{width="4.225366360454943in" height="3.683652668416448in"}</span>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image8.png)</span>{width="5.675492125984252in" height="1.6834787839020122in"}</span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a>注意PASS软件在计算两样本均数比较的样本量时对第1组与第2组具体所指并无具体要求，两组可互换，但实际结果仍有细微差异，如第1组代表对照组时的最终结果为388例。</span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image9.png)</span>{width="4.311023622047244in" height="3.8149606299212597in"}</span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image10.png)</span>{width="5.768055555555556in" height="1.679861111111111in"}</span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a>本例是考虑20%的脱落后得到样本量500例的，我们还原一下脱落前样本量400例时可提供的检验效能为91.9%：</span>
+<span id="cb1-240"><a href="#cb1-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-241"><a href="#cb1-241" aria-hidden="true" tabindex="-1"></a>pwrss.t.2means(mu1 = 0.14, mu2 = 0.35, sd1 = 0.54, kappa = 3,</span>
+<span id="cb1-242"><a href="#cb1-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-243"><a href="#cb1-243" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, n2 = 100)</span>
+<span id="cb1-244"><a href="#cb1-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-245"><a href="#cb1-245" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-246"><a href="#cb1-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-247"><a href="#cb1-247" aria-hidden="true" tabindex="-1"></a>Difference between Two means</span>
+<span id="cb1-248"><a href="#cb1-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-249"><a href="#cb1-249" aria-hidden="true" tabindex="-1"></a>(Independent Samples t Test)</span>
+<span id="cb1-250"><a href="#cb1-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-251"><a href="#cb1-251" aria-hidden="true" tabindex="-1"></a>H0: mu1 = mu2</span>
+<span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a>HA: mu1 != mu2</span>
+<span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a><span class="sc">\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-</span>-</span>
+<span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a>Statistical power = 0.919</span>
+<span id="cb1-258"><a href="#cb1-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-259"><a href="#cb1-259" aria-hidden="true" tabindex="-1"></a>n1 = 300</span>
+<span id="cb1-260"><a href="#cb1-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-261"><a href="#cb1-261" aria-hidden="true" tabindex="-1"></a>n2 = 100</span>
+<span id="cb1-262"><a href="#cb1-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-263"><a href="#cb1-263" aria-hidden="true" tabindex="-1"></a><span class="sc">\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-</span>-</span>
+<span id="cb1-264"><a href="#cb1-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a>Alternative = "not equal"</span>
+<span id="cb1-266"><a href="#cb1-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-267"><a href="#cb1-267" aria-hidden="true" tabindex="-1"></a>Degrees of freedom = 398</span>
+<span id="cb1-268"><a href="#cb1-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-269"><a href="#cb1-269" aria-hidden="true" tabindex="-1"></a>Non-centrality parameter = -3.368</span>
+<span id="cb1-270"><a href="#cb1-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-271"><a href="#cb1-271" aria-hidden="true" tabindex="-1"></a>Type I error rate = 0.05</span>
+<span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a>Type II error rate = 0.081</span>
+<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a>该研究最终入组了500例患者，结果为传统支架组0.40±0.45mm，新型支架组0.11±0.36 mm，P<span class="sc">\&lt;</span>0.001。同时研究也计算了管腔丢失的相对结果，传统支架组为22.20±16.00%，新型支架组为11.06±13.86%，P<span class="sc">\&lt;</span>0.001。</span>
+<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a>例 3‑4 PEDAP研究^12^评价了某闭环胰岛素泵控制2\~6岁儿童I型糖尿病的效果。主要终点为治疗后血糖处于70\~180mg/dl的百分比，闭环胰岛素泵与标准治疗比较，2:1分组，假设治疗13周后试验组较对照组可提高主要终点绝对值7.5%，标准差为10%，双侧检验I类错误5%，则90例患者可提供90%的检验效能，考虑到脱落，总样本量增加至102例。</span>
+<span id="cb1-278"><a href="#cb1-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-279"><a href="#cb1-279" aria-hidden="true" tabindex="-1"></a>Excel表Z检验法及校正后都是87例，R语言pwrss包t检验法及PASS软件t检验法结果也都是87例。</span>
+<span id="cb1-280"><a href="#cb1-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-281"><a href="#cb1-281" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-282"><a href="#cb1-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-283"><a href="#cb1-283" aria-hidden="true" tabindex="-1"></a>pwrss.t.2means(mu1 = 7.5, mu2 = 0, sd1 = 10, kappa = 2,</span>
+<span id="cb1-284"><a href="#cb1-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-285"><a href="#cb1-285" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, power = 0.9)</span>
+<span id="cb1-286"><a href="#cb1-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-287"><a href="#cb1-287" aria-hidden="true" tabindex="-1"></a>研究入选了102例患者，治疗后血糖控制率试验组从基线56.7±18.0%提高至69.3±11.1%， 对照组从基线54.9±14.7% 提高至55.9±12.6%（调整后两组变化的差值为12.4%，相当于每天3小时左右。95%置信区间9.5\~15.3%，P<span class="sc">\&lt;</span>0.001）。注意此例研究终点的百分率是定量数据而不是定性数据。</span>
+<span id="cb1-288"><a href="#cb1-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-289"><a href="#cb1-289" aria-hidden="true" tabindex="-1"></a><span class="fu">## Wilcoxon检验法</span></span>
+<span id="cb1-290"><a href="#cb1-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-291"><a href="#cb1-291" aria-hidden="true" tabindex="-1"></a>Machin^13^</span>
+<span id="cb1-292"><a href="#cb1-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-293"><a href="#cb1-293" aria-hidden="true" tabindex="-1"></a><span class="al">![A screenshot of a math problem Description automatically generated](media/S3_2Means/image11.png)</span>{width="5.768055555555556in" height="5.021527777777778in"}</span>
+<span id="cb1-294"><a href="#cb1-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-295"><a href="#cb1-295" aria-hidden="true" tabindex="-1"></a>如果研究数据不符合正态分布，需要使用非参数方法Wilcoxon检验法。</span>
+<span id="cb1-296"><a href="#cb1-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-297"><a href="#cb1-297" aria-hidden="true" tabindex="-1"></a>[]{#_Ref186379791 .anchor}例 3‑5 STELLAR III期临床试验^14^评价某药物治疗肺动脉高压的疗效。主要终点为治疗24周后6分钟步行距离的变化。双侧检验I类错误0.05，假设组间差异为25米，标准差为50米，则基于Wilcoxon秩和检验，每组121例患者（该数值是基于次要终点的计算结果）可提供约96%的检验效能。假设脱落率15%，总样本量为284。样本量计算使用了nQuery软件。</span>
+<span id="cb1-298"><a href="#cb1-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-299"><a href="#cb1-299" aria-hidden="true" tabindex="-1"></a>我们先看一下每组121例的样本量能够提供的检验效能，R语言pwrss包计算的结果为96.6%。</span>
+<span id="cb1-300"><a href="#cb1-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-301"><a href="#cb1-301" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-302"><a href="#cb1-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-303"><a href="#cb1-303" aria-hidden="true" tabindex="-1"></a>pwrss.np.2groups(mu1 = 25, mu2 = 0, sd1 = 50,</span>
+<span id="cb1-304"><a href="#cb1-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-305"><a href="#cb1-305" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, n2 = 121)</span>
+<span id="cb1-306"><a href="#cb1-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-307"><a href="#cb1-307" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-308"><a href="#cb1-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-309"><a href="#cb1-309" aria-hidden="true" tabindex="-1"></a>Non-parametric Difference between Two Groups (Independent samples)</span>
+<span id="cb1-310"><a href="#cb1-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-311"><a href="#cb1-311" aria-hidden="true" tabindex="-1"></a>Mann-Whitney U or Wilcoxon Rank-sum Test</span>
+<span id="cb1-312"><a href="#cb1-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-313"><a href="#cb1-313" aria-hidden="true" tabindex="-1"></a>(a.k.a Wilcoxon-Mann-Whitney Test)</span>
+<span id="cb1-314"><a href="#cb1-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-315"><a href="#cb1-315" aria-hidden="true" tabindex="-1"></a>Method: GUENTHER</span>
+<span id="cb1-316"><a href="#cb1-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-317"><a href="#cb1-317" aria-hidden="true" tabindex="-1"></a><span class="sc">\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-</span>-</span>
+<span id="cb1-318"><a href="#cb1-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-319"><a href="#cb1-319" aria-hidden="true" tabindex="-1"></a>Statistical power = 0.966</span>
+<span id="cb1-320"><a href="#cb1-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-321"><a href="#cb1-321" aria-hidden="true" tabindex="-1"></a>n1 = 121</span>
+<span id="cb1-322"><a href="#cb1-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-323"><a href="#cb1-323" aria-hidden="true" tabindex="-1"></a>n2 = 121</span>
+<span id="cb1-324"><a href="#cb1-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-325"><a href="#cb1-325" aria-hidden="true" tabindex="-1"></a><span class="sc">\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-</span>-</span>
+<span id="cb1-326"><a href="#cb1-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-327"><a href="#cb1-327" aria-hidden="true" tabindex="-1"></a>Alternative = "not equal"</span>
+<span id="cb1-328"><a href="#cb1-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-329"><a href="#cb1-329" aria-hidden="true" tabindex="-1"></a>Non-centrality parameter = 3.8</span>
+<span id="cb1-330"><a href="#cb1-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-331"><a href="#cb1-331" aria-hidden="true" tabindex="-1"></a>Degrees of freedom = 229.09</span>
+<span id="cb1-332"><a href="#cb1-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-333"><a href="#cb1-333" aria-hidden="true" tabindex="-1"></a>Type I error rate = 0.05</span>
+<span id="cb1-334"><a href="#cb1-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-335"><a href="#cb1-335" aria-hidden="true" tabindex="-1"></a>Type II error rate = 0.034</span>
+<span id="cb1-336"><a href="#cb1-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-337"><a href="#cb1-337" aria-hidden="true" tabindex="-1"></a>如果将96%的检验效能带入，计算所得的样本量为每组117例。</span>
+<span id="cb1-338"><a href="#cb1-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-339"><a href="#cb1-339" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-340"><a href="#cb1-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-341"><a href="#cb1-341" aria-hidden="true" tabindex="-1"></a>pwrss.np.2groups(mu1 = 25, mu2 = 0, sd1 = 50,</span>
+<span id="cb1-342"><a href="#cb1-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-343"><a href="#cb1-343" aria-hidden="true" tabindex="-1"></a>alpha = 0.05, power = 0.96)</span>
+<span id="cb1-344"><a href="#cb1-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-345"><a href="#cb1-345" aria-hidden="true" tabindex="-1"></a>PASS软件以96%的检验效能计算的结果为每组118例，操作时依次点击Means, Two Independent Means, Nonparametric, Mann-Whitney U or Wilcoxon Rank-Sum Tests(Guenther)。</span>
+<span id="cb1-346"><a href="#cb1-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-347"><a href="#cb1-347" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image12.png)</span>{width="4.255905511811024in" height="3.543307086614173in"}</span>
+<span id="cb1-348"><a href="#cb1-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-349"><a href="#cb1-349" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S3_2Means/image13.png)</span>{width="5.768055555555556in" height="1.8833333333333333in"}</span>
+<span id="cb1-350"><a href="#cb1-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-351"><a href="#cb1-351" aria-hidden="true" tabindex="-1"></a>研究实际入选了323例患者，6分钟步行距离治疗组增加了34.4米，对照组增加了1米，Hodges--Lehmann估计的组间差异为40.8米（95%置信区间27.5\~54.1米，P<span class="sc">\&lt;</span>0.001）。</span>
+<span id="cb1-352"><a href="#cb1-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-353"><a href="#cb1-353" aria-hidden="true" tabindex="-1"></a><span class="fu">## 讨论</span></span>
+<span id="cb1-354"><a href="#cb1-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-355"><a href="#cb1-355" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span></span>
+<span id="cb1-356"><a href="#cb1-356" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span></span>
+<span id="cb1-357"><a href="#cb1-357" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>1.  </span>
+<span id="cb1-358"><a href="#cb1-358" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span></span>
+<span id="cb1-359"><a href="#cb1-359" aria-hidden="true" tabindex="-1"></a><span class="ss">    3.  </span></span>
+<span id="cb1-360"><a href="#cb1-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-361"><a href="#cb1-361" aria-hidden="true" tabindex="-1"></a><span class="fu">### 绝对差值和相对差值</span></span>
+<span id="cb1-362"><a href="#cb1-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-363"><a href="#cb1-363" aria-hidden="true" tabindex="-1"></a>均数的差异性比较，可以有绝对差值和相对差值，临床研究中选择绝对差值的似多见一些。比如在起搏治疗心力衰竭的心脏再同步化治疗（CRT）领域，判断CRT治疗有效的指标有很多，对LVEF的要求是绝对值增加5%以上，而对左室收缩期末容量（LVESV）的要求则通常是相对值减少15%以上，偶尔有定义绝对值减少15mL的。<span class="co">[</span><span class="ot">例 3‑1</span><span class="co">](#_Ref138326543)</span>左束支起搏的研究，选择了左室射血分数（LVEF）变化的绝对差值。<span class="co">[</span><span class="ot">例 3‑2</span><span class="co">](#_Ref138326616)</span>药物治疗阿尔茨海默病，研究比较的也是变化的绝对差值。对于该研究，有读者来信质疑研究终点的临床意义，认为主要终点CDR-SB评分的范围为0\~18分，临床有意义的变化为1\~2分，因此18个月时对照组增加了1.66分，治疗组增加了1.21分，都是有临床意义的恶化，而两组的绝对差值为-0.45，即治疗组的延缓进展可能没有临床意义。在这种情况下，如果绝对差值转换为相对差值可能会更直观些。</span>
+<span id="cb1-364"><a href="#cb1-364" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-365"><a href="#cb1-365" aria-hidden="true" tabindex="-1"></a><span class="fu">### 样本量计算与统计分析的一致性</span></span>
+<span id="cb1-366"><a href="#cb1-366" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-367"><a href="#cb1-367" aria-hidden="true" tabindex="-1"></a>选择样本量计算的方法时有一个基本原则，即研究结束时使用哪个方法进行统计分析，就应该在研究设计时使用那个方法进行样本量计算。比如，统计分析时打算用Wilcoxon秩和检验，在样本量计算就应该使用Wilcoxon秩和检验法；或者在统计分析阶段需要进行数据转换时，在样本量计算时也应当使用数据转换等等。</span>
+<span id="cb1-368"><a href="#cb1-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-369"><a href="#cb1-369" aria-hidden="true" tabindex="-1"></a>但临床研究实际中往往有不同的做法。某研究^15^的主要终点为房间隔穿刺时间，尽管方案里提到如果数据呈正态分布，则统计分析时采用t检验；如果表现为偏态，则使用Wilcoxon秩和检验；但这不是一个值得推荐的做法，应当可以预见到或者根据既往研究事先估计到穿刺时间的非正态分布。<span class="co">[</span><span class="ot">例 3‑5</span><span class="co">](#_Ref186379791)</span>药物治疗肺动脉高压研究，样本量计算时用的Wilcoxon秩和检验法，统计分析阶段使用Hodges-Lehmann方法估计了组间差异，尽管这是基于Wilcoxon的推广。</span>
+<span id="cb1-370"><a href="#cb1-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-371"><a href="#cb1-371" aria-hidden="true" tabindex="-1"></a>样本量计算与统计分析不一致的情况在临床研究实际中并不少见，尽管有些问题并不大，但这种现象仍值得重视，并且应当尽可能避免。我们在<span class="co">[</span><span class="ot">生存数据的章节</span><span class="co">]</span>{.mark}还会讨论到样本量计算用简单率的比较而统计分析用Kaplan-Meier率进行log-rank分析的情况。</span>
+<span id="cb1-372"><a href="#cb1-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-373"><a href="#cb1-373" aria-hidden="true" tabindex="-1"></a><span class="fu">### 基线和协变量</span></span>
+<span id="cb1-374"><a href="#cb1-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-375"><a href="#cb1-375" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">例 3‑2</span><span class="co">](#_Ref138326616)</span>药物治疗阿尔茨海默病，样本量计算时为t检验法，统计分析时使用了基线调整后的t检验。一般来说，基线调整可缩窄95%置信区间，提高统计效率。我们在<span class="co">[</span><span class="ot">两组均数比较的非劣效设计一章</span><span class="co">]</span>{.mark}中将要介绍的SIMPLICIY HTN-3研究^16^，评价肾动脉消融治疗高血压的效果，主要分析两组t检验结果是阴性的，在作敏感性分析时进行了基线调整及将基线值作为协变量分析，尽管95%置信区间缩窄了，但结果仍然是阴性的。</span>
+<span id="cb1-376"><a href="#cb1-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-377"><a href="#cb1-377" aria-hidden="true" tabindex="-1"></a>如果在样本量计算阶段就考虑协变量效应，有望减少样本量。假设某协变量与终点变量的相关系数为r，则样本量可以调整为^6^：</span>
+<span id="cb1-378"><a href="#cb1-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-379"><a href="#cb1-379" aria-hidden="true" tabindex="-1"></a>$n' = n(1 - r^{2})$ （3-8）</span>
+<span id="cb1-380"><a href="#cb1-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-381"><a href="#cb1-381" aria-hidden="true" tabindex="-1"></a>FDA2023年发布的《药物和生物制品随机临床试验中协变量的调整指导原则》^17^指出，在对主要有效性终点分析时不进行协变量的调整是可以接受的。申办方在随机临床试验有效性终点分析时可以进行基线协变量的调整。这样做通常可减少治疗效应估计的变异，从而缩窄置信区间，提高假设检验的效能。</span>
+<span id="cb1-382"><a href="#cb1-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-383"><a href="#cb1-383" aria-hidden="true" tabindex="-1"></a><span class="fu">### 脱落和交叉</span></span>
+<span id="cb1-384"><a href="#cb1-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-385"><a href="#cb1-385" aria-hidden="true" tabindex="-1"></a>因各种原因没有观察到患者的研究终点，都可称为脱落（attrition或drop out），包括患者退出、失访、死亡（如果死亡不是终点事件）等。</span>
+<span id="cb1-386"><a href="#cb1-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-387"><a href="#cb1-387" aria-hidden="true" tabindex="-1"></a>假设脱落率是r，通常样本量会调整至：</span>
+<span id="cb1-388"><a href="#cb1-388" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-389"><a href="#cb1-389" aria-hidden="true" tabindex="-1"></a>$n' = n/(1 - r)$（3-9）</span>
+<span id="cb1-390"><a href="#cb1-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-391"><a href="#cb1-391" aria-hidden="true" tabindex="-1"></a>交叉包括患者从对照组进入试验组或从试验组进入对照组的情况，从进一步细分的话，可以将患者由试验组转入对照组叫做落出（drop out，注意这和上文的drop out含义并不相同，假设发生率为r~o~），由对照组转入试验组叫落进（drop in，假设发生率为r~i~），根据ITT分析原则，这会稀释治疗效果，因此样本量应调整至：</span>
+<span id="cb1-392"><a href="#cb1-392" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-393"><a href="#cb1-393" aria-hidden="true" tabindex="-1"></a>$n' = n/{(1 - r_{o} - r_{i})}^{2}$（3-10）</span>
+<span id="cb1-394"><a href="#cb1-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-395"><a href="#cb1-395" aria-hidden="true" tabindex="-1"></a>此时样本量将有明显的增加，比如假设落出和落入的比例都是10%，则样本量需增加至原来的1.56倍。因此加强临床研究的质量，提高患者的依从性非常重要。</span>
+<span id="cb1-396"><a href="#cb1-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-397"><a href="#cb1-397" aria-hidden="true" tabindex="-1"></a>**References:**</span>
+<span id="cb1-398"><a href="#cb1-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-399"><a href="#cb1-399" aria-hidden="true" tabindex="-1"></a>1<span class="sc">\.</span> 李康, 贺佳. 医学统计学. 6版 ed. 北京: 人民卫生出版社; 2013.</span>
+<span id="cb1-400"><a href="#cb1-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-401"><a href="#cb1-401" aria-hidden="true" tabindex="-1"></a>2<span class="sc">\.</span> 颜艳, 王彤. 医学统计学. 5版 ed. 北京: 人民卫生出版社; 2020.</span>
+<span id="cb1-402"><a href="#cb1-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-403"><a href="#cb1-403" aria-hidden="true" tabindex="-1"></a>3<span class="sc">\.</span> 李卫. 医疗器械临床试验统计方法. 2版 ed. 北京: 科学出版社; 2016.</span>
+<span id="cb1-404"><a href="#cb1-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-405"><a href="#cb1-405" aria-hidden="true" tabindex="-1"></a>4<span class="sc">\.</span> 贺佳, 邓伟, 王素珍. 临床试验设计与统计分析. 2版 ed. 北京: 人民卫生出版社; 2022.</span>
+<span id="cb1-406"><a href="#cb1-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-407"><a href="#cb1-407" aria-hidden="true" tabindex="-1"></a>5<span class="sc">\.</span> 陈峰, 夏结来. 临床试验统计学. 北京: 人民卫生出版社; 2018.</span>
+<span id="cb1-408"><a href="#cb1-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-409"><a href="#cb1-409" aria-hidden="true" tabindex="-1"></a>6<span class="sc">\.</span> Chow S, Shao J, Wang H, Lokhnygina Y. Sample Size Calculations in Clinical Research. Third Edition ed: CRC Press; 2018.</span>
+<span id="cb1-410"><a href="#cb1-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-411"><a href="#cb1-411" aria-hidden="true" tabindex="-1"></a>7<span class="sc">\.</span> 颜虹, 徐勇勇. 医学统计学. 3版 ed. 北京: 人民卫生出版社; 2015.</span>
+<span id="cb1-412"><a href="#cb1-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-413"><a href="#cb1-413" aria-hidden="true" tabindex="-1"></a>8<span class="sc">\.</span> Kieser M. Methods and Applications of Sample Size Calculation and Recalculation in Clinical Trials: Springer; 2020.</span>
+<span id="cb1-414"><a href="#cb1-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-415"><a href="#cb1-415" aria-hidden="true" tabindex="-1"></a>9<span class="sc">\.</span> Wang Y, Zhu H, Hou X, et al. Randomized Trial of Left Bundle Branch vs Biventricular Pacing for Cardiac Resynchronization Therapy. J AM COLL CARDIOL 2022;80:1205-16.</span>
+<span id="cb1-416"><a href="#cb1-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-417"><a href="#cb1-417" aria-hidden="true" tabindex="-1"></a>10<span class="sc">\.</span> van Dyck CH, Swanson CJ, Aisen P, et al. Lecanemab in Early Alzheimer\'s Disease. NEW ENGL J MED 2023;388:9-21.</span>
+<span id="cb1-418"><a href="#cb1-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-419"><a href="#cb1-419" aria-hidden="true" tabindex="-1"></a>11<span class="sc">\.</span> Gao R, Han Y, Yang Y, et al. PLATINUM China: a prospective, randomized investigation of the platinum chromium everolimus-eluting stent in de novo coronary artery lesions. CATHETER CARDIO INTE 2015;85 Suppl 1:716-23.</span>
+<span id="cb1-420"><a href="#cb1-420" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-421"><a href="#cb1-421" aria-hidden="true" tabindex="-1"></a>12<span class="sc">\.</span> Wadwa RP, Reed ZW, Buckingham BA, et al. Trial of Hybrid Closed-Loop Control in Young Children with Type 1 Diabetes. NEW ENGL J MED 2023;388:991-1001.</span>
+<span id="cb1-422"><a href="#cb1-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-423"><a href="#cb1-423" aria-hidden="true" tabindex="-1"></a>13<span class="sc">\.</span> Machin D, Campbell MJ, Tan SB, Tan SH. Sample Sizes for Clinical, Laboratory and Epidemiology Studies. Fourth Edition ed. Pondicherry: Wiley Blackwell; 2018.</span>
+<span id="cb1-424"><a href="#cb1-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-425"><a href="#cb1-425" aria-hidden="true" tabindex="-1"></a>14<span class="sc">\.</span> Hoeper MM, Badesch DB, Ghofrani HA, et al. Phase 3 Trial of Sotatercept for Treatment of Pulmonary Arterial Hypertension. NEW ENGL J MED 2023;388:1478-90.</span>
+<span id="cb1-426"><a href="#cb1-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-427"><a href="#cb1-427" aria-hidden="true" tabindex="-1"></a>15<span class="sc">\.</span> Dewland TA, Gerstenfeld EP, Moss JD, et al. Randomized Comparison of a Radiofrequency Wire Versus a Radiofrequency Needle System for Transseptal Puncture. JACC-CLIN ELECTROPHY 2023;9:611-9.</span>
+<span id="cb1-428"><a href="#cb1-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-429"><a href="#cb1-429" aria-hidden="true" tabindex="-1"></a>16<span class="sc">\.</span> Bhatt DL, Kandzari DE, O\'Neill WW, et al. A controlled trial of renal denervation for resistant hypertension. NEW ENGL J MED 2014;370:1393-401.</span>
+<span id="cb1-430"><a href="#cb1-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-431"><a href="#cb1-431" aria-hidden="true" tabindex="-1"></a>17<span class="sc">\.</span> FDA. Adjusting for Covariates in Randomized Clinical Trials for Drugs and Biological Products Guidance for Industry; 2023.</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
