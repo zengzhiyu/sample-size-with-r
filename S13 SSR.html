@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>13. 样本量重新估计 – R语言临床研究样本量计算案例教程</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./S14 Multiplicityfactorial.html" rel="next">
+<link href="./S12 GS.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-6b6957c917596b414ec0b78690761e87.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-e9b94c5c92cfde000641fbcd395a1216.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./S13 SSR.html"><span class="chapter-title">13. 样本量重新估计</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">R语言临床研究样本量计算案例教程</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R语言临床研究样本量计算案例教程</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S0_preface.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">1. 前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S1 1Mean.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">2. 单组均数的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S2 1Proportion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">3. 单组率的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S3 2Means.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">4. 两组均数的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S4 2Proportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">5. 两组率的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S5 noninferiorMeans.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">6. 两组均数比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S6 noninferiorProportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">7. 两组率比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S7 SurvivalAnalysis.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">8. 生存分析的研究设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S8 crossover.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">9. 交叉设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S9 cluster.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">10. 整群随机研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S10 诊断试验.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">11. 诊断试验</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S11 观察性研究.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 观察性研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S12 GS.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 成组序贯设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S13 SSR.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">13. 样本量重新估计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S14 Multiplicityfactorial.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">14. 多重性与析因设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S15 simulation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">15. 样本量模拟计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S16 WinRatio.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">16. Win Ratio 样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">附录</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S17 Appendix.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">附录</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#样本量再计算" id="toc-样本量再计算" class="nav-link active" data-scroll-target="#样本量再计算">样本量再计算</a>
+  <ul class="collapse">
+  <li><a href="#盲态法样本量再计算" id="toc-盲态法样本量再计算" class="nav-link" data-scroll-target="#盲态法样本量再计算">盲态法样本量再计算</a></li>
+  <li><a href="#非盲态法样本量再计算" id="toc-非盲态法样本量再计算" class="nav-link" data-scroll-target="#非盲态法样本量再计算">非盲态法样本量再计算</a></li>
+  <li><a href="#其他情况的样本量再计算" id="toc-其他情况的样本量再计算" class="nav-link" data-scroll-target="#其他情况的样本量再计算">其他情况的样本量再计算</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-title">13. 样本量重新估计</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> 代码</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="样本量再计算" class="level2">
+<h2 class="anchored" data-anchor-id="样本量再计算">样本量再计算</h2>
+<p>样本量再计算，亦称样本量重新估计，是指依据预先设定的期中分析计划，利用累积的试验数据重新计算样本量，以保证最终的统计检验能达到预先设定的目标或修改后的目标，并同时能够控制 I类错误率1。</p>
+<p>样本量再计算可分为盲态法和非盲态法。盲态下的样本量重新估算，不揭盲分组信息，样本量根据一些重要的参数（如合并方差或合并事件发生率）进行调整，因不涉及假设检验，一般不需要调整I类错误率1, 2。非盲态法，根据分组信息计算了试验的效应量，通常需要对I类错误率进行相应的调整。近年来较为流行的是promising zone（有望区）法，事先设定最大样本量及期中分析条件效能的有望区，当期中分析的条件效能落入有望区时，可适当增加样本量直至最大样本量以期最终研究达成；低于该区为不利区（unfavorable zone）,即使样本量增加至最大样本量，也无法达到预期的检验效能，因此不增加样本量，继续按原计划完成入组；高于该区为有利区（favorable zone），无需增加样本量，按原计划完成入组即可3。</p>
+<p>仅基于外部数据的修改。对于产品注册类临床试验，药监局要求必须有充分的依据，并需提前与监管机构进行沟通确认后方可通过试验方案的修正案来体现1。</p>
+<p>各种原因造成的非预先计划的样本量再计算，临床研究中并不少见，应给予足够的重视。</p>
+<section id="盲态法样本量再计算" class="level3">
+<h3 class="anchored" data-anchor-id="盲态法样本量再计算">盲态法样本量再计算</h3>
+<section id="例-13-1-vps-ii随机对照双盲试验4评价了起搏器在血管迷走性晕厥中的疗效所有患者均植入带有频率骤降反应功能的双腔起搏器对照组程控为仅感知不进行起搏假设起搏器治疗可以将6个月晕厥事件由60降为30检验效能80则共需80例患者" class="level4">
+<h4 class="anchored" data-anchor-id="例-13-1-vps-ii随机对照双盲试验4评价了起搏器在血管迷走性晕厥中的疗效所有患者均植入带有频率骤降反应功能的双腔起搏器对照组程控为仅感知不进行起搏假设起搏器治疗可以将6个月晕厥事件由60降为30检验效能80则共需80例患者">例 13-1 VPS II随机对照双盲试验4评价了起搏器在血管迷走性晕厥中的疗效，所有患者均植入带有频率骤降反应功能的双腔起搏器，对照组程控为仅感知，不进行起搏。假设起搏器治疗可以将6个月晕厥事件由60%降为30%，检验效能80%，则共需80例患者。</h4>
+<p>研究在入组60例患者后发现实际的总事件率低于预期，样本量增加至100例。结果6个月累积晕厥率在对照组为40%，试验组为31%，降低了30%（95%置信区间-33%~63%，log-rank P=0.14），研究未达成。</p>
+</section>
+<section id="例-13-2-aristotle研究5为新型口服抗凝药与华法林在房颤卒中高危患者中的非劣效比较假设主要终点事件率为1.67100患者年研究进展过程中盲态数据显示主要终点事件率为1.2100患者年样本量从15000增加至18000" class="level4">
+<h4 class="anchored" data-anchor-id="例-13-2-aristotle研究5为新型口服抗凝药与华法林在房颤卒中高危患者中的非劣效比较假设主要终点事件率为1.67100患者年研究进展过程中盲态数据显示主要终点事件率为1.2100患者年样本量从15000增加至18000">例 13-2 ARISTOTLE研究5为新型口服抗凝药与华法林在房颤卒中高危患者中的非劣效比较，假设主要终点事件率为1.67/100患者年，研究进展过程中盲态数据显示主要终点事件率为1.2/100患者年，样本量从15000增加至18000。</h4>
+<p>FAME36</p>
+<p>During recruitment and without knowledge of event rates, the</p>
+<p>trial steering committee decided to increase the</p>
+<p>noninferiority margin to an upper boundary of</p>
+<p>less than 1.65 for the 95% confidence interval</p>
+<p>of the hazard ratio because it was thought to be</p>
+<p>more appropriate on the basis of newly published clinical trials comparing CABG with PCI,</p>
+<p>which reported major adverse cardiac or cerebrovascular events occurring in no more than 10%</p>
+<p>of the patients randomly assigned to undergo</p>
+<p>CABG and used noninferiority margins similar</p>
+<p>to a hazard ratio of 1.65.</p>
+<p>With this change, a</p>
+<p>sample of 645 patients per group (1290 for the</p>
+<p>entire trial) was required to achieve 90% power</p>
+<p>to claim noninferiority; however, the steering</p>
+<p>committee elected to complete the scheduled</p>
+<p>enrollment of 1500 patients</p>
+<p>It is important to note that the decision to change the noninferiority margin was made by the steering committee</p>
+<p>without knowledge of the event rates in either of the</p>
+<p>randomized arms</p>
+<p>FULL REVASC7</p>
+<p><img src="media/S13_SSR/S13_SSR_img1.png" class="img-fluid" style="width:6in"></p>
+</section>
+</section>
+<section id="非盲态法样本量再计算" class="level3">
+<h3 class="anchored" data-anchor-id="非盲态法样本量再计算">非盲态法样本量再计算</h3>
+<section id="例-13-3-protected-tavr研究8旨在评价脑栓塞保护器械sentinel在经导管主动脉瓣置换术tavrtranscatheter-aortic-valve-replacement中的应用患者随机分配入sentinel组试验组或对照组主要终点为术后72小时内的卒中假设试验组和对照组的卒中率分别为2和4取双侧α0.05则3000例患者的检验效能可超过90拟入组702100患者时进行一次期中分析采用lan-demets消耗函数obrien-fleming边界期中分析和最终分析的α水平分别为0.0148和0.0455根据期中分析的结果决定是否宣布有效而提前终止或者调整样本量继续入组样本量最大为6000" class="level4">
+<h4 class="anchored" data-anchor-id="例-13-3-protected-tavr研究8旨在评价脑栓塞保护器械sentinel在经导管主动脉瓣置换术tavrtranscatheter-aortic-valve-replacement中的应用患者随机分配入sentinel组试验组或对照组主要终点为术后72小时内的卒中假设试验组和对照组的卒中率分别为2和4取双侧α0.05则3000例患者的检验效能可超过90拟入组702100患者时进行一次期中分析采用lan-demets消耗函数obrien-fleming边界期中分析和最终分析的α水平分别为0.0148和0.0455根据期中分析的结果决定是否宣布有效而提前终止或者调整样本量继续入组样本量最大为6000">例 13-3 PROTECTED TAVR研究8旨在评价脑栓塞保护器械Sentinel在经导管主动脉瓣置换术（TAVR，transcatheter aortic-valve replacement）中的应用。患者随机分配入Sentinel组（试验组）或对照组，主要终点为术后72小时内的卒中。假设试验组和对照组的卒中率分别为2%和4%，取双侧α=0.05，则3000例患者的检验效能可超过90%。拟入组70%（2100）患者时进行一次期中分析，采用Lan-Demets消耗函数O’Brien-Fleming边界，期中分析和最终分析的α水平分别为0.0148和0.0455。根据期中分析的结果决定是否宣布有效而提前终止或者调整样本量继续入组，样本量最大为6000。</h4>
+<p>期中分析时，试验组与对照组的卒中率分别为2.2%（23/1051）和2.4%（25/1049），根据既定方案建议研究按原计划入组至3000例患者。入组完成后，主要终点在试验组和对照组分别为2.3%和2.9%（差值-0.6%，95%置信区间-1.7%<sub>0.5%，P=0.3），致残性卒中在两组分别为0.5%和1.3%（差值-0.8%，95%置信区间-1.5%</sub>-0.1%）。</p>
+<p>此例Excel表、PASS及R计算的固定设计样本量均略高于3000。</p>
+<p><img src="media/S13_SSR/S13_SSR_img2.emf" class="img-fluid" style="width:6in"> 该研究设计使用了promising zone法，但PASS软件尚无此方法。看一下PASS软件的计算，依次点击：Sample Size Reestimation, Proportions, Conditional Power and Sample Size Reestimation of Test for the Difference Between Two Proportions. 输入界面稍复杂，需先计期中分析的Z1值，此例为-0.262（注意PASS软件使用初始假设的效应值计算），条件效能为0.078，非常低。PASS软件可以据此计算最终需要的样本量，但过低的期中分析条件效能会引起I类错误膨胀3。</p>
+<p>计算条件效能：</p>
+<p><img src="media/S13_SSR/S13_SSR_img3.emf" class="img-fluid" style="width:6in"> <img src="media/S13_SSR/S13_SSR_img4.png" class="img-fluid" style="width:6in"> 样本量再计算：</p>
+<p><img src="media/S13_SSR/S13_SSR_img5.png" class="img-fluid" style="width:6in"> <img src="media/S13_SSR/S13_SSR_img6.png" class="img-fluid" style="width:6in"> R语言gsDesign包样本量再计算部分如下：</p>
+<p>library(gsDesign)</p>
+<p>test &lt;- gsDesign(</p>
+<p>k = 2,</p>
+<p>n.fix = 1,</p>
+<p>timing = c(0.7, 1),</p>
+<p>sfu = sfLDOF,</p>
+<p>sfl = sfLDOF</p>
+<p>)</p>
+<p>x &lt;- gsDesign(</p>
+<p>k = 2,</p>
+<p>n.fix = 3000/test$n.I[2],</p>
+<p>timing = c(0.7, 1),</p>
+<p>sfu = sfLDOF,</p>
+<p>sfl = sfLDOF</p>
+<p>)</p>
+<p>z &lt;- seq(1, 3, 0.01)</p>
+<p>cpadj &lt;- c(0.5, 0.9)</p>
+<p>xx &lt;- ssrCP(x = x, z1 = z, beta = 0.1, cpadj = cpadj,</p>
+<p>maxinc = 2, z2 = z2Z)</p>
+<p>plot(xx,col=“red”,lwd=2)</p>
+<p>结果输出：</p>
+<p><img src="media/S13_SSR/S13_SSR_img7.png" class="img-fluid" style="width:6in"> 原文未给出promising zone的范围，我们暂假设为0.5-0.9。根据期中分析时数据计算z1为0.2987071（利用期中分析当前的效应值计算，不同于PASS软件的结果，并且PASS软件使用的是双侧检验），条件检验效能0.001，远小于promising zone的低限，故不增加样本量，按原计划的3000完成入组。</p>
+</section>
+<section id="例-13-4-agent-ide研究欲比较某药物球囊与非药物球囊在支架内再狭窄病变中的疗效主要终点为12个月靶病变失败tlftarget-lesion-failure试验组与对照组按21随机分配预计试验组和对照组主要终点发生率分别为10.6和21.2取单侧0.025检验效能85则需要465例患者假设脱落率为3则样本量增加至480研究拟在入组90n432患者时进行一次期中分析预期此时有40的患者完成了1年期的随访设有望区的条件检验效能为0.460.85低于0.46为不利区高于0.85为有利区如果期中分析的结果落入有望区可增加样本量最大至600采用haybittle-peto-α消耗函数" class="level4">
+<h4 class="anchored" data-anchor-id="例-13-4-agent-ide研究欲比较某药物球囊与非药物球囊在支架内再狭窄病变中的疗效主要终点为12个月靶病变失败tlftarget-lesion-failure试验组与对照组按21随机分配预计试验组和对照组主要终点发生率分别为10.6和21.2取单侧0.025检验效能85则需要465例患者假设脱落率为3则样本量增加至480研究拟在入组90n432患者时进行一次期中分析预期此时有40的患者完成了1年期的随访设有望区的条件检验效能为0.460.85低于0.46为不利区高于0.85为有利区如果期中分析的结果落入有望区可增加样本量最大至600采用haybittle-peto-α消耗函数">例 13-4 Agent IDE研究欲比较某药物球囊与非药物球囊在支架内再狭窄病变中的疗效，主要终点为12个月靶病变失败（TLF，target lesion failure）。试验组与对照组按2:1随机分配，预计试验组和对照组主要终点发生率分别为10.6%和21.2%，取单侧=0.025，检验效能85%，则需要465例患者。假设脱落率为3%，则样本量增加至480。研究拟在入组90%（n=432）患者时进行一次期中分析（预期此时有40%的患者完成了1年期的随访），设有望区的条件检验效能为0.46~0.85，低于0.46为不利区，高于0.85为有利区。如果期中分析的结果落入有望区，可增加样本量，最大至600。采用Haybittle-Peto α消耗函数。</h4>
+<p>Excel计算合并方差法需样本量465，考虑脱落后为：465/(1-3%)=479.4。</p>
+<p><img src="media/S13_SSR/S13_SSR_img8.png" class="img-fluid" style="width:6in"> PASS软件因无promising zone方法，不再介绍，具体可参看例 13-3。</p>
+<p>R语言gsDesign包样本量再计算部分如下：</p>
+<p>library(gsDesign)</p>
+<p>test &lt;- gsDesign(</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.15,</p>
+<p>k=2,</p>
+<p>timing = c(0.4, 1),</p>
+<p>sfu = sfPoints,</p>
+<p>sfupar = c(0.001, 0.025)/0.025,</p>
+<p>sfl = sfPoints,</p>
+<p>sflpar = c(0.001, 0.025)/0.025</p>
+<p>)</p>
+<p>x &lt;- gsDesign(</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.15,</p>
+<p>k=2,</p>
+<p>timing = c(0.4, 1),</p>
+<p>n.fix = round(480/test$n.I[2]),</p>
+<p>sfu = sfPoints,</p>
+<p>sfupar = c(0.001, 0.025)/0.025,</p>
+<p>sfl = sfPoints,</p>
+<p>sflpar = c(0.001, 0.025)/0.025,</p>
+<p>delta1 = 0.106/0.212</p>
+<p>)</p>
+<p>结果输出：</p>
+<p><img src="media/S13_SSR/S13_SSR_img9.png" class="img-fluid" style="width:6in"> 研究入组过快，在入组完600例患者时尚无人完成1年的随访。FDA仍然建议按原计划在40%的患者有1年结果时进行一次期中分析，结果支持按原计划入组至480例，但此时入组早已完成600例。于是在前480例患者随访满1年时做了主要终点的分析，结果显示试验组优于对照组（18.2% vs 29.3%，P=0.005）。最终600例患者随访1年的结果与之一致（17.9% vs 28.6%，P=0.003），研究达成。</p>
+</section>
+</section>
+<section id="其他情况的样本量再计算" class="level3">
+<h3 class="anchored" data-anchor-id="其他情况的样本量再计算">其他情况的样本量再计算</h3>
+<p>研究开展过程中对样本量计算进行修改的情形并不少见，原因也是多样的。本章例 4-1 VPS II研究就在入组60例患者后发现实际的总事件率低于预期，样本量由80例增加至100例。这个研究的结果显示试验组比对照组降低晕厥率30%，但没有统计学意义，事后分析可以看出研究设计时预计降低50%其实是过于乐观了。如果此研究中主要终点事件降低30%也具有临床意义的话（当前很多研究试验组比对照组的改善也就在30%左右），样本量需要增加至236例，可见处理效应对样本量的影响是明显的。另外，在80例样本量的设计下，欲发现晕厥率下降30%的差异，检验效能只有37.4%；即使100例时，检验效能也只有44.8%，尽管这种事后评价检验效能的做法争议较大。</p>
+<p>library(pwrss)</p>
+<p>pwrss.z.2props(p1 = 0.6*0.7, p2 = 0.6, alpha = 0.05, power = 0.8)</p>
+<p>pwrss.z.2props(p1 = 0.6*0.7, p2 = 0.6, alpha = 0.05, n2 = 40)</p>
+<p>pwrss.z.2props(p1 = 0.6*0.7, p2 = 0.6, alpha = 0.05, n2 = 50)</p>
+<p>临床研究中实际事件率比预估事件率低的情况并不少见。RESCUE BT2研究9试验组和对照组的实际预后良好率比样本量计算时的预期值都明显降低，好在是同时降低，研究仍然能够达成，如果采用了单组目标值法（仅试验组），研究就很可能会失败了。</p>
+<p>PROMPT-AF研究，初始假设的试验组和对照组的消融后房颤复发率分别为35%和55%，考虑10%的脱落后样本量为27610。后试验组和对照组的复发率分别假设为40%和55%时，双侧α=0.05，检验效能90%，则样本量计算为448例，考虑脱落后为498例11。研究结果为试验组和对照组的成功率分别为70.7%和61.5%（即复发率分别为29.3%与38.5%），P=0.045，研究达成12。</p>
+<p>某超声消融治疗帕金森病的研究13，样本量计算的修改过程较为复杂。根据论文网页附件里的方案，第六版原版（2017年）提到：试验组评分改善24.0分, SD=12.0；对照组改善3.5分，SD=12.0，按3:1随机，t检验双侧α=0.05，则总计116例患者可提供至少95%的检验效能（根据这些参数无法重复该样本量计算结果）。方案第六版增补5（2020年）提到：假设治疗组反应率为70%，对照组20%，当样本量为试验组为36例，对照组12例，总计48例时可提供至少90%的检验效能。同时假设试验组不良事件率5%，希望发现1例不良事件的概率为95%，需样本量59，取60，这样总样本量为80，考虑15%的脱落率，最终样本量为92。而实际发表的论文中的样本量计算的描述为：将患者按3:1随机分组进入试验组或假手术对照组，主要终点为3个月时治疗反应率。假设对照组治疗反应率为20%，试验组为70%，双侧α=0.05，基于Fisher确切概率检验，92例（试验组69例，对照组23例）患者可提供98%的检验效能。实在是大相径庭！如果该研究不是发表在了《新英格兰医学杂志》上，并按要求附上了研究方案，我们可能根本无从知晓其样本量计算发生了如此大的变化。</p>
+<p>我们将在适应性设计章节中讨论正规的样本量再计算。（CABANA研究）</p>
+<p>其余如BAOCHE、PROMPT-AF、SOLVE-CRT等研究在方案中也涉及样本量的调整或调整计划，可参见相应文献14。</p>
+<p>讨论</p>
+<p>当再计算的样本量少于最初设计的样本量时，通常不接受样本量减少的调整1。</p>
+<p>样本量再计算还可能因“测不准”问题引入偏倚：期中分析的结果本身受到研究行为的影响（例如继续或停止入组会改变最终的效应估计），因此成组序贯或样本量再计算的设计须在方案中预先严格规定分析计划，以尽量减少操作偏倚。</p>
+<p>样本量再计算与成组序贯设计都借助期中分析调整研究，但目标不同：成组序贯设计通常依据期中分析的检验统计量做出继续/终止的决策（不改变样本量），而盲态样本量再计算仅依据参数估计的更新调整样本量、不改变检验边界；非盲态样本量再计算则可能同时涉及效应估计与边界调整，对I类错误率的控制要求更高。</p>
+<p>此外，若因期中分析达到主要终点而提前终止研究，可能损失次要终点的检验效能（例如PROTECTED TAVR研究如果提前终止，则无法得到次要终点的阳性结果），这也是设计中需要权衡的因素。</p>
+<p>References:</p>
+<ol type="1">
+<li><p>国家药品监督管理局. 药物临床试验适应性设计指导原则（试行）; 2021.</p></li>
+<li><p>陈峰. 医学统计学. 4版 ed.&nbsp;北京: 人民卫生出版社; 2024.</p></li>
+<li><p>Mehta CR, Pocock SJ. Adaptive increase in sample size when interim results are promising: a practical guide with examples. STAT MED 2011;30:3267-84.</p></li>
+<li><p>Connolly SJ, Sheldon R, Thorpe KE, et al.&nbsp;Pacemaker therapy for prevention of syncope in patients with recurrent severe vasovagal syncope: Second Vasovagal Pacemaker Study (VPS II): a randomized trial. JAMA-J AM MED ASSOC 2003;289:2224-9.</p></li>
+<li><p>Granger CB, Alexander JH, McMurray JJ, et al.&nbsp;Apixaban versus warfarin in patients with atrial fibrillation. NEW ENGL J MED 2011;365:981-92.</p></li>
+<li><p>Fearon WF, Zimmermann FM, De Bruyne B, et al.&nbsp;Fractional Flow Reserve-Guided PCI as Compared with Coronary Bypass Surgery. NEW ENGL J MED 2022;386:128-37.</p></li>
+<li><p>Bohm F, Mogensen B, Engstrom T, et al.&nbsp;FFR-Guided Complete or Culprit-Only PCI in Patients with Myocardial Infarction. NEW ENGL J MED 2024;390:1481-92.</p></li>
+<li><p>Kapadia SR, Makkar R, Leon M, et al.&nbsp;Cerebral Embolic Protection during Transcatheter Aortic-Valve Replacement. NEW ENGL J MED 2022;387:1253-63.</p></li>
+<li><p>Zi W, Song J, Kong W, et al.&nbsp;Tirofiban for Stroke without Large or Medium-Sized Vessel Occlusion. NEW ENGL J MED 2023;388:2025-36.</p></li>
+<li><p>Liu XX, Sang CH, Long DY, et al.&nbsp;Withdrawal: Prospective randomized comparison between upgraded “2C3L” versus PVI approach for catheter ablation of persistent atrial fibrillation: PROMPT-AF trial design. PACE 2021;44:1651.</p></li>
+<li><p>Liu XX, Liu Q, Lai YW, et al.&nbsp;Prospective randomized comparison between upgraded ‘2C3L’ vs.&nbsp;PVI approach for catheter ablation of persistent atrial fibrillation: PROMPT-AF trial design. AM HEART J 2023;260:34-43.</p></li>
+<li><p>Sang C, Liu Q, Lai Y, et al.&nbsp;Pulmonary Vein Isolation With Optimized Linear Ablation vs Pulmonary Vein Isolation Alone for Persistent AF: The PROMPT-AF Randomized Clinical Trial. JAMA-J AM MED ASSOC 2024.</p></li>
+<li><p>Krishna V, Fishman PS, Eisenberg HM, et al.&nbsp;Trial of Globus Pallidus Focused Ultrasound Ablation in Parkinson’s Disease. NEW ENGL J MED 2023;388:683-93.</p></li>
+<li><p>Jovin TG, Li C, Wu L, et al.&nbsp;Trial of Thrombectomy 6 to 24 Hours after Stroke Due to Basilar-Artery Occlusion. NEW ENGL J MED 2022;387:1373-84.</p></li>
+</ol>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./S12 GS.html" class="pagination-link" aria-label="12. 成组序贯设计">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">12. 成组序贯设计</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./S14 Multiplicityfactorial.html" class="pagination-link" aria-label="14. 多重性与析因设计">
+        <span class="nav-page-text"><span class="chapter-title">14. 多重性与析因设计</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">源代码</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># 13. 样本量重新估计</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">## 样本量再计算</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>样本量再计算，亦称样本量重新估计，是指依据预先设定的期中分析计划，利用累积的试验数据重新计算样本量，以保证最终的统计检验能达到预先设定的目标或修改后的目标，并同时能够控制 I类错误率1。</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>样本量再计算可分为盲态法和非盲态法。盲态下的样本量重新估算，不揭盲分组信息，样本量根据一些重要的参数（如合并方差或合并事件发生率）进行调整，因不涉及假设检验，一般不需要调整I类错误率1, 2。非盲态法，根据分组信息计算了试验的效应量，通常需要对I类错误率进行相应的调整。近年来较为流行的是promising zone（有望区）法，事先设定最大样本量及期中分析条件效能的有望区，当期中分析的条件效能落入有望区时，可适当增加样本量直至最大样本量以期最终研究达成；低于该区为不利区（unfavorable zone）,即使样本量增加至最大样本量，也无法达到预期的检验效能，因此不增加样本量，继续按原计划完成入组；高于该区为有利区（favorable zone），无需增加样本量，按原计划完成入组即可3。</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>仅基于外部数据的修改。对于产品注册类临床试验，药监局要求必须有充分的依据，并需提前与监管机构进行沟通确认后方可通过试验方案的修正案来体现1。</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>各种原因造成的非预先计划的样本量再计算，临床研究中并不少见，应给予足够的重视。</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">### 盲态法样本量再计算</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 13-1 VPS II随机对照双盲试验4评价了起搏器在血管迷走性晕厥中的疗效，所有患者均植入带有频率骤降反应功能的双腔起搏器，对照组程控为仅感知，不进行起搏。假设起搏器治疗可以将6个月晕厥事件由60%降为30%，检验效能80%，则共需80例患者。</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>研究在入组60例患者后发现实际的总事件率低于预期，样本量增加至100例。结果6个月累积晕厥率在对照组为40%，试验组为31%，降低了30%（95%置信区间-33%~63%，log-rank P=0.14），研究未达成。</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 13-2 ARISTOTLE研究5为新型口服抗凝药与华法林在房颤卒中高危患者中的非劣效比较，假设主要终点事件率为1.67/100患者年，研究进展过程中盲态数据显示主要终点事件率为1.2/100患者年，样本量从15000增加至18000。</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>FAME36</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>During recruitment and without knowledge of event rates, the</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>trial steering committee decided to increase the</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>noninferiority margin to an upper boundary of</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>less than 1.65 for the 95% confidence interval</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>of the hazard ratio because it was thought to be</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>more appropriate on the basis of newly published clinical trials comparing CABG with PCI,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>which reported major adverse cardiac or cerebrovascular events occurring in no more than 10%</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>of the patients randomly assigned to undergo</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>CABG and used noninferiority margins similar</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>to a hazard ratio of 1.65.</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>With this change, a</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>sample of 645 patients per group (1290 for the</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>entire trial) was required to achieve 90% power</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>to claim noninferiority; however, the steering</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>committee elected to complete the scheduled</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>enrollment of 1500 patients</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>It is important to note that the decision to change the noninferiority margin was made by the steering committee</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>without knowledge of the event rates in either of the</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>randomized arms</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>FULL REVASC7</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img1.png)</span>{width="6.0in"}</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="fu">### 非盲态法样本量再计算</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 13-3 PROTECTED TAVR研究8旨在评价脑栓塞保护器械Sentinel在经导管主动脉瓣置换术（TAVR，transcatheter aortic-valve replacement）中的应用。患者随机分配入Sentinel组（试验组）或对照组，主要终点为术后72小时内的卒中。假设试验组和对照组的卒中率分别为2%和4%，取双侧α=0.05，则3000例患者的检验效能可超过90%。拟入组70%（2100）患者时进行一次期中分析，采用Lan-Demets消耗函数O’Brien-Fleming边界，期中分析和最终分析的α水平分别为0.0148和0.0455。根据期中分析的结果决定是否宣布有效而提前终止或者调整样本量继续入组，样本量最大为6000。</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>期中分析时，试验组与对照组的卒中率分别为2.2%（23/1051）和2.4%（25/1049），根据既定方案建议研究按原计划入组至3000例患者。入组完成后，主要终点在试验组和对照组分别为2.3%和2.9%（差值-0.6%，95%置信区间-1.7%~0.5%，P=0.3），致残性卒中在两组分别为0.5%和1.3%（差值-0.8%，95%置信区间-1.5%~-0.1%）。</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>此例Excel表、PASS及R计算的固定设计样本量均略高于3000。</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img2.emf)</span>{width="6.0in"}</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>该研究设计使用了promising zone法，但PASS软件尚无此方法。看一下PASS软件的计算，依次点击：Sample Size Reestimation, Proportions, Conditional Power and Sample Size Reestimation of Test for the Difference Between Two Proportions. 输入界面稍复杂，需先计期中分析的Z1值，此例为-0.262（注意PASS软件使用初始假设的效应值计算），条件效能为0.078，非常低。PASS软件可以据此计算最终需要的样本量，但过低的期中分析条件效能会引起I类错误膨胀3。</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>计算条件效能：</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img3.emf)</span>{width="6.0in"}</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img4.png)</span>{width="6.0in"}</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>样本量再计算：</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img5.png)</span>{width="6.0in"}</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img6.png)</span>{width="6.0in"}</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>R语言gsDesign包样本量再计算部分如下：</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>library(gsDesign)</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>test &lt;- gsDesign(</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>k = 2,</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>n.fix = 1,</span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>timing = c(0.7, 1),</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>sfu = sfLDOF,</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>sfl = sfLDOF</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>x &lt;- gsDesign(</span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>k = 2,</span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>n.fix = 3000/test$n.I<span class="co">[</span><span class="ot">2</span><span class="co">]</span>,</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>timing = c(0.7, 1),</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>sfu = sfLDOF,</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>sfl = sfLDOF</span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>z &lt;- seq(1, 3, 0.01)</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>cpadj &lt;- c(0.5, 0.9)</span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>xx &lt;- ssrCP(x = x, z1 = z, beta = 0.1, cpadj = cpadj,</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a>maxinc = 2, z2 = z2Z)</span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a>plot(xx,col="red",lwd=2)</span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img7.png)</span>{width="6.0in"}</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>原文未给出promising zone的范围，我们暂假设为0.5-0.9。根据期中分析时数据计算z1为0.2987071（利用期中分析当前的效应值计算，不同于PASS软件的结果，并且PASS软件使用的是双侧检验），条件检验效能0.001，远小于promising zone的低限，故不增加样本量，按原计划的3000完成入组。</span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 13-4 Agent IDE研究欲比较某药物球囊与非药物球囊在支架内再狭窄病变中的疗效，主要终点为12个月靶病变失败（TLF，target lesion failure）。试验组与对照组按2:1随机分配，预计试验组和对照组主要终点发生率分别为10.6%和21.2%，取单侧=0.025，检验效能85%，则需要465例患者。假设脱落率为3%，则样本量增加至480。研究拟在入组90%（n=432）患者时进行一次期中分析（预期此时有40%的患者完成了1年期的随访），设有望区的条件检验效能为0.46~0.85，低于0.46为不利区，高于0.85为有利区。如果期中分析的结果落入有望区，可增加样本量，最大至600。采用Haybittle-Peto α消耗函数。</span></span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>Excel计算合并方差法需样本量465，考虑脱落后为：465/(1-3%)=479.4。</span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img8.png)</span>{width="6.0in"}</span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>PASS软件因无promising zone方法，不再介绍，具体可参看例 13-3。</span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>R语言gsDesign包样本量再计算部分如下：</span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a>library(gsDesign)</span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>test &lt;- gsDesign(</span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a>beta = 0.15,</span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a>k=2,</span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a>timing = c(0.4, 1),</span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a>sfu = sfPoints,</span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a>sfupar = c(0.001, 0.025)/0.025,</span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a>sfl = sfPoints,</span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>sflpar = c(0.001, 0.025)/0.025</span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a>x &lt;- gsDesign(</span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a>beta = 0.15,</span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a>k=2,</span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a>timing = c(0.4, 1),</span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a>n.fix = round(480/test$n.I<span class="co">[</span><span class="ot">2</span><span class="co">]</span>),</span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a>sfu = sfPoints,</span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a>sfupar = c(0.001, 0.025)/0.025,</span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a>sfl = sfPoints,</span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a>sflpar = c(0.001, 0.025)/0.025,</span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a>delta1 = 0.106/0.212</span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S13_SSR/S13_SSR_img9.png)</span>{width="6.0in"}</span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a>研究入组过快，在入组完600例患者时尚无人完成1年的随访。FDA仍然建议按原计划在40%的患者有1年结果时进行一次期中分析，结果支持按原计划入组至480例，但此时入组早已完成600例。于是在前480例患者随访满1年时做了主要终点的分析，结果显示试验组优于对照组（18.2% vs 29.3%，P=0.005）。最终600例患者随访1年的结果与之一致（17.9% vs 28.6%，P=0.003），研究达成。</span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a><span class="fu">### 其他情况的样本量再计算</span></span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a>研究开展过程中对样本量计算进行修改的情形并不少见，原因也是多样的。本章例 4-1 VPS II研究就在入组60例患者后发现实际的总事件率低于预期，样本量由80例增加至100例。这个研究的结果显示试验组比对照组降低晕厥率30%，但没有统计学意义，事后分析可以看出研究设计时预计降低50%其实是过于乐观了。如果此研究中主要终点事件降低30%也具有临床意义的话（当前很多研究试验组比对照组的改善也就在30%左右），样本量需要增加至236例，可见处理效应对样本量的影响是明显的。另外，在80例样本量的设计下，欲发现晕厥率下降30%的差异，检验效能只有37.4%；即使100例时，检验效能也只有44.8%，尽管这种事后评价检验效能的做法争议较大。</span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a>pwrss.z.2props(p1 = 0.6*0.7, p2 = 0.6, alpha = 0.05, power = 0.8)</span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a>pwrss.z.2props(p1 = 0.6*0.7, p2 = 0.6, alpha = 0.05, n2 = 40)</span>
+<span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a>pwrss.z.2props(p1 = 0.6*0.7, p2 = 0.6, alpha = 0.05, n2 = 50)</span>
+<span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a>临床研究中实际事件率比预估事件率低的情况并不少见。RESCUE BT2研究9试验组和对照组的实际预后良好率比样本量计算时的预期值都明显降低，好在是同时降低，研究仍然能够达成，如果采用了单组目标值法（仅试验组），研究就很可能会失败了。</span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a>PROMPT-AF研究，初始假设的试验组和对照组的消融后房颤复发率分别为35%和55%，考虑10%的脱落后样本量为27610。后试验组和对照组的复发率分别假设为40%和55%时，双侧α=0.05，检验效能90%，则样本量计算为448例，考虑脱落后为498例11。研究结果为试验组和对照组的成功率分别为70.7%和61.5%（即复发率分别为29.3%与38.5%），P=0.045，研究达成12。</span>
+<span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a>某超声消融治疗帕金森病的研究13，样本量计算的修改过程较为复杂。根据论文网页附件里的方案，第六版原版（2017年）提到：试验组评分改善24.0分, SD=12.0；对照组改善3.5分，SD=12.0，按3:1随机，t检验双侧α=0.05，则总计116例患者可提供至少95%的检验效能（根据这些参数无法重复该样本量计算结果）。方案第六版增补5（2020年）提到：假设治疗组反应率为70%，对照组20%，当样本量为试验组为36例，对照组12例，总计48例时可提供至少90%的检验效能。同时假设试验组不良事件率5%，希望发现1例不良事件的概率为95%，需样本量59，取60，这样总样本量为80，考虑15%的脱落率，最终样本量为92。而实际发表的论文中的样本量计算的描述为：将患者按3:1随机分组进入试验组或假手术对照组，主要终点为3个月时治疗反应率。假设对照组治疗反应率为20%，试验组为70%，双侧α=0.05，基于Fisher确切概率检验，92例（试验组69例，对照组23例）患者可提供98%的检验效能。实在是大相径庭！如果该研究不是发表在了《新英格兰医学杂志》上，并按要求附上了研究方案，我们可能根本无从知晓其样本量计算发生了如此大的变化。</span>
+<span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a>我们将在适应性设计章节中讨论正规的样本量再计算。（CABANA研究）</span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a>其余如BAOCHE、PROMPT-AF、SOLVE-CRT等研究在方案中也涉及样本量的调整或调整计划，可参见相应文献14。</span>
+<span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a>讨论</span>
+<span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a>当再计算的样本量少于最初设计的样本量时，通常不接受样本量减少的调整1。</span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a>样本量再计算还可能因“测不准”问题引入偏倚：期中分析的结果本身受到研究行为的影响（例如继续或停止入组会改变最终的效应估计），因此成组序贯或样本量再计算的设计须在方案中预先严格规定分析计划，以尽量减少操作偏倚。</span>
+<span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a>样本量再计算与成组序贯设计都借助期中分析调整研究，但目标不同：成组序贯设计通常依据期中分析的检验统计量做出继续/终止的决策（不改变样本量），而盲态样本量再计算仅依据参数估计的更新调整样本量、不改变检验边界；非盲态样本量再计算则可能同时涉及效应估计与边界调整，对I类错误率的控制要求更高。</span>
+<span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a>此外，若因期中分析达到主要终点而提前终止研究，可能损失次要终点的检验效能（例如PROTECTED TAVR研究如果提前终止，则无法得到次要终点的阳性结果），这也是设计中需要权衡的因素。</span>
+<span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a>References:</span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>国家药品监督管理局. 药物临床试验适应性设计指导原则（试行）; 2021.</span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>陈峰. 医学统计学. 4版 ed. 北京: 人民卫生出版社; 2024.</span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Mehta CR, Pocock SJ. Adaptive increase in sample size when interim results are promising: a practical  guide with examples. STAT MED 2011;30:3267-84.</span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>Connolly SJ, Sheldon R, Thorpe KE, et al. Pacemaker therapy for prevention of syncope in patients with recurrent severe  vasovagal syncope: Second Vasovagal Pacemaker Study (VPS II): a randomized trial. JAMA-J AM MED ASSOC 2003;289:2224-9.</span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-240"><a href="#cb1-240" aria-hidden="true" tabindex="-1"></a><span class="ss">5.  </span>Granger CB, Alexander JH, McMurray JJ, et al. Apixaban versus warfarin in patients with atrial fibrillation. NEW ENGL J MED 2011;365:981-92.</span>
+<span id="cb1-241"><a href="#cb1-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-242"><a href="#cb1-242" aria-hidden="true" tabindex="-1"></a><span class="ss">6.  </span>Fearon WF, Zimmermann FM, De Bruyne B, et al. Fractional Flow Reserve-Guided PCI as Compared with Coronary Bypass Surgery. NEW ENGL J MED 2022;386:128-37.</span>
+<span id="cb1-243"><a href="#cb1-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-244"><a href="#cb1-244" aria-hidden="true" tabindex="-1"></a><span class="ss">7.  </span>Bohm F, Mogensen B, Engstrom T, et al. FFR-Guided Complete or Culprit-Only PCI in Patients with Myocardial Infarction. NEW ENGL J MED 2024;390:1481-92.</span>
+<span id="cb1-245"><a href="#cb1-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-246"><a href="#cb1-246" aria-hidden="true" tabindex="-1"></a><span class="ss">8.  </span>Kapadia SR, Makkar R, Leon M, et al. Cerebral Embolic Protection during Transcatheter Aortic-Valve Replacement. NEW ENGL J MED 2022;387:1253-63.</span>
+<span id="cb1-247"><a href="#cb1-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-248"><a href="#cb1-248" aria-hidden="true" tabindex="-1"></a><span class="ss">9.  </span>Zi W, Song J, Kong W, et al. Tirofiban for Stroke without Large or Medium-Sized Vessel Occlusion. NEW ENGL J MED 2023;388:2025-36.</span>
+<span id="cb1-249"><a href="#cb1-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-250"><a href="#cb1-250" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Liu XX, Sang CH, Long DY, et al. Withdrawal: Prospective randomized comparison between upgraded "2C3L" versus PVI  approach for catheter ablation of persistent atrial fibrillation: PROMPT-AF trial  design. PACE 2021;44:1651.</span>
+<span id="cb1-251"><a href="#cb1-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Liu XX, Liu Q, Lai YW, et al. Prospective randomized comparison between upgraded '2C3L' vs. PVI approach for  catheter ablation of persistent atrial fibrillation: PROMPT-AF trial design. AM HEART J 2023;260:34-43.</span>
+<span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Sang C, Liu Q, Lai Y, et al. Pulmonary Vein Isolation With Optimized Linear Ablation vs Pulmonary Vein  Isolation Alone for Persistent AF: The PROMPT-AF Randomized Clinical Trial. JAMA-J AM MED ASSOC 2024.</span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a><span class="ss">13. </span>Krishna V, Fishman PS, Eisenberg HM, et al. Trial of Globus Pallidus Focused Ultrasound Ablation in Parkinson's Disease. NEW ENGL J MED 2023;388:683-93.</span>
+<span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-258"><a href="#cb1-258" aria-hidden="true" tabindex="-1"></a><span class="ss">14. </span>Jovin TG, Li C, Wu L, et al. Trial of Thrombectomy 6 to 24 Hours after Stroke Due to Basilar-Artery Occlusion. NEW ENGL J MED 2022;387:1373-84.</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>8. 生存分析的研究设计 – R语言临床研究样本量计算案例教程</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./S8 crossover.html" rel="next">
+<link href="./S6 noninferiorProportions.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-6b6957c917596b414ec0b78690761e87.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-e9b94c5c92cfde000641fbcd395a1216.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./S7 SurvivalAnalysis.html"><span class="chapter-title">8. 生存分析的研究设计</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">R语言临床研究样本量计算案例教程</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R语言临床研究样本量计算案例教程</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S0_preface.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">1. 前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S1 1Mean.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">2. 单组均数的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S2 1Proportion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">3. 单组率的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S3 2Means.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">4. 两组均数的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S4 2Proportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">5. 两组率的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S5 noninferiorMeans.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">6. 两组均数比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S6 noninferiorProportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">7. 两组率比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S7 SurvivalAnalysis.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">8. 生存分析的研究设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S8 crossover.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">9. 交叉设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S9 cluster.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">10. 整群随机研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S10 诊断试验.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">11. 诊断试验</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S11 观察性研究.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 观察性研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S12 GS.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 成组序贯设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S13 SSR.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">13. 样本量重新估计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S14 Multiplicityfactorial.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">14. 多重性与析因设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S15 simulation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">15. 样本量模拟计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S16 WinRatio.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">16. Win Ratio 样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">附录</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S17 Appendix.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">附录</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#单组生存数据的研究设计" id="toc-单组生存数据的研究设计" class="nav-link active" data-scroll-target="#单组生存数据的研究设计">单组生存数据的研究设计</a></li>
+  <li><a href="#两组生存数据的比较" id="toc-两组生存数据的比较" class="nav-link" data-scroll-target="#两组生存数据的比较">两组生存数据的比较</a>
+  <ul class="collapse">
+  <li><a href="#风险率λ已知" id="toc-风险率λ已知" class="nav-link" data-scroll-target="#风险率λ已知">风险率λ已知</a></li>
+  <li><a href="#中位生存时间已知" id="toc-中位生存时间已知" class="nav-link" data-scroll-target="#中位生存时间已知">中位生存时间已知</a></li>
+  <li><a href="#事件率已知" id="toc-事件率已知" class="nav-link" data-scroll-target="#事件率已知">事件率已知</a></li>
+  </ul></li>
+  <li><a href="#两组生存数据比较的非劣效设计" id="toc-两组生存数据比较的非劣效设计" class="nav-link" data-scroll-target="#两组生存数据比较的非劣效设计">两组生存数据比较的非劣效设计</a></li>
+  <li><a href="#讨论" id="toc-讨论" class="nav-link" data-scroll-target="#讨论">讨论</a>
+  <ul class="collapse">
+  <li><a href="#kaplan-meier率与简单率" id="toc-kaplan-meier率与简单率" class="nav-link" data-scroll-target="#kaplan-meier率与简单率">Kaplan-Meier率与简单率</a></li>
+  <li><a href="#两种随访结束的方式" id="toc-两种随访结束的方式" class="nav-link" data-scroll-target="#两种随访结束的方式">两种随访结束的方式</a></li>
+  <li><a href="#不同样本量计算方法的比较" id="toc-不同样本量计算方法的比较" class="nav-link" data-scroll-target="#不同样本量计算方法的比较">不同样本量计算方法的比较</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-title">8. 生存分析的研究设计</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> 代码</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>有一种数据类型与时间有关，比如肿瘤治疗后的复发、死亡等事件；PCI术后死亡、心肌梗死或血运重建等事件，即时间-事件（time-to-event）数据，尽管不能治愈这些疾病或者完全预防不良事件的发生，但如果延长这些事件的发生时间也是有临床意义的，通常会考虑生存分析的研究设计。</p>
+<p>生存分析有一些基本的假设和公式，比如最简单的指数模型为：</p>
+<p><span id="_Ref186450241" class="anchor"></span>公式 7‑1 <span class="math inline">\(S = e^{- \lambda t}\)</span></p>
+<p>S为生存率，λ是风险率（hazard），代表瞬时的风险，在指数模型里λ是恒定的。</p>
+<p>在指数模型中，当S=0.5，即有一半患者生存时，可推出中位生存时间，</p>
+<p>公式 7‑2 <span class="math inline">\(T_{m} = \frac{\ln(2)}{\lambda}\)</span></p>
+<p>但临床上多见的情况是<span class="math inline">\(T_{m}\)</span>已知，根据上式可以由<span class="math inline">\(T_{m}\)</span>求出λ：</p>
+<p>公式 7‑3 <span class="math inline">\(\lambda = \frac{ln(2)}{T_{m}}\)</span></p>
+<p>也可以根据<a href="#_Ref186450241">公式 7‑1</a>由生存率S，或事件率P（P=1-S）求出λ：</p>
+<p><span id="_Ref186451116" class="anchor"></span>公式 7‑4 <span class="math inline">\(\lambda = - \ln(S)/t = - \ln(1 - P)/t\)</span></p>
+<p>临床医生较为熟悉的风险比HR（hazard ratio），即试验组与对照组风险率之比，可由多种方法得出：</p>
+<p>公式 7‑5 <span class="math inline">\(HR = \frac{\lambda_{T}}{\lambda_{C}} = \frac{T_{mC}}{T_{mT}} = \ln\left( S_{T} \right)/ln(S_{C}) = \ln\left( {1 - P}_{T} \right)/ln(1 - P_{C})\)</span></p>
+<p>这样就可以根据风险率λ、中位生存时间<span class="math inline">\(T_{m}\)</span>或事件率P去计算HR或样本量了。</p>
+<p>生存分析一般是事件驱动的，所以通常首先计算出所需的事件数，Schoenfeld法公式如下（该方法并不要求数据符合指数模型）<sup>1</sup>：</p>
+<p><span id="_Ref186451694" class="anchor"></span>公式 7‑6 <span class="math inline">\(\mathbb{e} = \frac{4\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}}{\left\lbrack \ln(HR) \right\rbrack^{2}}\)</span></p>
+<p>如果两组例数不等，假设试验组与对照组按r:1分配，则<sup>1</sup>：</p>
+<p>公式 7‑7 <span class="math inline">\(e_{C} = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}(1 + 1 \slash r)}{\left\lbrack \ln(HR) \right\rbrack^{2}}\)</span></p>
+<p>如果是非劣效设计，则<sup>2</sup>：</p>
+<p>公式 7‑8 <span class="math inline">\(\mathbb{e} = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}}{\left\lbrack \ln{(HR) - ln(\mathrm{\Delta})} \right\rbrack^{2}}\frac{{(1 + r)}^{2}}{r}\)</span></p>
+<p>Freedman法计算事件数的公式如下<sup>1</sup>：</p>
+<p>公式 7‑9 <span class="math inline">\(e = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}{(HR + 1)}^{2}}{{(HR - 1)}^{2}}\)</span></p>
+<p>如果两组例数不等，假设试验组与对照组按r:1分配，则<sup>1</sup>：</p>
+<p>公式 7‑10 <span class="math inline">\(e = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}{(HR \cdot r + 1)}^{2}}{{(HR - 1)}^{2} \cdot r}\)</span></p>
+<p>如果是非劣效设计，则：</p>
+<p>公式 7‑11 <span class="math inline">\(e = \frac{\left( z_{\alpha/2} + z_{\beta} \right)^{2}{(1 + r(HR + \mathrm{\Delta}))}^{2}}{{r\left( 1 - (HR - \mathrm{\Delta}) \right)}^{2}}\)</span></p>
+<p>指数模型下的事件率为：</p>
+<p>公式 7‑12 <span class="math inline">\(\varphi(\lambda) = 1 - \left( e^{- \lambda t_{f}} - \mathbb{e}^{- \lambda\left( t_{a} + t_{f} \right)} \right) \slash \left( \lambda t_{a} \right)\)</span></p>
+<p>其中<span class="math inline">\(t_{a}\)</span>代表入组，<span class="math inline">\(t_{f}\)</span>代表随访，接着即可求得所需样本例数：</p>
+<p>公式 7‑13 <span class="math inline">\(n = \mathbb{e} \slash (\varphi\left( \lambda_{C} \right) + \varphi\left( \lambda_{T} \right))\)</span></p>
+<p>或者已知生存率<span class="math inline">\(\pi_{C}\)</span>与<span class="math inline">\(\pi_{T}\)</span>时，总生存率为：</p>
+<p>公式 7‑14 <span class="math inline">\(\pi = \frac{\left( 1 - \pi_{C} \right) + r(1 - \pi_{T})}{1 + r}\)</span></p>
+<p>公式 7‑15 <span class="math inline">\(n = e/\pi\)</span></p>
+<p>生存分析的样本量计算，重要的是确定事件数，而样本量则会根据入组的速度和时间，以及随访方式和时间等不同的假设而有所不同。</p>
+<p>很多临床医生对风险率λ不太熟悉，下面举一简单例子进一步说明。假设某种肿瘤的年死亡率为10%，则由<a href="#_Ref186451116">公式 7‑4</a>可得年λ=-ln(1-0.1)/1=0.1054，注意死亡率和λ这两个数值并不相等，通常λ或略高一些。根据<a href="#_Ref186451116">公式 7‑4</a>进一步可以计算月λ=-ln(1-0.1)/12=0.1054/12=0.00878，而月死亡率不是简单的10%/12，而是继续由<a href="#_Ref186451116">公式 7‑4</a>得到P=1-exp(-λt)=1-exp(-0.00878x1)=0.00874（<a href="#_Ref186451665">图 7‑1</a>）。</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S7_SurvivalAnalysis/image1.png" style="width:6in;height:4.45069in" class="figure-img"></p>
+<figcaption><span id="_Ref186451665" class="anchor"></span>图 7‑1 指数模型生存曲线示意图</figcaption>
+</figure>
+</div>
+<p>根据<a href="#_Ref186451694">公式 7‑6</a> Schoenfeld法计算的事件数见<a href="#_Ref186451753">图 7‑2</a>，<a href="#_Ref186451775">表 7‑1</a>。</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S7_SurvivalAnalysis/image2.png" style="width:6in;height:4.51736in" class="figure-img"></p>
+<figcaption><span id="_Ref186451753" class="anchor"></span>图 7‑2 事件数随着HR的增加而迅速增加（α=0.05双侧）</figcaption>
+</figure>
+</div>
+<table class="caption-top table">
+<caption><span id="_Ref186451775" class="anchor"></span>表 7‑1 不同HR及α、β组合下所需的事件数</caption>
+<colgroup>
+<col style="width: 13%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th rowspan="2">HR</th>
+<th colspan="2" style="text-align: right;">α=0.05双侧</th>
+<th colspan="2" style="text-align: right;">α=0.1双侧</th>
+</tr>
+<tr class="even">
+<th style="text-align: right;">β=0.1</th>
+<th style="text-align: right;">β=0.2</th>
+<th style="text-align: right;">β=0.1</th>
+<th style="text-align: right;">β=0.2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.20</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td>0.25</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="odd">
+<td>0.30</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="even">
+<td>0.35</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">23</td>
+</tr>
+<tr class="odd">
+<td>0.40</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">30</td>
+</tr>
+<tr class="even">
+<td>0.45</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">39</td>
+</tr>
+<tr class="odd">
+<td>0.50</td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">52</td>
+</tr>
+<tr class="even">
+<td>0.55</td>
+<td style="text-align: right;">118</td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">96</td>
+<td style="text-align: right;">70</td>
+</tr>
+<tr class="odd">
+<td>0.60</td>
+<td style="text-align: right;">162</td>
+<td style="text-align: right;">121</td>
+<td style="text-align: right;">132</td>
+<td style="text-align: right;">95</td>
+</tr>
+<tr class="even">
+<td>0.65</td>
+<td style="text-align: right;">227</td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">185</td>
+<td style="text-align: right;">134</td>
+</tr>
+<tr class="odd">
+<td>0.70</td>
+<td style="text-align: right;">331</td>
+<td style="text-align: right;">247</td>
+<td style="text-align: right;">270</td>
+<td style="text-align: right;">195</td>
+</tr>
+<tr class="even">
+<td>0.75</td>
+<td style="text-align: right;">508</td>
+<td style="text-align: right;">380</td>
+<td style="text-align: right;">414</td>
+<td style="text-align: right;">299</td>
+</tr>
+<tr class="odd">
+<td>0.80</td>
+<td style="text-align: right;">845</td>
+<td style="text-align: right;">631</td>
+<td style="text-align: right;">688</td>
+<td style="text-align: right;">497</td>
+</tr>
+</tbody>
+</table>
+<p>统计学教材<sup>3</sup></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S7_SurvivalAnalysis/image3.jpeg" style="width:6in;height:8in" class="figure-img"></p>
+<figcaption>A page of a book with text Description automatically generated</figcaption>
+</figure>
+</div>
+<p>特殊类型，rate<sup>4</sup>，</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S7_SurvivalAnalysis/image4.png" style="width:2.17253in;height:0.41088in" class="figure-img"></p>
+<figcaption>A black and white math equation Description automatically generated</figcaption>
+</figure>
+</div>
+<p>Single arm, at least one event<sup>4</sup></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S7_SurvivalAnalysis/image5.png" style="width:0.68468in;height:0.33995in" class="figure-img"></p>
+<figcaption>A mathematical equation with black text Description automatically generated</figcaption>
+</figure>
+</div>
+<section id="单组生存数据的研究设计" class="level2">
+<h2 class="anchored" data-anchor-id="单组生存数据的研究设计">单组生存数据的研究设计</h2>
+<p>例 7‑1 某研究方案<sup>5</sup>欲评价一种疗法对晚期结直肠癌的效果。主要终点为无进展生存（PFS，progression free survival），无效假设为PFS 2个月，预期PFS为4个月。设定单侧α=0.05，检验效能90%，假设入组时间12个月，随访12个月，需24例患者。考虑到10%的脱落率，样本量定为27。样本量计算使用了PASS软件。</p>
+<p>R语言未找到相应的包，自编程序如下，计算结果为23.3，向上取整得24：</p>
+<p>logrank1s &lt;- function(median0, median1,</p>
+<p>ta, tf,</p>
+<p>alpha=0.05, beta=0.1) {</p>
+<p>alpha = alpha</p>
+<p>beta = beta</p>
+<p>median0 &lt;- median0</p>
+<p>median1 &lt;- median1</p>
+<p>lam0 &lt;- log(2)/median0</p>
+<p>lam1 &lt;- log(2)/median1</p>
+<p>ta &lt;- ta</p>
+<p>tf &lt;- tf</p>
+<p>Gt=function(t){</p>
+<p>ifelse(t &lt;= tf, 1, ifelse(t &lt;= ta + tf, (ta+tf-t)/ta, 0))}</p>
+<p>S0t=function(t){exp(-lam0*t)}</p>
+<p>S1t=function(t){exp(-lam1*t)}</p>
+<p>p0f = function(t){</p>
+<p>ifelse(t &lt;= tf, 1, ifelse(t &lt;= ta + tf, (ta+tf-t)/ta, 0))*</p>
+<p>exp(-lam1*t)*lam0}</p>
+<p>p0=integrate(p0f, 0, Inf)$value</p>
+<p>p1f = function(t){</p>
+<p>ifelse(t &lt;= tf, 1, ifelse(t &lt;= ta + tf, (ta+tf-t)/ta, 0))*</p>
+<p>exp(-lam1*t)*lam1}</p>
+<p>p1=integrate(p1f,0,Inf)$value</p>
+<p>p00f = function(t){</p>
+<p>ifelse(t &lt;= tf, 1, ifelse(t &lt;= ta + tf, (ta+tf-t)/ta, 0))*</p>
+<p>exp(-lam1*t)*</p>
+<p>lam0*t*lam0}</p>
+<p>p00=integrate(p00f,0,Inf)$value</p>
+<p>p01f = function(t){</p>
+<p>ifelse(t &lt;= tf, 1, ifelse(t &lt;= ta + tf, (ta+tf-t)/ta, 0))*</p>
+<p>exp(-lam1*t)*</p>
+<p>lam0*t*lam1}</p>
+<p>p01=integrate(p01f,0,Inf)$value</p>
+<p>sigma0 &lt;- sqrt(p0)</p>
+<p>sigma1 &lt;- sqrt(p1)</p>
+<p>w &lt;- sigma1^2 - sigma0^2</p>
+<p>sigma &lt;- sqrt(p1 - p1^2 + 2*p00 - p0^2 - 2*p01 + 2*p0*p1)</p>
+<p>n=(sigma0*qnorm(1-alpha/2)+sigma*qnorm(1-beta))^2/w^2</p>
+<p>return (n)</p>
+<p>}</p>
+<p>计算：</p>
+<p>logrank1s (2, 4, 12, 12, alpha = 0.1)</p>
+<p>结果输出：</p>
+<p>[1] 23.32901</p>
+<p>PASS软件操作时依次点击Survival, One Survival Curve, One-Sample Longrank Tests。</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S7_SurvivalAnalysis/image6.png" style="width:5.20878in;height:4.68374in" class="figure-img"></p>
+<figcaption>A screenshot of a computer Description automatically generated</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="media/S7_SurvivalAnalysis/image7.png" style="width:6in;height:1.72014in" class="figure-img"></p>
+<figcaption>A screenshot of a computer Description automatically generated</figcaption>
+</figure>
+</div>
+</section>
+<section id="两组生存数据的比较" class="level2">
+<h2 class="anchored" data-anchor-id="两组生存数据的比较">两组生存数据的比较</h2>
+<section id="风险率λ已知" class="level3">
+<h3 class="anchored" data-anchor-id="风险率λ已知">风险率λ已知</h3>
+<p>这种情形在临床研究中并不多见。</p>
+<p><span id="_Ref186452524" class="anchor"></span>例 7‑2 颜艳等主编的医学研究生教材《医学统计学（第5版）》<sup>6</sup>介绍了一个生存分析样本量计算的例子。首先根据HR=0.5，双侧α=0.05，检验效能90%，计算出需要的事件数为88。然后假设对照组的事件率为0.1/人年（incidence rate，即λ），需样本量1216例。</p>
+<p>该例没有给出入组时间和随访时间，我们简单假定为患者同时入组（入组时间给了一个极小值0.001），随访1年。Excel表计算如下，可见此例的事件数计算符合Schoenfeld法，病例数1216例与原文相同。</p>
+<p><img src="media/S7_SurvivalAnalysis/image8.png" style="width:2.70833in;height:2.17361in"></p>
+<p>R语言rpact包计算如下：</p>
+<p>library(rpact)</p>
+<p>getSampleSizeSurvival(</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.1,</p>
+<p>lambda1 = 0.05,</p>
+<p>lambda2 = 0.1,</p>
+<p>accrualTime = 0.001,</p>
+<p>followUpTime = 1</p>
+<p>)</p>
+<p>结果输出：</p>
+<p>Design plan parameters and output for survival data:</p>
+<p>Design parameters:</p>
+<p>Critical values : 1.96</p>
+<p>Significance level : 0.0250</p>
+<p>Type II error rate : 0.1000</p>
+<p>Test : one-sided</p>
+<p>User defined parameters:</p>
+<p>lambda(1) : 0.050</p>
+<p>lambda(2) : 0.100</p>
+<p>Accrual time : 0.001</p>
+<p>Follow up time : 1.00</p>
+<p>Default parameters:</p>
+<p>Theta H0 : 1</p>
+<p>Type of computation : Schoenfeld</p>
+<p>Planned allocation ratio : 1</p>
+<p>kappa : 1</p>
+<p>Piecewise survival times : 0.00</p>
+<p>Drop-out rate (1) : 0.000</p>
+<p>Drop-out rate (2) : 0.000</p>
+<p>Drop-out time : 12</p>
+<p>Sample size and output:</p>
+<p>Direction upper : FALSE</p>
+<p>median(1) : 13.9</p>
+<p>median(2) : 6.9</p>
+<p>Hazard ratio : 0.500</p>
+<p>Number of events : 87.5</p>
+<p>Accrual intensity : 1214971.9</p>
+<p>Number of events fixed : 87.5</p>
+<p>Number of subjects fixed : 1215</p>
+<p>Number of subjects fixed (1) : 607.5</p>
+<p>Number of subjects fixed (2) : 607.5</p>
+<p>Analysis times : 1.00</p>
+<p>Study duration : 1.00</p>
+<p>Critical values (treatment effect scale) : 0.658</p>
+<p>Legend:</p>
+<p>(i): values of treatment arm i</p>
+<p>事件数87.5，向上取整为88。尽管样本量总数为1215，但每组607.5，如果先进行每组向上取整至608，总样本量仍然为1216，与教材案例一致。</p>
+<p>R语言gsDesign包的nEvents函数可以简洁地得到事件数：</p>
+<p>library(gsDesign)</p>
+<p>nEvents(hr = 0.5, alpha = 0.025, beta = 0.1)</p>
+<p>输出结果：</p>
+<p>[1] 87.4793</p>
+<p>进一步计算样本量：</p>
+<p>nSurvival(</p>
+<p>lambda1 = 0.1,</p>
+<p>lambda2 = 0.05,</p>
+<p>Ts = 0.001+1,</p>
+<p>Tr = 0.001,</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.1</p>
+<p>)</p>
+<p>结果输出：</p>
+<p>Fixed design, two-arm trial with time-to-event</p>
+<p>outcome (Lachin and Foulkes, 1986).</p>
+<p>Study duration (fixed): Ts=1.001</p>
+<p>Accrual duration (fixed): Tr=0.001</p>
+<p>Uniform accrual: entry="unif"</p>
+<p>Control median: log(2)/lambda1=6.9</p>
+<p>Experimental median: log(2)/lambda2=13.9</p>
+<p>Censoring only at study end (eta=0)</p>
+<p>Control failure rate: lambda1=0.1</p>
+<p>Experimental failure rate: lambda2=0.05</p>
+<p>Censoring rate: eta=0</p>
+<p>Power: 100*(1-beta)=90%</p>
+<p>Type I error (1-sided): 100*alpha=2.5%</p>
+<p>Equal randomization: ratio=1</p>
+<p>Sample size based on hazard ratio=0.5 (type="rr")</p>
+<p>Sample size (computed): n=1268</p>
+<p>Events required (computed): nEvents=92</p>
+<p>这与原来的计算略有差异，事件数为92，样本量为1268，主要是因为gsDesign包的nSurvival函数采用了Lachin和Foulkes的方法，这里不展开讨论。注意R语言gsDesign包默认第1组为对照组，而rpact包默认第1组为试验组，不过两个包的α默认设定都是单侧0.025。</p>
+<p>Excel表Lachin和Foulkes法与R语言gsDesign包结果相同，事件数92，样本量1268：</p>
+<p><img src="media/S7_SurvivalAnalysis/image9.png" style="width:2.70833in;height:2.38194in"></p>
+<p>PASS软件默认的计算为Lakatos法，需要90个事件，1250例样本。操作时依次点击Survival, Two Survival Curves, Test(Inequality), Logrank Tests。</p>
+<p><img src="media/S7_SurvivalAnalysis/image10.png" style="width:4.43372in;height:4.56706in"></p>
+<p>Input type可根据需要灵活选用。如果有现成的参数可直接填入，也可通过本章开头的公式计算，或者利用PASS软件自带的参数转换功能，点击右侧生存曲线小图标后进行转换。</p>
+<p><img src="media/S7_SurvivalAnalysis/image11.png" style="width:1.08312in;height:0.65006in"></p>
+<p><img src="media/S7_SurvivalAnalysis/image12.png" style="width:5.75883in;height:1.96684in"></p>
+<p><img src="media/S7_SurvivalAnalysis/image13.png" style="width:6in;height:1.68958in"></p>
+<p><img src="media/S7_SurvivalAnalysis/image14.png" style="width:1.36111in;height:1in"></p>
+<p>在Excel表中，如果将90作为事件数，计算得需患者数1250例，同PASS，可见这两种方法在计算事件率时是一致的，因而根据事件数推算样本量的结果是一致的。</p>
+<p>PASS软件Freedman法需事件数95，样本量1316，与Excel表基本一致。操作时依次点击Survival, Two Survival Curves, Test(Inequality), Logrank Tests (Freedman)。</p>
+<p>PASS软件Lachin和Foulkes法计算样本量为1311例，与Excel表及R语言gsDesign包的结果均稍有差异，PASS也未给出所需事件数。操作时依次点击Survival, Two Survival Curves, Test(Inequality), Logrank test (Lachin and Foulkes)。</p>
+<p>PASS软件Cox比例风险模型给出的结果为事件数88，样本量1216，从而推测是采用了Schoenfeld法。PASS软件指数模型给出的结果为事件数95，样本量1314，与Freedman法一致。</p>
+<p>例 7‑3 STABLE-SR-III研究<sup>7</sup>在老年阵发性房颤患者中比较肺静脉隔离加低电压区消融与单纯肺静脉隔离的效果。主要终点为无房性心律失常发生率，预期在试验组和对照组中分别为每年85%和75%。设入组2年，随访1年，log-rank检验，双侧α=0.05，检验效能90%，需369例患者。假定脱落率为15%，则需434例患者。样本量计算使用了PASS 13软件。</p>
+<p>Excel表Schoenfeld法计算结果为368，PASS 2024软件log-rank模块计算结果为369，R语言rpact包计算结果为366.1。</p>
+<p><img src="media/S7_SurvivalAnalysis/image15.png" style="width:2.70833in;height:2.18333in"></p>
+<p>library(rpact)</p>
+<p>getSampleSizeSurvival(</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.1,</p>
+<p>pi1 = 0.15,</p>
+<p>pi2 = 0.25,</p>
+<p>eventTime = 1,</p>
+<p>accrualTime = 2,</p>
+<p>followUpTime = 1</p>
+<p>)</p>
+<p>研究实际入组438例患者，中位随访时间为23个月，试验组房性心律失常发生率明显低于对照组（15% vs 24%，P=0.03），研究达成。</p>
+<p>（与PROMPT-AF比较）</p>
+</section>
+<section id="中位生存时间已知" class="level3">
+<h3 class="anchored" data-anchor-id="中位生存时间已知">中位生存时间已知</h3>
+<p>已知中位生存时间计算样本量，多见于肿瘤的临床研究。</p>
+<p>例 7‑4 SYNCHRONOUS研究<sup>8</sup>欲比较结肠癌的两种治疗方案，假设对照组中位生存时间20个月，试验组26个月，入组24个月，随访36个月，显著性水平5%，检验效能85%，则需522个事件，694例患者。</p>
+<p>由Excel表计算可知该例采用了Freedman方法，样本量694例。</p>
+<p><img src="media/S7_SurvivalAnalysis/image16.png" style="width:2.70833in;height:2.58333in"></p>
+<p>R语言rpact包计算如下，需528个事件，694例患者：</p>
+<p>library(rpact)</p>
+<p>getSampleSizeSurvival(</p>
+<p>typeOfComputation = "Freedman",</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.15,</p>
+<p>median1 = 26,</p>
+<p>median2 = 20,</p>
+<p>accrualTime = 24,</p>
+<p>followUpTime = 36</p>
+<p>)</p>
+<p>PASS软件Freedman法需事件数528，样本量688；而选择指数模型给出的结果为事件数532，样本量698。</p>
+</section>
+<section id="事件率已知" class="level3">
+<h3 class="anchored" data-anchor-id="事件率已知">事件率已知</h3>
+<p>已知事件率，计算样本量，心血管病领域的研究多用此法。</p>
+<p>例 7‑5 PARTNER Cohort B研究<sup>9</sup>是TAVR领域第一个里程碑式的随机对照试验，将严重主动脉瓣狭窄且不适合外科手术的患者随机分为经导管主动脉瓣植入（TAVI）或标准治疗组，主要终点为全因死亡率。假设对照组1年死亡率37.5%，试验组25%，脱落率每年10%，预计350例患者可提供84%的检验效能。附件方案里提供了进一步的信息：α=0.05，研究所需事件数为148，按150计算。计划匀速入组18个月，随访1年。</p>
+<p>Excel表计算Schoenfeld法需事件数145，需样本量308，脱落率每年10%，可粗略对应18个月为15%，则样本量扩充为308/(1-15%)=362.4。</p>
+<p><img src="media/S7_SurvivalAnalysis/image17.png" style="width:2.70833in;height:2.17361in"></p>
+<p>PASS软件Lakatos法需事件数146，样本量336；指数模型的结果为事件数152，样本量322。</p>
+<p>研究实际随机了358例患者，对照组1年死亡率50.7%，试验组为30.7%，HR=0.55（95%置信区间0.40~0.74），P&lt;0.001，研究达成。</p>
+</section>
+</section>
+<section id="两组生存数据比较的非劣效设计" class="level2">
+<h2 class="anchored" data-anchor-id="两组生存数据比较的非劣效设计">两组生存数据比较的非劣效设计</h2>
+<p>例 7‑6 Aspirin LAAO研究<sup>10</sup>欲探索植入左心耳封堵器后的患者，是否可以停用阿司匹林长期抗凝治疗。主要终点为复合事件包括卒中、全身栓塞，心血管/原因不明死亡，大出血，急性冠脉综合征及冠脉或外周动脉血运重建。假设主要终点事件率在两组均为7/百患者年，非劣效界值1.5，检验效能0.8，单侧α=0.025，则需要191个事件，考虑10%的脱落率，需要1120例患者。</p>
+<p>Excel表Schoenfeld法计算需要191个事件，1012例患者，考虑脱落后为1012/(1-10%)=1124.4例。</p>
+<p><img src="media/S7_SurvivalAnalysis/image18.png" style="width:2.70833in;height:2.79167in"></p>
+<p>R语言rpact包计算，事件数和病例数分别为191和1012，与Excel表相同。</p>
+<p>getSampleSizeSurvival(</p>
+<p>thetaH0 = 1.5,</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.2,</p>
+<p>lambda1 = 0.07,</p>
+<p>lambda2 = 0.07,</p>
+<p>accrualTime = 2,</p>
+<p>followUpTime = 2,</p>
+<p>eventTime = 1</p>
+<p>)</p>
+<p>SPSS软件Lakatos法计算需191个事件，在考虑脱落前需1011例患者。</p>
+</section>
+<section id="讨论" class="level2">
+<h2 class="anchored" data-anchor-id="讨论">讨论</h2>
+<section id="kaplan-meier率与简单率" class="level3">
+<h3 class="anchored" data-anchor-id="kaplan-meier率与简单率">Kaplan-Meier率与简单率</h3>
+<p>本书之前章节讨论的率比较简单，分子是事件数，分母是总人数，可称之为简单率。本章介绍的生存数据同时包含了计数资料和计量资料的信息，虽然仍可以计算简单率，但由于1）出现失访或删失情况时，该失访或删失者是否或者如何放入分母会比较麻烦，2）简单率没有充分利用时间的信息（比如推迟肿瘤的复发时间也是有临床意义的），因而在生存分析里通常使用利用乘积限法计算的Kaplan-Meier率（K-M率）。在没有删失的情况下，K-M与简单率相等，有删失时，K-M率配合log-rank检验显得更为合理。</p>
+<p>值得指出的是，样本量计算的方法应当与随后的统计分析方法保持一致。样本量计算时采用的是简单率的比较，而统计分析时采用了log-rank分析，这种情况在临床研究中并不少见（<mark>举例</mark>）。考虑简单率的比较与log-rank检验（本质上是对时间进行了加权）的差异，这并不是一个好的做法。</p>
+</section>
+<section id="两种随访结束的方式" class="level3">
+<h3 class="anchored" data-anchor-id="两种随访结束的方式">两种随访结束的方式</h3>
+<p>本章之前介绍的研究设计，每位患者的随访时间通常是相同的，比如都是随访1年或者2年，到了1年或2年后，该患者即完成了研究而按方案退出。但在生存分析研究里，更多的情况是所有患者随访至一个统一的时间点（积累了预期的事件数后），这样第一个入组的患者随访时间最长，最后一个入组的患者随访时间最短。两种方法各有优缺点，逐个结束法（或固定随访时间法）简便易行，事件率较低的心血管病研究多见；统一结束法可追踪更多的信息从而减少样本量，但增加了结束时的管理工作，事件率较高的肿瘤研究多见。</p>
+<p>应注意这两种随访结束方式对样本量计算的影响。常见的生存分析样本量计算时假定的都是统一结束法，如果需要采用逐个结束法，可将入组时间设定为零或给一个极小值如0.001，视软件或具体的计算方法而定，可参考本章<a href="#_Ref186452524">例 7‑1</a>。</p>
+</section>
+<section id="不同样本量计算方法的比较" class="level3">
+<h3 class="anchored" data-anchor-id="不同样本量计算方法的比较">不同样本量计算方法的比较</h3>
+<p>生存分析的样本量计算有不同的方法，如Schoenfeld， Freedman，Lachin and Flulkes及Lakatos等。一般来说，对称性设计（两组样本量相等）且HR&gt;0.5时，Schoenfeld法给出的事件数比较准确，而Freedman法计算的事件数略高于Schoenfeld法；HR≤0.25时，Schoenfeld易低估事件数而Freedman高估事件数。在不对称设计且HR远离1时，Schoenfeld法在试验组人数多时高估事件术，而对照组人数多时低估事件数；Freedman法表现整体欠佳<sup>11</sup>。必要时可进行模拟分析。</p>
+<p><strong>References:</strong></p>
+<p>1. 陈峰, 夏结来. 临床试验统计学. 北京: 人民卫生出版社; 2018.</p>
+<p>2. 贺佳, 邓伟, 王素珍. 临床试验设计与统计分析. 2版 ed.&nbsp;北京: 人民卫生出版社; 2022.</p>
+<p>3. 陈峰. 医学统计学. 4版 ed.&nbsp;北京: 人民卫生出版社; 2024.</p>
+<p>4. Machin D, Campbell MJ, Tan SB, Tan SH. Sample Sizes for Clinical, Laboratory and Epidemiology Studies. Fourth Edition ed.&nbsp;Pondicherry: Wiley Blackwell; 2018.</p>
+<p>5. Zhang P, Li X, Wang X, Yang Y, Wang J, Cao D. SHR-8068 combined with adebrelimab and bevacizumab in the treatment of refractory advanced colorectal cancer: study protocol for a single-arm, phase Ib/II study. FRONT IMMUNOL 2024;15:1450533.</p>
+<p>6. 颜艳, 王彤. 医学统计学. 5版 ed.&nbsp;北京: 人民卫生出版社; 2020.</p>
+<p>7. Chen H, Li C, Han B, et al.&nbsp;Circumferential Pulmonary Vein Isolation With vs Without Additional Low-Voltage-Area Ablation in Older Patients With Paroxysmal Atrial Fibrillation: A Randomized Clinical Trial. JAMA CARDIOL 2023;8:765-72.</p>
+<p>8. Rahbari NN, Lordick F, Fink C, et al.&nbsp;Resection of the primary tumour versus no resection prior to systemic therapy in patients with colon cancer and synchronous unresectable metastases (UICC stage IV): SYNCHRONOUS--a randomised controlled multicentre trial (ISRCTN30964555). BMC CANCER 2012;12:142.</p>
+<p>9. Leon MB, Smith CR, Mack M, et al.&nbsp;Transcatheter aortic-valve implantation for aortic stenosis in patients who cannot undergo surgery. NEW ENGL J MED 2010;363:1597-607.</p>
+<p>10. Chen M, Wang Q, Sun J, et al.&nbsp;Double-blind, placebo-controlled randomised clinical trial to evaluate the effect of ASPIRIN discontinuation after left atrial appendage occlusion in atrial fibrillation: protocol of the ASPIRIN LAAO trial. BMJ OPEN 2021;11:e44695.</p>
+<p>11. Wu J. Statistical methods for survival trial design : with applications to cancer clinical trials using R. Boca Raton London New York: CRC Press; 2018.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./S6 noninferiorProportions.html" class="pagination-link" aria-label="7. 两组率比较的非劣效设计">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">7. 两组率比较的非劣效设计</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./S8 crossover.html" class="pagination-link" aria-label="9. 交叉设计">
+        <span class="nav-page-text"><span class="chapter-title">9. 交叉设计</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">源代码</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># 8. 生存分析的研究设计</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>有一种数据类型与时间有关，比如肿瘤治疗后的复发、死亡等事件；PCI术后死亡、心肌梗死或血运重建等事件，即时间-事件（time-to-event）数据，尽管不能治愈这些疾病或者完全预防不良事件的发生，但如果延长这些事件的发生时间也是有临床意义的，通常会考虑生存分析的研究设计。</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>生存分析有一些基本的假设和公式，比如最简单的指数模型为：</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>[]{#_Ref186450241 .anchor}公式 7‑1 $S = e^{- \lambda t}$</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>S为生存率，λ是风险率（hazard），代表瞬时的风险，在指数模型里λ是恒定的。</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>在指数模型中，当S=0.5，即有一半患者生存时，可推出中位生存时间，</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>公式 7‑2 $T_{m} = \frac{\ln(2)}{\lambda}$</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>但临床上多见的情况是$T_{m}$已知，根据上式可以由$T_{m}$求出λ：</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>公式 7‑3 $\lambda = \frac{ln(2)}{T_{m}}$</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>也可以根据<span class="co">[</span><span class="ot">公式 7‑1</span><span class="co">](#_Ref186450241)</span>由生存率S，或事件率P（P=1-S）求出λ：</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>[]{#_Ref186451116 .anchor}公式 7‑4 $\lambda = - \ln(S)/t = - \ln(1 - P)/t$</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>临床医生较为熟悉的风险比HR（hazard ratio），即试验组与对照组风险率之比，可由多种方法得出：</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>公式 7‑5 $HR = \frac{\lambda_{T}}{\lambda_{C}} = \frac{T_{mC}}{T_{mT}} = \ln\left( S_{T} \right)/ln(S_{C}) = \ln\left( {1 - P}_{T} \right)/ln(1 - P_{C})$</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>这样就可以根据风险率λ、中位生存时间$T_{m}$或事件率P去计算HR或样本量了。</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>生存分析一般是事件驱动的，所以通常首先计算出所需的事件数，Schoenfeld法公式如下（该方法并不要求数据符合指数模型）^1^：</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>[]{#_Ref186451694 .anchor}公式 7‑6 $\mathbb{e} = \frac{4\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}}{\left\lbrack \ln(HR) \right\rbrack^{2}}$</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>如果两组例数不等，假设试验组与对照组按r:1分配，则^1^：</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>公式 7‑7 $e_{C} = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}(1 + 1 \slash r)}{\left\lbrack \ln(HR) \right\rbrack^{2}}$</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>如果是非劣效设计，则^2^：</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>公式 7‑8 $\mathbb{e} = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}}{\left\lbrack \ln{(HR) - ln(\mathrm{\Delta})} \right\rbrack^{2}}\frac{{(1 + r)}^{2}}{r}$</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>Freedman法计算事件数的公式如下^1^：</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>公式 7‑9 $e = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}{(HR + 1)}^{2}}{{(HR - 1)}^{2}}$</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>如果两组例数不等，假设试验组与对照组按r:1分配，则^1^：</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>公式 7‑10 $e = \frac{\left( Z_{1 - \alpha/2} + Z_{1 - \beta} \right)^{2}{(HR \cdot r + 1)}^{2}}{{(HR - 1)}^{2} \cdot r}$</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>如果是非劣效设计，则：</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>公式 7‑11 $e = \frac{\left( z_{\alpha/2} + z_{\beta} \right)^{2}{(1 + r(HR + \mathrm{\Delta}))}^{2}}{{r\left( 1 - (HR - \mathrm{\Delta}) \right)}^{2}}$</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>指数模型下的事件率为：</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>公式 7‑12 $\varphi(\lambda) = 1 - \left( e^{- \lambda t_{f}} - \mathbb{e}^{- \lambda\left( t_{a} + t_{f} \right)} \right) \slash \left( \lambda t_{a} \right)$</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>其中$t_{a}$代表入组，$t_{f}$代表随访，接着即可求得所需样本例数：</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>公式 7‑13 $n = \mathbb{e} \slash (\varphi\left( \lambda_{C} \right) + \varphi\left( \lambda_{T} \right))$</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>或者已知生存率$\pi_{C}$与$\pi_{T}$时，总生存率为：</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>公式 7‑14 $\pi = \frac{\left( 1 - \pi_{C} \right) + r(1 - \pi_{T})}{1 + r}$</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>公式 7‑15 $n = e/\pi$</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>生存分析的样本量计算，重要的是确定事件数，而样本量则会根据入组的速度和时间，以及随访方式和时间等不同的假设而有所不同。</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>很多临床医生对风险率λ不太熟悉，下面举一简单例子进一步说明。假设某种肿瘤的年死亡率为10%，则由<span class="co">[</span><span class="ot">公式 7‑4</span><span class="co">](#_Ref186451116)</span>可得年λ=-ln(1-0.1)/1=0.1054，注意死亡率和λ这两个数值并不相等，通常λ或略高一些。根据<span class="co">[</span><span class="ot">公式 7‑4</span><span class="co">](#_Ref186451116)</span>进一步可以计算月λ=-ln(1-0.1)/12=0.1054/12=0.00878，而月死亡率不是简单的10%/12，而是继续由<span class="co">[</span><span class="ot">公式 7‑4</span><span class="co">](#_Ref186451116)</span>得到P=1-exp(-λt)=1-exp(-0.00878x1)=0.00874（<span class="co">[</span><span class="ot">图 7‑1</span><span class="co">](#_Ref186451665)</span>）。</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>![[]{#_Ref186451665 .anchor}图 7‑1 指数模型生存曲线示意图](media/S7_SurvivalAnalysis/image1.png){width="6.0in" height="4.450694444444444in"}</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>根据<span class="co">[</span><span class="ot">公式 7‑6</span><span class="co">](#_Ref186451694)</span> Schoenfeld法计算的事件数见<span class="co">[</span><span class="ot">图 7‑2</span><span class="co">](#_Ref186451753)</span>，<span class="co">[</span><span class="ot">表 7‑1</span><span class="co">](#_Ref186451775)</span>。</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>![[]{#_Ref186451753 .anchor}图 7‑2 事件数随着HR的增加而迅速增加（α=0.05双侧）](media/S7_SurvivalAnalysis/image2.png){width="6.0in" height="4.517361111111111in"}</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>+---------+-----------------------+-----------------------+</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> HR      <span class="pp">|</span> α=0.05双侧            <span class="pp">|</span> α=0.1双侧             <span class="pp">|</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>         +-----------+-----------+-----------+-----------+</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>         <span class="pp">|</span> β=0.1     <span class="pp">|</span> β=0.2     <span class="pp">|</span> β=0.1     <span class="pp">|</span> β=0.2     <span class="pp">|</span></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>+=======<span class="al">==+==========:+==========:+==========:+==</span>========:+</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.20    <span class="pp">|</span> 17        <span class="pp">|</span> 13        <span class="pp">|</span> 14        <span class="pp">|</span> 10        <span class="pp">|</span></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.25    <span class="pp">|</span> 22        <span class="pp">|</span> 17        <span class="pp">|</span> 18        <span class="pp">|</span> 13        <span class="pp">|</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.30    <span class="pp">|</span> 29        <span class="pp">|</span> 22        <span class="pp">|</span> 24        <span class="pp">|</span> 18        <span class="pp">|</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.35    <span class="pp">|</span> 39        <span class="pp">|</span> 29        <span class="pp">|</span> 32        <span class="pp">|</span> 23        <span class="pp">|</span></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.40    <span class="pp">|</span> 51        <span class="pp">|</span> 38        <span class="pp">|</span> 41        <span class="pp">|</span> 30        <span class="pp">|</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.45    <span class="pp">|</span> 66        <span class="pp">|</span> 50        <span class="pp">|</span> 54        <span class="pp">|</span> 39        <span class="pp">|</span></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.50    <span class="pp">|</span> 88        <span class="pp">|</span> 66        <span class="pp">|</span> 72        <span class="pp">|</span> 52        <span class="pp">|</span></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.55    <span class="pp">|</span> 118       <span class="pp">|</span> 88        <span class="pp">|</span> 96        <span class="pp">|</span> 70        <span class="pp">|</span></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.60    <span class="pp">|</span> 162       <span class="pp">|</span> 121       <span class="pp">|</span> 132       <span class="pp">|</span> 95        <span class="pp">|</span></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.65    <span class="pp">|</span> 227       <span class="pp">|</span> 170       <span class="pp">|</span> 185       <span class="pp">|</span> 134       <span class="pp">|</span></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.70    <span class="pp">|</span> 331       <span class="pp">|</span> 247       <span class="pp">|</span> 270       <span class="pp">|</span> 195       <span class="pp">|</span></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.75    <span class="pp">|</span> 508       <span class="pp">|</span> 380       <span class="pp">|</span> 414       <span class="pp">|</span> 299       <span class="pp">|</span></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 0.80    <span class="pp">|</span> 845       <span class="pp">|</span> 631       <span class="pp">|</span> 688       <span class="pp">|</span> 497       <span class="pp">|</span></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>+---------+-----------+-----------+-----------+-----------+</span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>: []{#_Ref186451775 .anchor}表 7‑1 不同HR及α、β组合下所需的事件数</span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>统计学教材^3^</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a><span class="al">![A page of a book with text Description automatically generated](media/S7_SurvivalAnalysis/image3.jpeg)</span>{width="6.0in" height="8.0in"}</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>特殊类型，rate^4^，</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a><span class="al">![A black and white math equation Description automatically generated](media/S7_SurvivalAnalysis/image4.png)</span>{width="2.1725251531058616in" height="0.4108803587051619in"}</span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>Single arm, at least one event^4^</span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a><span class="al">![A mathematical equation with black text Description automatically generated](media/S7_SurvivalAnalysis/image5.png)</span>{width="0.6846839457567804in" height="0.33994860017497813in"}</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a><span class="fu">## 单组生存数据的研究设计</span></span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>例 7‑1 某研究方案^5^欲评价一种疗法对晚期结直肠癌的效果。主要终点为无进展生存（PFS，progression free survival），无效假设为PFS 2个月，预期PFS为4个月。设定单侧α=0.05，检验效能90%，假设入组时间12个月，随访12个月，需24例患者。考虑到10%的脱落率，样本量定为27。样本量计算使用了PASS软件。</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a>R语言未找到相应的包，自编程序如下，计算结果为23.3，向上取整得24：</span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a>logrank1s <span class="sc">\&lt;</span>- function(median0, median1,</span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>ta, tf,</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a>alpha=0.05, beta=0.1) {</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>alpha = alpha</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>beta = beta</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>median0 <span class="sc">\&lt;</span>- median0</span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>median1 <span class="sc">\&lt;</span>- median1</span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a>lam0 <span class="sc">\&lt;</span>- log(2)/median0</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a>lam1 <span class="sc">\&lt;</span>- log(2)/median1</span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>ta <span class="sc">\&lt;</span>- ta</span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a>tf <span class="sc">\&lt;</span>- tf</span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>Gt=function(t){</span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a>ifelse(t <span class="sc">\&lt;</span>= tf, 1, ifelse(t <span class="sc">\&lt;</span>= ta + tf, (ta+tf-t)/ta, 0))}</span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a>S0t=function(t){exp(-lam0<span class="sc">\*</span>t)}</span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a>S1t=function(t){exp(-lam1<span class="sc">\*</span>t)}</span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a>p0f = function(t){</span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a>ifelse(t <span class="sc">\&lt;</span>= tf, 1, ifelse(t <span class="sc">\&lt;</span>= ta + tf, (ta+tf-t)/ta, 0))<span class="sc">\*</span></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>exp(-lam1<span class="sc">\*</span>t)<span class="sc">\*</span>lam0}</span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a>p0=integrate(p0f, 0, Inf)\$value</span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a>p1f = function(t){</span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a>ifelse(t <span class="sc">\&lt;</span>= tf, 1, ifelse(t <span class="sc">\&lt;</span>= ta + tf, (ta+tf-t)/ta, 0))<span class="sc">\*</span></span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a>exp(-lam1<span class="sc">\*</span>t)<span class="sc">\*</span>lam1}</span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a>p1=integrate(p1f,0,Inf)\$value</span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a>p00f = function(t){</span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a>ifelse(t <span class="sc">\&lt;</span>= tf, 1, ifelse(t <span class="sc">\&lt;</span>= ta + tf, (ta+tf-t)/ta, 0))<span class="sc">\*</span></span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a>exp(-lam1<span class="sc">\*</span>t)<span class="sc">\*</span></span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a>lam0<span class="sc">\*</span>t<span class="sc">\*</span>lam0}</span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a>p00=integrate(p00f,0,Inf)\$value</span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a>p01f = function(t){</span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a>ifelse(t <span class="sc">\&lt;</span>= tf, 1, ifelse(t <span class="sc">\&lt;</span>= ta + tf, (ta+tf-t)/ta, 0))<span class="sc">\*</span></span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a>exp(-lam1<span class="sc">\*</span>t)<span class="sc">\*</span></span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a>lam0<span class="sc">\*</span>t<span class="sc">\*</span>lam1}</span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a>p01=integrate(p01f,0,Inf)\$value</span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a>sigma0 <span class="sc">\&lt;</span>- sqrt(p0)</span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a>sigma1 <span class="sc">\&lt;</span>- sqrt(p1)</span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a>w <span class="sc">\&lt;</span>- sigma1\^2 - sigma0\^2</span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a>sigma <span class="sc">\&lt;</span>- sqrt(p1 - p1\^2 + 2<span class="sc">\*</span>p00 - p0\^2 - 2<span class="sc">\*</span>p01 + 2<span class="sc">\*</span>p0<span class="sc">\*</span>p1)</span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a>n=(sigma0<span class="sc">\*</span>qnorm(1-alpha/2)+sigma<span class="sc">\*</span>qnorm(1-beta))\^2/w\^2</span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a>return (n)</span>
+<span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a>计算：</span>
+<span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a>logrank1s (2, 4, 12, 12, alpha = 0.1)</span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a><span class="sc">\[</span>1<span class="sc">\]</span> 23.32901</span>
+<span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a>PASS软件操作时依次点击Survival, One Survival Curve, One-Sample Longrank Tests。</span>
+<span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a><span class="al">![A screenshot of a computer Description automatically generated](media/S7_SurvivalAnalysis/image6.png)</span>{width="5.208784995625547in" height="4.683739063867017in"}</span>
+<span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a><span class="al">![A screenshot of a computer Description automatically generated](media/S7_SurvivalAnalysis/image7.png)</span>{width="6.0in" height="1.7201388888888889in"}</span>
+<span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a><span class="fu">## 两组生存数据的比较</span></span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a><span class="fu">### 风险率λ已知</span></span>
+<span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a>这种情形在临床研究中并不多见。</span>
+<span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a>[]{#_Ref186452524 .anchor}例 7‑2 颜艳等主编的医学研究生教材《医学统计学（第5版）》^6^介绍了一个生存分析样本量计算的例子。首先根据HR=0.5，双侧α=0.05，检验效能90%，计算出需要的事件数为88。然后假设对照组的事件率为0.1/人年（incidence rate，即λ），需样本量1216例。</span>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a>该例没有给出入组时间和随访时间，我们简单假定为患者同时入组（入组时间给了一个极小值0.001），随访1年。Excel表计算如下，可见此例的事件数计算符合Schoenfeld法，病例数1216例与原文相同。</span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image8.png)</span>{width="2.7083333333333335in" height="2.173611111111111in"}</span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a>R语言rpact包计算如下：</span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a>library(rpact)</span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a>getSampleSizeSurvival(</span>
+<span id="cb1-240"><a href="#cb1-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-241"><a href="#cb1-241" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-242"><a href="#cb1-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-243"><a href="#cb1-243" aria-hidden="true" tabindex="-1"></a>beta = 0.1,</span>
+<span id="cb1-244"><a href="#cb1-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-245"><a href="#cb1-245" aria-hidden="true" tabindex="-1"></a>lambda1 = 0.05,</span>
+<span id="cb1-246"><a href="#cb1-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-247"><a href="#cb1-247" aria-hidden="true" tabindex="-1"></a>lambda2 = 0.1,</span>
+<span id="cb1-248"><a href="#cb1-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-249"><a href="#cb1-249" aria-hidden="true" tabindex="-1"></a>accrualTime = 0.001,</span>
+<span id="cb1-250"><a href="#cb1-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-251"><a href="#cb1-251" aria-hidden="true" tabindex="-1"></a>followUpTime = 1</span>
+<span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a>Design plan parameters and output for survival data:</span>
+<span id="cb1-258"><a href="#cb1-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-259"><a href="#cb1-259" aria-hidden="true" tabindex="-1"></a>Design parameters:</span>
+<span id="cb1-260"><a href="#cb1-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-261"><a href="#cb1-261" aria-hidden="true" tabindex="-1"></a>Critical values : 1.96</span>
+<span id="cb1-262"><a href="#cb1-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-263"><a href="#cb1-263" aria-hidden="true" tabindex="-1"></a>Significance level : 0.0250</span>
+<span id="cb1-264"><a href="#cb1-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a>Type II error rate : 0.1000</span>
+<span id="cb1-266"><a href="#cb1-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-267"><a href="#cb1-267" aria-hidden="true" tabindex="-1"></a>Test : one-sided</span>
+<span id="cb1-268"><a href="#cb1-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-269"><a href="#cb1-269" aria-hidden="true" tabindex="-1"></a>User defined parameters:</span>
+<span id="cb1-270"><a href="#cb1-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-271"><a href="#cb1-271" aria-hidden="true" tabindex="-1"></a>lambda(1) : 0.050</span>
+<span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a>lambda(2) : 0.100</span>
+<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a>Accrual time : 0.001</span>
+<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a>Follow up time : 1.00</span>
+<span id="cb1-278"><a href="#cb1-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-279"><a href="#cb1-279" aria-hidden="true" tabindex="-1"></a>Default parameters:</span>
+<span id="cb1-280"><a href="#cb1-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-281"><a href="#cb1-281" aria-hidden="true" tabindex="-1"></a>Theta H0 : 1</span>
+<span id="cb1-282"><a href="#cb1-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-283"><a href="#cb1-283" aria-hidden="true" tabindex="-1"></a>Type of computation : Schoenfeld</span>
+<span id="cb1-284"><a href="#cb1-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-285"><a href="#cb1-285" aria-hidden="true" tabindex="-1"></a>Planned allocation ratio : 1</span>
+<span id="cb1-286"><a href="#cb1-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-287"><a href="#cb1-287" aria-hidden="true" tabindex="-1"></a>kappa : 1</span>
+<span id="cb1-288"><a href="#cb1-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-289"><a href="#cb1-289" aria-hidden="true" tabindex="-1"></a>Piecewise survival times : 0.00</span>
+<span id="cb1-290"><a href="#cb1-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-291"><a href="#cb1-291" aria-hidden="true" tabindex="-1"></a>Drop-out rate (1) : 0.000</span>
+<span id="cb1-292"><a href="#cb1-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-293"><a href="#cb1-293" aria-hidden="true" tabindex="-1"></a>Drop-out rate (2) : 0.000</span>
+<span id="cb1-294"><a href="#cb1-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-295"><a href="#cb1-295" aria-hidden="true" tabindex="-1"></a>Drop-out time : 12</span>
+<span id="cb1-296"><a href="#cb1-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-297"><a href="#cb1-297" aria-hidden="true" tabindex="-1"></a>Sample size and output:</span>
+<span id="cb1-298"><a href="#cb1-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-299"><a href="#cb1-299" aria-hidden="true" tabindex="-1"></a>Direction upper : FALSE</span>
+<span id="cb1-300"><a href="#cb1-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-301"><a href="#cb1-301" aria-hidden="true" tabindex="-1"></a>median(1) : 13.9</span>
+<span id="cb1-302"><a href="#cb1-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-303"><a href="#cb1-303" aria-hidden="true" tabindex="-1"></a>median(2) : 6.9</span>
+<span id="cb1-304"><a href="#cb1-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-305"><a href="#cb1-305" aria-hidden="true" tabindex="-1"></a>Hazard ratio : 0.500</span>
+<span id="cb1-306"><a href="#cb1-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-307"><a href="#cb1-307" aria-hidden="true" tabindex="-1"></a>Number of events : 87.5</span>
+<span id="cb1-308"><a href="#cb1-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-309"><a href="#cb1-309" aria-hidden="true" tabindex="-1"></a>Accrual intensity : 1214971.9</span>
+<span id="cb1-310"><a href="#cb1-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-311"><a href="#cb1-311" aria-hidden="true" tabindex="-1"></a>Number of events fixed : 87.5</span>
+<span id="cb1-312"><a href="#cb1-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-313"><a href="#cb1-313" aria-hidden="true" tabindex="-1"></a>Number of subjects fixed : 1215</span>
+<span id="cb1-314"><a href="#cb1-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-315"><a href="#cb1-315" aria-hidden="true" tabindex="-1"></a>Number of subjects fixed (1) : 607.5</span>
+<span id="cb1-316"><a href="#cb1-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-317"><a href="#cb1-317" aria-hidden="true" tabindex="-1"></a>Number of subjects fixed (2) : 607.5</span>
+<span id="cb1-318"><a href="#cb1-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-319"><a href="#cb1-319" aria-hidden="true" tabindex="-1"></a>Analysis times : 1.00</span>
+<span id="cb1-320"><a href="#cb1-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-321"><a href="#cb1-321" aria-hidden="true" tabindex="-1"></a>Study duration : 1.00</span>
+<span id="cb1-322"><a href="#cb1-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-323"><a href="#cb1-323" aria-hidden="true" tabindex="-1"></a>Critical values (treatment effect scale) : 0.658</span>
+<span id="cb1-324"><a href="#cb1-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-325"><a href="#cb1-325" aria-hidden="true" tabindex="-1"></a>Legend:</span>
+<span id="cb1-326"><a href="#cb1-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-327"><a href="#cb1-327" aria-hidden="true" tabindex="-1"></a>(i): values of treatment arm i</span>
+<span id="cb1-328"><a href="#cb1-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-329"><a href="#cb1-329" aria-hidden="true" tabindex="-1"></a>事件数87.5，向上取整为88。尽管样本量总数为1215，但每组607.5，如果先进行每组向上取整至608，总样本量仍然为1216，与教材案例一致。</span>
+<span id="cb1-330"><a href="#cb1-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-331"><a href="#cb1-331" aria-hidden="true" tabindex="-1"></a>R语言gsDesign包的nEvents函数可以简洁地得到事件数：</span>
+<span id="cb1-332"><a href="#cb1-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-333"><a href="#cb1-333" aria-hidden="true" tabindex="-1"></a>library(gsDesign)</span>
+<span id="cb1-334"><a href="#cb1-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-335"><a href="#cb1-335" aria-hidden="true" tabindex="-1"></a>nEvents(hr = 0.5, alpha = 0.025, beta = 0.1)</span>
+<span id="cb1-336"><a href="#cb1-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-337"><a href="#cb1-337" aria-hidden="true" tabindex="-1"></a>输出结果：</span>
+<span id="cb1-338"><a href="#cb1-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-339"><a href="#cb1-339" aria-hidden="true" tabindex="-1"></a><span class="sc">\[</span>1<span class="sc">\]</span> 87.4793</span>
+<span id="cb1-340"><a href="#cb1-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-341"><a href="#cb1-341" aria-hidden="true" tabindex="-1"></a>进一步计算样本量：</span>
+<span id="cb1-342"><a href="#cb1-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-343"><a href="#cb1-343" aria-hidden="true" tabindex="-1"></a>nSurvival(</span>
+<span id="cb1-344"><a href="#cb1-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-345"><a href="#cb1-345" aria-hidden="true" tabindex="-1"></a>lambda1 = 0.1,</span>
+<span id="cb1-346"><a href="#cb1-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-347"><a href="#cb1-347" aria-hidden="true" tabindex="-1"></a>lambda2 = 0.05,</span>
+<span id="cb1-348"><a href="#cb1-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-349"><a href="#cb1-349" aria-hidden="true" tabindex="-1"></a>Ts = 0.001+1,</span>
+<span id="cb1-350"><a href="#cb1-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-351"><a href="#cb1-351" aria-hidden="true" tabindex="-1"></a>Tr = 0.001,</span>
+<span id="cb1-352"><a href="#cb1-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-353"><a href="#cb1-353" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-354"><a href="#cb1-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-355"><a href="#cb1-355" aria-hidden="true" tabindex="-1"></a>beta = 0.1</span>
+<span id="cb1-356"><a href="#cb1-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-357"><a href="#cb1-357" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-358"><a href="#cb1-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-359"><a href="#cb1-359" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-360"><a href="#cb1-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-361"><a href="#cb1-361" aria-hidden="true" tabindex="-1"></a>Fixed design, two-arm trial with time-to-event</span>
+<span id="cb1-362"><a href="#cb1-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-363"><a href="#cb1-363" aria-hidden="true" tabindex="-1"></a>outcome (Lachin and Foulkes, 1986).</span>
+<span id="cb1-364"><a href="#cb1-364" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-365"><a href="#cb1-365" aria-hidden="true" tabindex="-1"></a>Study duration (fixed): Ts=1.001</span>
+<span id="cb1-366"><a href="#cb1-366" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-367"><a href="#cb1-367" aria-hidden="true" tabindex="-1"></a>Accrual duration (fixed): Tr=0.001</span>
+<span id="cb1-368"><a href="#cb1-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-369"><a href="#cb1-369" aria-hidden="true" tabindex="-1"></a>Uniform accrual: entry=\"unif\"</span>
+<span id="cb1-370"><a href="#cb1-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-371"><a href="#cb1-371" aria-hidden="true" tabindex="-1"></a>Control median: log(2)/lambda1=6.9</span>
+<span id="cb1-372"><a href="#cb1-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-373"><a href="#cb1-373" aria-hidden="true" tabindex="-1"></a>Experimental median: log(2)/lambda2=13.9</span>
+<span id="cb1-374"><a href="#cb1-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-375"><a href="#cb1-375" aria-hidden="true" tabindex="-1"></a>Censoring only at study end (eta=0)</span>
+<span id="cb1-376"><a href="#cb1-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-377"><a href="#cb1-377" aria-hidden="true" tabindex="-1"></a>Control failure rate: lambda1=0.1</span>
+<span id="cb1-378"><a href="#cb1-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-379"><a href="#cb1-379" aria-hidden="true" tabindex="-1"></a>Experimental failure rate: lambda2=0.05</span>
+<span id="cb1-380"><a href="#cb1-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-381"><a href="#cb1-381" aria-hidden="true" tabindex="-1"></a>Censoring rate: eta=0</span>
+<span id="cb1-382"><a href="#cb1-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-383"><a href="#cb1-383" aria-hidden="true" tabindex="-1"></a>Power: 100<span class="sc">\*</span>(1-beta)=90%</span>
+<span id="cb1-384"><a href="#cb1-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-385"><a href="#cb1-385" aria-hidden="true" tabindex="-1"></a>Type I error (1-sided): 100<span class="sc">\*</span>alpha=2.5%</span>
+<span id="cb1-386"><a href="#cb1-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-387"><a href="#cb1-387" aria-hidden="true" tabindex="-1"></a>Equal randomization: ratio=1</span>
+<span id="cb1-388"><a href="#cb1-388" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-389"><a href="#cb1-389" aria-hidden="true" tabindex="-1"></a>Sample size based on hazard ratio=0.5 (type=\"rr\")</span>
+<span id="cb1-390"><a href="#cb1-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-391"><a href="#cb1-391" aria-hidden="true" tabindex="-1"></a>Sample size (computed): n=1268</span>
+<span id="cb1-392"><a href="#cb1-392" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-393"><a href="#cb1-393" aria-hidden="true" tabindex="-1"></a>Events required (computed): nEvents=92</span>
+<span id="cb1-394"><a href="#cb1-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-395"><a href="#cb1-395" aria-hidden="true" tabindex="-1"></a>这与原来的计算略有差异，事件数为92，样本量为1268，主要是因为gsDesign包的nSurvival函数采用了Lachin和Foulkes的方法，这里不展开讨论。注意R语言gsDesign包默认第1组为对照组，而rpact包默认第1组为试验组，不过两个包的α默认设定都是单侧0.025。</span>
+<span id="cb1-396"><a href="#cb1-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-397"><a href="#cb1-397" aria-hidden="true" tabindex="-1"></a>Excel表Lachin和Foulkes法与R语言gsDesign包结果相同，事件数92，样本量1268：</span>
+<span id="cb1-398"><a href="#cb1-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-399"><a href="#cb1-399" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image9.png)</span>{width="2.7083333333333335in" height="2.3819444444444446in"}</span>
+<span id="cb1-400"><a href="#cb1-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-401"><a href="#cb1-401" aria-hidden="true" tabindex="-1"></a>PASS软件默认的计算为Lakatos法，需要90个事件，1250例样本。操作时依次点击Survival, Two Survival Curves, Test(Inequality), Logrank Tests。</span>
+<span id="cb1-402"><a href="#cb1-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-403"><a href="#cb1-403" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image10.png)</span>{width="4.43371719160105in" height="4.567062554680665in"}</span>
+<span id="cb1-404"><a href="#cb1-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-405"><a href="#cb1-405" aria-hidden="true" tabindex="-1"></a>Input type可根据需要灵活选用。如果有现成的参数可直接填入，也可通过本章开头的公式计算，或者利用PASS软件自带的参数转换功能，点击右侧生存曲线小图标后进行转换。</span>
+<span id="cb1-406"><a href="#cb1-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-407"><a href="#cb1-407" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image11.png)</span>{width="1.0831244531933508in" height="0.6500568678915135in"}</span>
+<span id="cb1-408"><a href="#cb1-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-409"><a href="#cb1-409" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image12.png)</span>{width="5.758832020997375in" height="1.9668372703412074in"}</span>
+<span id="cb1-410"><a href="#cb1-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-411"><a href="#cb1-411" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image13.png)</span>{width="6.0in" height="1.6895833333333334in"}</span>
+<span id="cb1-412"><a href="#cb1-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-413"><a href="#cb1-413" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image14.png)</span>{width="1.3611111111111112in" height="1.0in"}</span>
+<span id="cb1-414"><a href="#cb1-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-415"><a href="#cb1-415" aria-hidden="true" tabindex="-1"></a>在Excel表中，如果将90作为事件数，计算得需患者数1250例，同PASS，可见这两种方法在计算事件率时是一致的，因而根据事件数推算样本量的结果是一致的。</span>
+<span id="cb1-416"><a href="#cb1-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-417"><a href="#cb1-417" aria-hidden="true" tabindex="-1"></a>PASS软件Freedman法需事件数95，样本量1316，与Excel表基本一致。操作时依次点击Survival, Two Survival Curves, Test(Inequality), Logrank Tests (Freedman)。</span>
+<span id="cb1-418"><a href="#cb1-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-419"><a href="#cb1-419" aria-hidden="true" tabindex="-1"></a>PASS软件Lachin和Foulkes法计算样本量为1311例，与Excel表及R语言gsDesign包的结果均稍有差异，PASS也未给出所需事件数。操作时依次点击Survival, Two Survival Curves, Test(Inequality), Logrank test (Lachin and Foulkes)。</span>
+<span id="cb1-420"><a href="#cb1-420" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-421"><a href="#cb1-421" aria-hidden="true" tabindex="-1"></a>PASS软件Cox比例风险模型给出的结果为事件数88，样本量1216，从而推测是采用了Schoenfeld法。PASS软件指数模型给出的结果为事件数95，样本量1314，与Freedman法一致。</span>
+<span id="cb1-422"><a href="#cb1-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-423"><a href="#cb1-423" aria-hidden="true" tabindex="-1"></a>例 7‑3 STABLE-SR-III研究^7^在老年阵发性房颤患者中比较肺静脉隔离加低电压区消融与单纯肺静脉隔离的效果。主要终点为无房性心律失常发生率，预期在试验组和对照组中分别为每年85%和75%。设入组2年，随访1年，log-rank检验，双侧α=0.05，检验效能90%，需369例患者。假定脱落率为15%，则需434例患者。样本量计算使用了PASS 13软件。</span>
+<span id="cb1-424"><a href="#cb1-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-425"><a href="#cb1-425" aria-hidden="true" tabindex="-1"></a>Excel表Schoenfeld法计算结果为368，PASS 2024软件log-rank模块计算结果为369，R语言rpact包计算结果为366.1。</span>
+<span id="cb1-426"><a href="#cb1-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-427"><a href="#cb1-427" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image15.png)</span>{width="2.7083333333333335in" height="2.183333333333333in"}</span>
+<span id="cb1-428"><a href="#cb1-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-429"><a href="#cb1-429" aria-hidden="true" tabindex="-1"></a>library(rpact)</span>
+<span id="cb1-430"><a href="#cb1-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-431"><a href="#cb1-431" aria-hidden="true" tabindex="-1"></a>getSampleSizeSurvival(</span>
+<span id="cb1-432"><a href="#cb1-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-433"><a href="#cb1-433" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-434"><a href="#cb1-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-435"><a href="#cb1-435" aria-hidden="true" tabindex="-1"></a>beta = 0.1,</span>
+<span id="cb1-436"><a href="#cb1-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-437"><a href="#cb1-437" aria-hidden="true" tabindex="-1"></a>pi1 = 0.15,</span>
+<span id="cb1-438"><a href="#cb1-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-439"><a href="#cb1-439" aria-hidden="true" tabindex="-1"></a>pi2 = 0.25,</span>
+<span id="cb1-440"><a href="#cb1-440" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-441"><a href="#cb1-441" aria-hidden="true" tabindex="-1"></a>eventTime = 1,</span>
+<span id="cb1-442"><a href="#cb1-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-443"><a href="#cb1-443" aria-hidden="true" tabindex="-1"></a>accrualTime = 2,</span>
+<span id="cb1-444"><a href="#cb1-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-445"><a href="#cb1-445" aria-hidden="true" tabindex="-1"></a>followUpTime = 1</span>
+<span id="cb1-446"><a href="#cb1-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-447"><a href="#cb1-447" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-448"><a href="#cb1-448" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-449"><a href="#cb1-449" aria-hidden="true" tabindex="-1"></a>研究实际入组438例患者，中位随访时间为23个月，试验组房性心律失常发生率明显低于对照组（15% vs 24%，P=0.03），研究达成。</span>
+<span id="cb1-450"><a href="#cb1-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-451"><a href="#cb1-451" aria-hidden="true" tabindex="-1"></a>（与PROMPT-AF比较）</span>
+<span id="cb1-452"><a href="#cb1-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-453"><a href="#cb1-453" aria-hidden="true" tabindex="-1"></a><span class="fu">### 中位生存时间已知</span></span>
+<span id="cb1-454"><a href="#cb1-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-455"><a href="#cb1-455" aria-hidden="true" tabindex="-1"></a>已知中位生存时间计算样本量，多见于肿瘤的临床研究。</span>
+<span id="cb1-456"><a href="#cb1-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-457"><a href="#cb1-457" aria-hidden="true" tabindex="-1"></a>例 7‑4 SYNCHRONOUS研究^8^欲比较结肠癌的两种治疗方案，假设对照组中位生存时间20个月，试验组26个月，入组24个月，随访36个月，显著性水平5%，检验效能85%，则需522个事件，694例患者。</span>
+<span id="cb1-458"><a href="#cb1-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-459"><a href="#cb1-459" aria-hidden="true" tabindex="-1"></a>由Excel表计算可知该例采用了Freedman方法，样本量694例。</span>
+<span id="cb1-460"><a href="#cb1-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-461"><a href="#cb1-461" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image16.png)</span>{width="2.7083333333333335in" height="2.5833333333333335in"}</span>
+<span id="cb1-462"><a href="#cb1-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-463"><a href="#cb1-463" aria-hidden="true" tabindex="-1"></a>R语言rpact包计算如下，需528个事件，694例患者：</span>
+<span id="cb1-464"><a href="#cb1-464" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-465"><a href="#cb1-465" aria-hidden="true" tabindex="-1"></a>library(rpact)</span>
+<span id="cb1-466"><a href="#cb1-466" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-467"><a href="#cb1-467" aria-hidden="true" tabindex="-1"></a>getSampleSizeSurvival(</span>
+<span id="cb1-468"><a href="#cb1-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-469"><a href="#cb1-469" aria-hidden="true" tabindex="-1"></a>typeOfComputation = \"Freedman\",</span>
+<span id="cb1-470"><a href="#cb1-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-471"><a href="#cb1-471" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-472"><a href="#cb1-472" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-473"><a href="#cb1-473" aria-hidden="true" tabindex="-1"></a>beta = 0.15,</span>
+<span id="cb1-474"><a href="#cb1-474" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-475"><a href="#cb1-475" aria-hidden="true" tabindex="-1"></a>median1 = 26,</span>
+<span id="cb1-476"><a href="#cb1-476" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-477"><a href="#cb1-477" aria-hidden="true" tabindex="-1"></a>median2 = 20,</span>
+<span id="cb1-478"><a href="#cb1-478" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-479"><a href="#cb1-479" aria-hidden="true" tabindex="-1"></a>accrualTime = 24,</span>
+<span id="cb1-480"><a href="#cb1-480" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-481"><a href="#cb1-481" aria-hidden="true" tabindex="-1"></a>followUpTime = 36</span>
+<span id="cb1-482"><a href="#cb1-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-483"><a href="#cb1-483" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-484"><a href="#cb1-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-485"><a href="#cb1-485" aria-hidden="true" tabindex="-1"></a>PASS软件Freedman法需事件数528，样本量688；而选择指数模型给出的结果为事件数532，样本量698。</span>
+<span id="cb1-486"><a href="#cb1-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-487"><a href="#cb1-487" aria-hidden="true" tabindex="-1"></a><span class="fu">### 事件率已知</span></span>
+<span id="cb1-488"><a href="#cb1-488" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-489"><a href="#cb1-489" aria-hidden="true" tabindex="-1"></a>已知事件率，计算样本量，心血管病领域的研究多用此法。</span>
+<span id="cb1-490"><a href="#cb1-490" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-491"><a href="#cb1-491" aria-hidden="true" tabindex="-1"></a>例 7‑5 PARTNER Cohort B研究^9^是TAVR领域第一个里程碑式的随机对照试验，将严重主动脉瓣狭窄且不适合外科手术的患者随机分为经导管主动脉瓣植入（TAVI）或标准治疗组，主要终点为全因死亡率。假设对照组1年死亡率37.5%，试验组25%，脱落率每年10%，预计350例患者可提供84%的检验效能。附件方案里提供了进一步的信息：α=0.05，研究所需事件数为148，按150计算。计划匀速入组18个月，随访1年。</span>
+<span id="cb1-492"><a href="#cb1-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-493"><a href="#cb1-493" aria-hidden="true" tabindex="-1"></a>Excel表计算Schoenfeld法需事件数145，需样本量308，脱落率每年10%，可粗略对应18个月为15%，则样本量扩充为308/(1-15%)=362.4。</span>
+<span id="cb1-494"><a href="#cb1-494" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-495"><a href="#cb1-495" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image17.png)</span>{width="2.7083333333333335in" height="2.173611111111111in"}</span>
+<span id="cb1-496"><a href="#cb1-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-497"><a href="#cb1-497" aria-hidden="true" tabindex="-1"></a>PASS软件Lakatos法需事件数146，样本量336；指数模型的结果为事件数152，样本量322。</span>
+<span id="cb1-498"><a href="#cb1-498" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-499"><a href="#cb1-499" aria-hidden="true" tabindex="-1"></a>研究实际随机了358例患者，对照组1年死亡率50.7%，试验组为30.7%，HR=0.55（95%置信区间0.40\~0.74），P<span class="sc">\&lt;</span>0.001，研究达成。</span>
+<span id="cb1-500"><a href="#cb1-500" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-501"><a href="#cb1-501" aria-hidden="true" tabindex="-1"></a><span class="fu">## 两组生存数据比较的非劣效设计</span></span>
+<span id="cb1-502"><a href="#cb1-502" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-503"><a href="#cb1-503" aria-hidden="true" tabindex="-1"></a>例 7‑6 Aspirin LAAO研究^10^欲探索植入左心耳封堵器后的患者，是否可以停用阿司匹林长期抗凝治疗。主要终点为复合事件包括卒中、全身栓塞，心血管/原因不明死亡，大出血，急性冠脉综合征及冠脉或外周动脉血运重建。假设主要终点事件率在两组均为7/百患者年，非劣效界值1.5，检验效能0.8，单侧α=0.025，则需要191个事件，考虑10%的脱落率，需要1120例患者。</span>
+<span id="cb1-504"><a href="#cb1-504" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-505"><a href="#cb1-505" aria-hidden="true" tabindex="-1"></a>Excel表Schoenfeld法计算需要191个事件，1012例患者，考虑脱落后为1012/(1-10%)=1124.4例。</span>
+<span id="cb1-506"><a href="#cb1-506" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-507"><a href="#cb1-507" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S7_SurvivalAnalysis/image18.png)</span>{width="2.7083333333333335in" height="2.7916666666666665in"}</span>
+<span id="cb1-508"><a href="#cb1-508" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-509"><a href="#cb1-509" aria-hidden="true" tabindex="-1"></a>R语言rpact包计算，事件数和病例数分别为191和1012，与Excel表相同。</span>
+<span id="cb1-510"><a href="#cb1-510" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-511"><a href="#cb1-511" aria-hidden="true" tabindex="-1"></a>getSampleSizeSurvival(</span>
+<span id="cb1-512"><a href="#cb1-512" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-513"><a href="#cb1-513" aria-hidden="true" tabindex="-1"></a>thetaH0 = 1.5,</span>
+<span id="cb1-514"><a href="#cb1-514" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-515"><a href="#cb1-515" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-516"><a href="#cb1-516" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-517"><a href="#cb1-517" aria-hidden="true" tabindex="-1"></a>beta = 0.2,</span>
+<span id="cb1-518"><a href="#cb1-518" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-519"><a href="#cb1-519" aria-hidden="true" tabindex="-1"></a>lambda1 = 0.07,</span>
+<span id="cb1-520"><a href="#cb1-520" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-521"><a href="#cb1-521" aria-hidden="true" tabindex="-1"></a>lambda2 = 0.07,</span>
+<span id="cb1-522"><a href="#cb1-522" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-523"><a href="#cb1-523" aria-hidden="true" tabindex="-1"></a>accrualTime = 2,</span>
+<span id="cb1-524"><a href="#cb1-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-525"><a href="#cb1-525" aria-hidden="true" tabindex="-1"></a>followUpTime = 2,</span>
+<span id="cb1-526"><a href="#cb1-526" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-527"><a href="#cb1-527" aria-hidden="true" tabindex="-1"></a>eventTime = 1</span>
+<span id="cb1-528"><a href="#cb1-528" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-529"><a href="#cb1-529" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-530"><a href="#cb1-530" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-531"><a href="#cb1-531" aria-hidden="true" tabindex="-1"></a>SPSS软件Lakatos法计算需191个事件，在考虑脱落前需1011例患者。</span>
+<span id="cb1-532"><a href="#cb1-532" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-533"><a href="#cb1-533" aria-hidden="true" tabindex="-1"></a><span class="fu">## 讨论</span></span>
+<span id="cb1-534"><a href="#cb1-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-535"><a href="#cb1-535" aria-hidden="true" tabindex="-1"></a><span class="fu">### Kaplan-Meier率与简单率</span></span>
+<span id="cb1-536"><a href="#cb1-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-537"><a href="#cb1-537" aria-hidden="true" tabindex="-1"></a>本书之前章节讨论的率比较简单，分子是事件数，分母是总人数，可称之为简单率。本章介绍的生存数据同时包含了计数资料和计量资料的信息，虽然仍可以计算简单率，但由于1）出现失访或删失情况时，该失访或删失者是否或者如何放入分母会比较麻烦，2）简单率没有充分利用时间的信息（比如推迟肿瘤的复发时间也是有临床意义的），因而在生存分析里通常使用利用乘积限法计算的Kaplan-Meier率（K-M率）。在没有删失的情况下，K-M与简单率相等，有删失时，K-M率配合log-rank检验显得更为合理。</span>
+<span id="cb1-538"><a href="#cb1-538" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-539"><a href="#cb1-539" aria-hidden="true" tabindex="-1"></a>值得指出的是，样本量计算的方法应当与随后的统计分析方法保持一致。样本量计算时采用的是简单率的比较，而统计分析时采用了log-rank分析，这种情况在临床研究中并不少见（<span class="co">[</span><span class="ot">举例</span><span class="co">]</span>{.mark}）。考虑简单率的比较与log-rank检验（本质上是对时间进行了加权）的差异，这并不是一个好的做法。</span>
+<span id="cb1-540"><a href="#cb1-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-541"><a href="#cb1-541" aria-hidden="true" tabindex="-1"></a><span class="fu">### 两种随访结束的方式</span></span>
+<span id="cb1-542"><a href="#cb1-542" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-543"><a href="#cb1-543" aria-hidden="true" tabindex="-1"></a>本章之前介绍的研究设计，每位患者的随访时间通常是相同的，比如都是随访1年或者2年，到了1年或2年后，该患者即完成了研究而按方案退出。但在生存分析研究里，更多的情况是所有患者随访至一个统一的时间点（积累了预期的事件数后），这样第一个入组的患者随访时间最长，最后一个入组的患者随访时间最短。两种方法各有优缺点，逐个结束法（或固定随访时间法）简便易行，事件率较低的心血管病研究多见；统一结束法可追踪更多的信息从而减少样本量，但增加了结束时的管理工作，事件率较高的肿瘤研究多见。</span>
+<span id="cb1-544"><a href="#cb1-544" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-545"><a href="#cb1-545" aria-hidden="true" tabindex="-1"></a>应注意这两种随访结束方式对样本量计算的影响。常见的生存分析样本量计算时假定的都是统一结束法，如果需要采用逐个结束法，可将入组时间设定为零或给一个极小值如0.001，视软件或具体的计算方法而定，可参考本章<span class="co">[</span><span class="ot">例 7‑1</span><span class="co">](#_Ref186452524)</span>。</span>
+<span id="cb1-546"><a href="#cb1-546" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-547"><a href="#cb1-547" aria-hidden="true" tabindex="-1"></a><span class="fu">### 不同样本量计算方法的比较</span></span>
+<span id="cb1-548"><a href="#cb1-548" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-549"><a href="#cb1-549" aria-hidden="true" tabindex="-1"></a>生存分析的样本量计算有不同的方法，如Schoenfeld， Freedman，Lachin and Flulkes及Lakatos等。一般来说，对称性设计（两组样本量相等）且HR<span class="sc">\&gt;</span>0.5时，Schoenfeld法给出的事件数比较准确，而Freedman法计算的事件数略高于Schoenfeld法；HR≤0.25时，Schoenfeld易低估事件数而Freedman高估事件数。在不对称设计且HR远离1时，Schoenfeld法在试验组人数多时高估事件术，而对照组人数多时低估事件数；Freedman法表现整体欠佳^11^。必要时可进行模拟分析。</span>
+<span id="cb1-550"><a href="#cb1-550" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-551"><a href="#cb1-551" aria-hidden="true" tabindex="-1"></a>**References:**</span>
+<span id="cb1-552"><a href="#cb1-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-553"><a href="#cb1-553" aria-hidden="true" tabindex="-1"></a>1<span class="sc">\.</span> 陈峰, 夏结来. 临床试验统计学. 北京: 人民卫生出版社; 2018.</span>
+<span id="cb1-554"><a href="#cb1-554" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-555"><a href="#cb1-555" aria-hidden="true" tabindex="-1"></a>2<span class="sc">\.</span> 贺佳, 邓伟, 王素珍. 临床试验设计与统计分析. 2版 ed. 北京: 人民卫生出版社; 2022.</span>
+<span id="cb1-556"><a href="#cb1-556" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-557"><a href="#cb1-557" aria-hidden="true" tabindex="-1"></a>3<span class="sc">\.</span> 陈峰. 医学统计学. 4版 ed. 北京: 人民卫生出版社; 2024.</span>
+<span id="cb1-558"><a href="#cb1-558" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-559"><a href="#cb1-559" aria-hidden="true" tabindex="-1"></a>4<span class="sc">\.</span> Machin D, Campbell MJ, Tan SB, Tan SH. Sample Sizes for Clinical, Laboratory and Epidemiology Studies. Fourth Edition ed. Pondicherry: Wiley Blackwell; 2018.</span>
+<span id="cb1-560"><a href="#cb1-560" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-561"><a href="#cb1-561" aria-hidden="true" tabindex="-1"></a>5<span class="sc">\.</span> Zhang P, Li X, Wang X, Yang Y, Wang J, Cao D. SHR-8068 combined with adebrelimab and bevacizumab in the treatment of refractory advanced colorectal cancer: study protocol for a single-arm, phase Ib/II study. FRONT IMMUNOL 2024;15:1450533.</span>
+<span id="cb1-562"><a href="#cb1-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-563"><a href="#cb1-563" aria-hidden="true" tabindex="-1"></a>6<span class="sc">\.</span> 颜艳, 王彤. 医学统计学. 5版 ed. 北京: 人民卫生出版社; 2020.</span>
+<span id="cb1-564"><a href="#cb1-564" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-565"><a href="#cb1-565" aria-hidden="true" tabindex="-1"></a>7<span class="sc">\.</span> Chen H, Li C, Han B, et al. Circumferential Pulmonary Vein Isolation With vs Without Additional Low-Voltage-Area Ablation in Older Patients With Paroxysmal Atrial Fibrillation: A Randomized Clinical Trial. JAMA CARDIOL 2023;8:765-72.</span>
+<span id="cb1-566"><a href="#cb1-566" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-567"><a href="#cb1-567" aria-hidden="true" tabindex="-1"></a>8<span class="sc">\.</span> Rahbari NN, Lordick F, Fink C, et al. Resection of the primary tumour versus no resection prior to systemic therapy in patients with colon cancer and synchronous unresectable metastases (UICC stage IV): SYNCHRONOUS<span class="sc">\-</span>-a randomised controlled multicentre trial (ISRCTN30964555). BMC CANCER 2012;12:142.</span>
+<span id="cb1-568"><a href="#cb1-568" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-569"><a href="#cb1-569" aria-hidden="true" tabindex="-1"></a>9<span class="sc">\.</span> Leon MB, Smith CR, Mack M, et al. Transcatheter aortic-valve implantation for aortic stenosis in patients who cannot undergo surgery. NEW ENGL J MED 2010;363:1597-607.</span>
+<span id="cb1-570"><a href="#cb1-570" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-571"><a href="#cb1-571" aria-hidden="true" tabindex="-1"></a>10<span class="sc">\.</span> Chen M, Wang Q, Sun J, et al. Double-blind, placebo-controlled randomised clinical trial to evaluate the effect of ASPIRIN discontinuation after left atrial appendage occlusion in atrial fibrillation: protocol of the ASPIRIN LAAO trial. BMJ OPEN 2021;11:e44695.</span>
+<span id="cb1-572"><a href="#cb1-572" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-573"><a href="#cb1-573" aria-hidden="true" tabindex="-1"></a>11<span class="sc">\.</span> Wu J. Statistical methods for survival trial design : with applications to cancer clinical trials using R. Boca Raton London New York: CRC Press; 2018.</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

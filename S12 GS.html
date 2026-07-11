@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>12. 成组序贯设计 – R语言临床研究样本量计算案例教程</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./S13 SSR.html" rel="next">
+<link href="./S11 观察性研究.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-6b6957c917596b414ec0b78690761e87.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-e9b94c5c92cfde000641fbcd395a1216.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-55a92ded503ace7d6c921e162b1ea100.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./S12 GS.html"><span class="chapter-title">12. 成组序贯设计</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">R语言临床研究样本量计算案例教程</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R语言临床研究样本量计算案例教程</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S0_preface.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">1. 前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S1 1Mean.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">2. 单组均数的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S2 1Proportion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">3. 单组率的样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S3 2Means.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">4. 两组均数的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S4 2Proportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">5. 两组率的比较</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S5 noninferiorMeans.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">6. 两组均数比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S6 noninferiorProportions.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">7. 两组率比较的非劣效设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S7 SurvivalAnalysis.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">8. 生存分析的研究设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S8 crossover.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">9. 交叉设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S9 cluster.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">10. 整群随机研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S10 诊断试验.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">11. 诊断试验</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S11 观察性研究.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">12. 观察性研究</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S12 GS.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">12. 成组序贯设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S13 SSR.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">13. 样本量重新估计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S14 Multiplicityfactorial.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">14. 多重性与析因设计</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S15 simulation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">15. 样本量模拟计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S16 WinRatio.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">16. Win Ratio 样本量计算</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">附录</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./S17 Appendix.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">附录</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#成组序贯设计" id="toc-成组序贯设计" class="nav-link active" data-scroll-target="#成组序贯设计">成组序贯设计</a>
+  <ul class="collapse">
+  <li><a href="#单组研究的成组序贯设计" id="toc-单组研究的成组序贯设计" class="nav-link" data-scroll-target="#单组研究的成组序贯设计">单组研究的成组序贯设计</a></li>
+  <li><a href="#两组均数比较的成组序贯设计" id="toc-两组均数比较的成组序贯设计" class="nav-link" data-scroll-target="#两组均数比较的成组序贯设计">两组均数比较的成组序贯设计</a></li>
+  <li><a href="#两组率比较的成组序贯设计" id="toc-两组率比较的成组序贯设计" class="nav-link" data-scroll-target="#两组率比较的成组序贯设计">两组率比较的成组序贯设计</a></li>
+  <li><a href="#生存数据的成组序贯设计" id="toc-生存数据的成组序贯设计" class="nav-link" data-scroll-target="#生存数据的成组序贯设计">生存数据的成组序贯设计</a></li>
+  <li><a href="#讨论" id="toc-讨论" class="nav-link" data-scroll-target="#讨论">讨论</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-title">12. 成组序贯设计</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> 代码</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="成组序贯设计" class="level2">
+<h2 class="anchored" data-anchor-id="成组序贯设计">成组序贯设计</h2>
+<p>适应性设计是指按照预先设定的计划，在期中分析时使用试验期间累积的数据对试验做出相应修改的临床试验设计1-3。常见的适应性设计包括：成组序贯设计，样本量重新估计，适应性无缝剂量选择的设计，适应性富集设计，两阶段适应性设计，适应性主方案试验设计，多重适应性设计等。本章重点关注成组序贯设计。</p>
+<p>成组序贯设计是最早应用于临床试验的适应性设计，指方案中预先计划在试验过程中进行一次或多次期中分析，依据每一次期中分析的结果做出后续试验的决策，决策通常有四种可能：（1）依据优效性终止试验；（2）依据无效性终止试验；（3）依据安全性终止试验；（4）继续试验1。</p>
+<p>在研究开展的过程中预设若干个节点进行假设检验，有望因结果有效或无效而提前终止研究，提高研究的效率。这增加的期中分析，是一种特殊类型的多重检验，因此研究设计时总的样本量需适当扩增以控制I类错误，尽管成组序贯设计的期望样本量仍然是减少的。</p>
+<p>调整I类错误率的常见方法有O’Brien-Fleming法，Pocock法及各种α消耗函数法。经典的O’Brien-Fleming方法不考虑无效边界，样本量扩增系数见表 12-1。非绑定（non-binding，期中分析显示无效后仍继续研究）类O’Brien-Fleming法样本量扩增系数见表 12-2，绑定性类O’Brien-Fleming法（期中分析显示无效后终止研究）样本量扩增系数见表 12-3。</p>
+<p>表 12-1 经典O’Brien-Fleming法样本量扩增系数（k为总检验次数）</p>
+<p>表 12-2 非绑定类O’Brien-Fleming法样本量扩增系数（k为总检验次数）</p>
+<p>表 12-3 绑定性类O’Brien-Fleming法样本量扩增系数（k为总检验次数）</p>
+<p>α消耗函数法不受等间距进行期中分析的束缚，更为灵活。常用的有Lan-Demets及Hwang-Shih函数，也都可以模拟出类似O’Brien-Fleming的情形。</p>
+<p>Lan-DeMets α消耗函数，当ρ=1时类似O’Brien-Fleming。</p>
+<p>Hwang-Shih-DeCani α消耗函数，当γ=-4时类似O’Brien-Fleming。</p>
+<section id="单组研究的成组序贯设计" class="level3">
+<h3 class="anchored" data-anchor-id="单组研究的成组序贯设计">单组研究的成组序贯设计</h3>
+<section id="例-12-4-某单臂研究评价某心脏康复干预对运动耐量以6分钟步行距离6mwd单位米计的改善采用自身前后配对设计以基线值为对照假设干预前均值为290-m预期干预后提高5-m差值的个体内标准差within-subject-sd约为15-m取单侧α0.025检验效能80按配对t检验计算固定设计样本量" class="level4">
+<h4 class="anchored" data-anchor-id="例-12-4-某单臂研究评价某心脏康复干预对运动耐量以6分钟步行距离6mwd单位米计的改善采用自身前后配对设计以基线值为对照假设干预前均值为290-m预期干预后提高5-m差值的个体内标准差within-subject-sd约为15-m取单侧α0.025检验效能80按配对t检验计算固定设计样本量">例 12-4 某单臂研究评价某心脏康复干预对运动耐量（以6分钟步行距离，6MWD，单位米计）的改善，采用自身前后配对设计（以基线值为对照）。假设干预前均值为290 m，预期干预后提高5 m，差值的个体内标准差（within-subject SD）约为15 m。取单侧α=0.025，检验效能80%，按配对t检验计算固定设计样本量：</h4>
+<p>n = (z_{0.975}+z_{0.8})^2 σ_d^2 / δ^2 = (1.96+0.84)^2 × 15^2 / 5^2 ≈ 71</p>
+<p>即需71例患者。研究计划在入组约一半（36例）时进行一次期中分析，采用Lan-DeMets O’Brien-Fleming边界（ρ=1，近似O’Brien-Fleming）。R语言gsDesign包计算如下：</p>
+<p>library(gsDesign)</p>
+<p>x &lt;- gsDesign(</p>
+<p>k = 2,</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.2,</p>
+<p>test.type = 1,</p>
+<p>timing = c(0.5),</p>
+<p>sfu = sfLDOF,</p>
+<p>sfl = sfLDOF,</p>
+<p>n.fix = 71</p>
+<p>)</p>
+<p>x</p>
+<p>结果输出：</p>
+<p>One-sided group sequential design with</p>
+<p>80 % power and 2.5 % Type I Error.</p>
+<p>Analysis N Z Nominal p Spend</p>
+<p>1 36 2.96 0.0015 0.0015</p>
+<p>2 72 1.97 0.0245 0.0235</p>
+<p>Total 0.0250</p>
+<p>++ alpha spending:</p>
+<p>Lan-DeMets O’Brien-Fleming approximation spending function (no parameters).</p>
+<p>Boundary crossing probabilities and expected sample size</p>
+<p>assume any cross stops the trial</p>
+<p>Upper boundary (power or Type I Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 Total E{N}</p>
+<p>0.0000 0.0015 0.0235 0.025 71.2</p>
+<p>0.3325 0.1641 0.6359 0.800 65.4</p>
+<p>第1次分析（约36例）的疗效界值为Z=2.96（对应单侧P=0.0015），第2次分析（72例）为Z=1.97（对应单侧P=0.0245）。在真实效应δ=5 m时，预期需要的样本量E{N}=65.4，小于固定设计的71例，体现了成组序贯设计在有效时提前终止的优势；若期中分析未达到疗效界值，则继续入组至72例进行最终分析。单组/配对设计常用于单臂器械或自身前后对照研究，此时以单侧检验考察“是否改善”较为常见。</p>
+</section>
+</section>
+<section id="两组均数比较的成组序贯设计" class="level3">
+<h3 class="anchored" data-anchor-id="两组均数比较的成组序贯设计">两组均数比较的成组序贯设计</h3>
+<section id="例-12-5-某研究比较某降压干预与常规治疗对24小时动态收缩压mmhg降低值的影响假设常规治疗组降低5-mmhg试验组降低12-mmhg两组个体内标准差均为12-mmhg取双侧α0.05检验效能80按两独立样本均数比较的固定设计每组需" class="level4">
+<h4 class="anchored" data-anchor-id="例-12-5-某研究比较某降压干预与常规治疗对24小时动态收缩压mmhg降低值的影响假设常规治疗组降低5-mmhg试验组降低12-mmhg两组个体内标准差均为12-mmhg取双侧α0.05检验效能80按两独立样本均数比较的固定设计每组需">例 12-5 某研究比较某降压干预与常规治疗对24小时动态收缩压（mmHg）降低值的影响。假设常规治疗组降低5 mmHg，试验组降低12 mmHg，两组个体内标准差均为12 mmHg。取双侧α=0.05，检验效能80%，按两独立样本均数比较的固定设计，每组需：</h4>
+<p>n = 2(z_{0.975}+z_{0.8})^2 σ^2 / δ^2 = 2×(1.96+0.84)<sup>2×12</sup>2/7^2 ≈ 47</p>
+<p>即每组47例，共94例。研究计划在入组约一半时进行一次期中分析，采用Lan-DeMets O’Brien-Fleming边界。R语言可先按公式求得固定设计样本量，再用gsDesign包进行成组序贯设计：</p>
+<p>delta &lt;- 7; sigma &lt;- 12</p>
+<p>n_per_group &lt;- 2 * (qnorm(0.975) + qnorm(0.8))^2 * sigma^2 / delta^2</p>
+<p>ceiling(n_per_group)</p>
+<p>library(gsDesign)</p>
+<p>x &lt;- gsDesign(</p>
+<p>k = 2,</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.2,</p>
+<p>test.type = 2,</p>
+<p>timing = c(0.5),</p>
+<p>sfu = sfLDOF,</p>
+<p>sfl = sfLDOF,</p>
+<p>n.fix = 94</p>
+<p>)</p>
+<p>x</p>
+<p>结果输出：</p>
+<p>Symmetric two-sided group sequential design with</p>
+<p>80 % power and 2.5 % Type I Error.</p>
+<p>Spending computations assume trial stops</p>
+<p>if a bound is crossed.</p>
+<p>Analysis N Z Nominal p Spend</p>
+<p>1 48 2.96 0.0015 0.0015</p>
+<p>2 95 1.97 0.0245 0.0235</p>
+<p>Total 0.0250</p>
+<p>++ alpha spending:</p>
+<p>Lan-DeMets O’Brien-Fleming approximation spending function (no parameters).</p>
+<p>Boundary crossing probabilities and expected sample size</p>
+<p>assume any cross stops the trial</p>
+<p>Upper boundary (power or Type I Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 Total E{N}</p>
+<p>0.000 0.0015 0.0235 0.025 94.2</p>
+<p>0.289 0.1641 0.6359 0.800 86.6</p>
+<p>Lower boundary (futility or Type II Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 Total</p>
+<p>0.000 0.0015 0.0235 0.025</p>
+<p>0.289 0.0000 0.0000 0.000</p>
+<p>第1次分析（48例）的疗效界值为Z=2.96（双侧P=0.003），第2次分析（95例）为Z=1.97（双侧P=0.049）。在真实效应δ=7 mmHg时，预期样本量E{N}=86.6，小于固定设计的94例。当两组标准差不等或需考虑脱落时，可改用test.type=3（不等方差），或在n.fix中除以（1-脱落率），处理方式与本章“两组率比较”及“生存数据”部分相同。</p>
+</section>
+</section>
+<section id="两组率比较的成组序贯设计" class="level3">
+<h3 class="anchored" data-anchor-id="两组率比较的成组序贯设计">两组率比较的成组序贯设计</h3>
+<section id="例-12-1-baoche研究4考察血管内血栓切除对基底动脉急性闭塞引起的卒中的疗效与药物治疗比较主要终点为90天功能良好率rankin评分03假设对照组为0.4试验组为0.6双侧α0.05β0.1固定设计需样本量254采用lan-demets法obrienfleming成组序贯设计入组23患者时进行一次期中分析样本量增加至286考虑10脱落样本量定为318拟在入组212例患者时作一次期中分析期中分析和最终分析的α水平分别为0.012和0.046采用pass-13软件进行样本量计算" class="level4">
+<h4 class="anchored" data-anchor-id="例-12-1-baoche研究4考察血管内血栓切除对基底动脉急性闭塞引起的卒中的疗效与药物治疗比较主要终点为90天功能良好率rankin评分03假设对照组为0.4试验组为0.6双侧α0.05β0.1固定设计需样本量254采用lan-demets法obrienfleming成组序贯设计入组23患者时进行一次期中分析样本量增加至286考虑10脱落样本量定为318拟在入组212例患者时作一次期中分析期中分析和最终分析的α水平分别为0.012和0.046采用pass-13软件进行样本量计算">例 12-1 BAOCHE研究4考察血管内血栓切除对基底动脉急性闭塞引起的卒中的疗效。与药物治疗比较，主要终点为90天功能良好率（Rankin评分0~3），假设对照组为0.4，试验组为0.6，双侧α=0.05，β=0.1，固定设计需样本量254。采用Lan-Demets法O’Brien–Fleming成组序贯设计，入组2/3患者时进行一次期中分析，样本量增加至286，考虑10%脱落，样本量定为318，拟在入组212例患者时作一次期中分析。期中分析和最终分析的α水平分别为0.012和0.046。采用PASS 13软件进行样本量计算。</h4>
+<p>Legacy</p>
+<p>Excel表显示独立方差法的固定样本量为254。</p>
+<p>利用R语言pwrss包计算固定设计的样本量为254，再利用R语言gsDesign包计算脱落前的样本量为269，rpact包结果与之相同。</p>
+<p>x &lt;- gsDesign(</p>
+<p>k = 2,</p>
+<p>alpha = 0.025,</p>
+<p>timing = c(2/3),</p>
+<p>sfu = sfLDOF,</p>
+<p>sfl = sfLDOF,</p>
+<p>n.fix = 254</p>
+<p>)</p>
+<p>X</p>
+<p>结果输出：</p>
+<p>Asymmetric two-sided group sequential design with</p>
+<p>90 % power and 2.5 % Type I Error.</p>
+<p>Upper bound spending computations assume</p>
+<p>trial continues if lower bound is crossed.</p>
+<p>—-Lower bounds—- —-Upper bounds—–</p>
+<p>Analysis N Z Nominal p Spend+ Z Nominal p Spend++</p>
+<p>1 180 1.02 0.8451 0.044 2.51 0.0060 0.006</p>
+<p>2 269 1.99 0.9769 0.056 1.99 0.0231 0.019</p>
+<p>Total 0.1000 0.0250</p>
+<ul>
+<li>lower bound beta spending (under H1):</li>
+</ul>
+<p>Lan-DeMets O’Brien-Fleming approximation spending function (no parameters).</p>
+<p>++ alpha spending:</p>
+<p>Lan-DeMets O’Brien-Fleming approximation spending function (no parameters).</p>
+<p>Boundary crossing probabilities and expected sample size</p>
+<p>assume any cross stops the trial</p>
+<p>Upper boundary (power or Type I Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 Total E{N}</p>
+<p>0.0000 0.0060 0.0173 0.0233 192.5</p>
+<p>0.2034 0.5843 0.3157 0.9000 212.4</p>
+<p>Lower boundary (futility or Type II Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 Total</p>
+<p>0.0000 0.8451 0.1316 0.9767</p>
+<p>0.2034 0.0440 0.0560 0.1000</p>
+<p>依次点击Group-Sequential, Two Proportions, Test(Inequality), Group-Sequential Tests for Two Proportions (Legacy)</p>
+<p>选择Legacy的方法，依次点击Group-Sequential, Two Proportions, Test(Inequality), Group-Sequential Tests for Two Proportions (Legacy)，结果脱落前样本量为266。</p>
+<p><img src="media/S12_GS/S12_GS_img1.png" class="img-fluid" style="width:6in"> <img src="media/S12_GS/S12_GS_img2.png" class="img-fluid" style="width:6in"> <img src="media/S12_GS/S12_GS_img3.emf" class="img-fluid" style="width:6in"> <img src="media/S12_GS/S12_GS_img4.png" class="img-fluid" style="width:6in"> Simulation</p>
+<p>依次点击Group-Sequential, Two Proportions, Test(Inequality), Group-Sequential Tests for Two Proportions (Simulation)，因系模拟计算，结果难以完全重复，同样的设置下，差异可超过10例。</p>
+<p><img src="media/S12_GS/S12_GS_img5.png" class="img-fluid" style="width:6in"> <img src="media/S12_GS/S12_GS_img6.emf" class="img-fluid" style="width:6in"> <img src="media/S12_GS/S12_GS_img7.emf" class="img-fluid" style="width:6in"> <img src="media/S12_GS/S12_GS_img8.png" class="img-fluid" style="width:6in"> <img src="media/S12_GS/S12_GS_img9.png" class="img-fluid" style="width:6in"> <img src="media/S12_GS/S12_GS_img10.png" class="img-fluid" style="width:6in"> 该研究对入组的217例患者结果进行了一次期中分析，功能良好率在对照组和试验组分别为24%与46%，P&lt;0.001，研究达成，提前终止。</p>
+</section>
+<section id="例-12--total研究考察了某种胎儿手术的疗效手术组与对照组比较主要终点为新生儿出院存活率假设对照组存活率25手术组50成组序贯设计在入组40607080及90时设置了5次期中分析采用obrienfleming终止规则取双侧α0.05检验效能80需入组116例受试者" class="level4">
+<h4 class="anchored" data-anchor-id="例-12--total研究考察了某种胎儿手术的疗效手术组与对照组比较主要终点为新生儿出院存活率假设对照组存活率25手术组50成组序贯设计在入组40607080及90时设置了5次期中分析采用obrienfleming终止规则取双侧α0.05检验效能80需入组116例受试者">例 12- TOTAL研究考察了某种胎儿手术的疗效，手术组与对照组比较，主要终点为新生儿出院存活率。假设对照组存活率25%，手术组50%，成组序贯设计，在入组40%，60%，70%，80%及90%时设置了5次期中分析，采用O’Brien–Fleming终止规则，取双侧α=0.05，检验效能80%，需入组116例受试者。</h4>
+<p>首先计算固定设计时所需样本量为110：</p>
+<p><img src="media/S12_GS/S12_GS_img11.png" class="img-fluid" style="width:6in"> 利用R语言pwrss包计算固定设计的样本量为110，再利用gsDesign包进行成组序贯设计：</p>
+<p>library(pwrss)</p>
+<p>pwrss.z.2props(0.25, 0.5, power = 0.8)</p>
+<p>library(gsDesign)</p>
+<p>x &lt;- gsDesign(</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.2,</p>
+<p>k = 6,</p>
+<p>sfu = “OF”,</p>
+<p>sfl = “OF”,</p>
+<p>timing = c(0.4, 0.6, 0.7, 0.8, 0.9, 1),</p>
+<p>test.type = 2,</p>
+<p>n.fix = 110</p>
+<p>)</p>
+<p>x</p>
+<p>plot(x)</p>
+<p>结果输出：</p>
+<p>Symmetric two-sided group sequential design with</p>
+<p>80 % power and 2.5 % Type I Error.</p>
+<p>Spending computations assume trial stops</p>
+<p>if a bound is crossed.</p>
+<p>Analysis N Z Nominal p Spend</p>
+<p>1 46 3.29 0.0005 0.0005</p>
+<p>2 69 2.69 0.0036 0.0033</p>
+<p>3 80 2.49 0.0064 0.0037</p>
+<p>4 92 2.33 0.0099 0.0049</p>
+<p>5 103 2.20 0.0140 0.0059</p>
+<p>6 115 2.08 0.0186 0.0067</p>
+<p>Total 0.0250</p>
+<p>++ alpha spending:</p>
+<p>O’Brien-Fleming boundary.</p>
+<p>Boundary crossing probabilities and expected sample size</p>
+<p>assume any cross stops the trial</p>
+<p>Upper boundary (power or Type I Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 3 4 5 6 Total E{N}</p>
+<p>0.0000 0.0005 0.0033 0.0037 0.0049 0.0059 0.0067 0.025 113.2</p>
+<p>0.2671 0.0683 0.2509 0.1544 0.1343 0.1088 0.0833 0.800 88.5</p>
+<p>Lower boundary (futility or Type II Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 3 4 5 6 Total</p>
+<p>0.0000 5e-04 0.0033 0.0037 0.0049 0.0059 0.0067 0.025</p>
+<p>0.2671 0e+00 0.0000 0.0000 0.0000 0.0000 0.0000 0.000</p>
+<p>PASS Group-Sequential Tests for Two Proportions (Legacy)的界面较为简单，计算结果为124，并且其给出的期中分析的P值的界值也与原文不符。可尝试模拟计算Group-Sequential Tests for Two Proportions (Simulation)，此处不做介绍。</p>
+<p>研究在入组了80例产妇时进行了第3次期中分析，手术组存活率40%，对照组16%，P=0.009，研究方案里给出的第3次期中分析的P的界值为单侧0.0064，相当于双侧0.0128，因此宣告手术有效而提前终止了研究。从R语言的结果来看，第3次期中分析的P的界值为也是单侧0.0064，与该研究一致。</p>
+</section>
+</section>
+<section id="生存数据的成组序贯设计" class="level3">
+<h3 class="anchored" data-anchor-id="生存数据的成组序贯设计">生存数据的成组序贯设计</h3>
+<section id="例-12--某研究比较了鼻咽癌的两种化疗方案主要终点为无复发生存率假设hr0.52预期对照组3年无复发生存率为78试验组为88取双侧α0.05检验效能80则需要77个事件452例患者假设脱落率为5样本量扩增至476例研究计划在记录到一半的事件数时进行一次期中分析采用lan-demets-obrien-fleming边界期中分析的p要求0.003最终分析时的p值为0.049总的i类错误率控制在0.05" class="level4">
+<h4 class="anchored" data-anchor-id="例-12--某研究比较了鼻咽癌的两种化疗方案主要终点为无复发生存率假设hr0.52预期对照组3年无复发生存率为78试验组为88取双侧α0.05检验效能80则需要77个事件452例患者假设脱落率为5样本量扩增至476例研究计划在记录到一半的事件数时进行一次期中分析采用lan-demets-obrien-fleming边界期中分析的p要求0.003最终分析时的p值为0.049总的i类错误率控制在0.05">例 12- 某研究比较了鼻咽癌的两种化疗方案，主要终点为无复发生存率。假设HR=0.52（预期对照组3年无复发生存率为78%，试验组为88%），取双侧α=0.05，检验效能80%，则需要77个事件，452例患者。假设脱落率为5%，样本量扩增至476例。研究计划在记录到一半的事件数时进行一次期中分析，采用Lan-DeMets O’Brien-Fleming边界，期中分析的P要求&lt;0.003，最终分析时的P值为0.049，总的I类错误率控制在0.05。</h4>
+<p>研究在累积了38个主要终点事件后进行了期中分析，建议研究继续。最终入组了480例患者，主要终点在试验组和对照组分别为85.3%和76.5%（HR=0.51，95%置信区间0.34~0.77，P=0.001），研究达成。</p>
+<p>先将生存率0.78和0.88转化为事件率0.22和0.12，Excel表显示此例HR=0.5145（注意不是简单的(1-0.88)/(1-0.78）)，据此再计算出事件数。如果HR取0.52，则Schoenfeld法和Freedman法的事件数分别为74和79。此例未给出入组和随访时间，我们假设患者同时入组，Excel表中Ta给了一个极小值0.001；随访3年，即1个时间单位，Tf填入1。Shoenfeld法事件数为72，根据表 12-2，乘以样本量扩增系数1.056，得76.03，取整为77；样本量相应扩增为442。</p>
+<p><img src="media/S12_GS/S12_GS_img12.png" class="img-fluid" style="width:6in"> R语言gsDesign包计算如下，数值稍有不同，需要77个事件，451例患者：</p>
+<p>gsSurv(</p>
+<p>k = 2,</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.2,</p>
+<p>sfu = sfLDOF,</p>
+<p>sfl = sfLDOF,</p>
+<p>lambdaC = -log(0.78),</p>
+<p>hr = log(0.88)/log(0.78),</p>
+<p>T = 1.001,</p>
+<p>minfup = 1</p>
+<p>)</p>
+<p>结果输出：</p>
+<p>Time to event group sequential design with HR= 0.5145</p>
+<p>Equal randomization: ratio=1</p>
+<p>Asymmetric two-sided group sequential design with</p>
+<p>80 % power and 2.5 % Type I Error.</p>
+<p>Upper bound spending computations assume</p>
+<p>trial continues if lower bound is crossed.</p>
+<p>—-Lower bounds—- —-Upper bounds—–</p>
+<p>Analysis N Z Nominal p Spend+ Z Nominal p Spend++</p>
+<p>1 39 0.56 0.7121 0.0699 2.96 0.0015 0.0015</p>
+<p>2 77 1.97 0.9755 0.1301 1.97 0.0245 0.0235</p>
+<p>Total 0.2000 0.0250</p>
+<ul>
+<li>lower bound beta spending (under H1):</li>
+</ul>
+<p>Lan-DeMets O’Brien-Fleming approximation spending function (no parameters).</p>
+<p>++ alpha spending:</p>
+<p>Lan-DeMets O’Brien-Fleming approximation spending function (no parameters).</p>
+<p>Boundary crossing probabilities and expected sample size</p>
+<p>assume any cross stops the trial</p>
+<p>Upper boundary (power or Type I Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 Total E{N}</p>
+<p>0.0000 0.0015 0.0218 0.0233 49.3</p>
+<p>0.3287 0.1770 0.6230 0.8000 67.2</p>
+<p>Lower boundary (futility or Type II Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 Total</p>
+<p>0.0000 0.7121 0.2646 0.9767</p>
+<p>0.3287 0.0699 0.1301 0.2000</p>
+<p>T n Events HR futility HR efficacy</p>
+<p>IA 1 0.475 451 38.35 0.835 0.384</p>
+<p>Final 1.001 451 76.70 0.638 0.638</p>
+<p>Accrual rates:</p>
+<p>Stratum 1</p>
+<p>0-0 450988</p>
+<p>Control event rates (H1):</p>
+<p>Stratum 1</p>
+<p>0-Inf 0.25</p>
+<p>Censoring rates:</p>
+<p>Stratum 1</p>
+<p>0-Inf 0</p>
+<p>结果中的One-sided local significance level为0.0015和0.00245，转换为双侧分别为0.003和0.0049，与原例的要求完全一致。</p>
+<p>R语言rpact包计算需76个事件，442例患者。</p>
+<p>PASS软件操作时一次点击Group-Sequential, Survival, Test(Inequality), Group-Sequential Logrank Tests (Legacy)，参数界面较为简陋，计算需事件数71.4，样本量420，可考虑使用模拟法。</p>
+</section>
+<section id="例12--3-berlin-vt研究探索预防性室速消融能否降低全因死亡及室速或心衰恶化住院的复合终点入选缺血性心肌病合并室速拟接受icd植入的患者随机分为预防消融组icd植入前进行室速消融和延迟消融组在3次icd治疗室速后再进行消融obrien-fleming成组序贯设计预设3次期中分析假设hr0.525预防消融组风险率0.168延迟消融组为0.320在检验效能80单侧显著性水平0.025时需85个事件假设入组1.5年随访1.5年脱落率8年共需样本量208例" class="level4">
+<h4 class="anchored" data-anchor-id="例12--3-berlin-vt研究探索预防性室速消融能否降低全因死亡及室速或心衰恶化住院的复合终点入选缺血性心肌病合并室速拟接受icd植入的患者随机分为预防消融组icd植入前进行室速消融和延迟消融组在3次icd治疗室速后再进行消融obrien-fleming成组序贯设计预设3次期中分析假设hr0.525预防消融组风险率0.168延迟消融组为0.320在检验效能80单侧显著性水平0.025时需85个事件假设入组1.5年随访1.5年脱落率8年共需样本量208例">例12- 3 BERLIN VT研究探索预防性室速消融能否降低全因死亡及室速或心衰恶化住院的复合终点。入选缺血性心肌病合并室速拟接受ICD植入的患者，随机分为预防消融组（ICD植入前进行室速消融）和延迟消融组（在3次ICD治疗室速后再进行消融）。O’Brien-Fleming成组序贯设计，预设3次期中分析。假设HR=0.525（预防消融组风险率0.168，延迟消融组为0.320），在检验效能80%，单侧显著性水平0.025时需85个事件。假设入组1.5年，随访1.5年，脱落率8%/年，共需样本量208例。</h4>
+<p>研究在累积了43个主要终点事件后进行了第二次期中分析，P=0.297，大于既定的0.253，故因无效而终止，研究此时已入组163例患者。</p>
+<p>Excel表计算固定设计的事件数为76，样本量为202，乘以表 12-3中的样本量扩增系数1.078，得81.9与217.8，向上取整后分别为82与218。</p>
+<p><img src="media/S12_GS/S12_GS_img13.emf" class="img-fluid" style="width:6in"> R语言gsDesign计算需要82个事件，216.8例患者（向上取整并保持两组例数相等后为218，与Excel表一致）。</p>
+<p>library(gsDesign)</p>
+<p>nEvents(hr = 0.525, alpha = 0.025, beta = 0.2)</p>
+<p>x&lt;-gsSurv(</p>
+<p>k = 4,</p>
+<p>test.type = 3,</p>
+<p>alpha = 0.025,</p>
+<p>beta = 0.2,</p>
+<p>sfu = sfLDOF,</p>
+<p>sfl = sfLDOF,</p>
+<p>lambdaC = 0.32,</p>
+<p>hr = 0.525,</p>
+<p>T = 3,</p>
+<p>minfup = 1.5,</p>
+<p>eta = -log(1-0.08)</p>
+<p>)</p>
+<p>x</p>
+<p>plot(x)</p>
+<p>结果输出：</p>
+<p>Time to event group sequential design with HR= 0.525</p>
+<p>Equal randomization: ratio=1</p>
+<p>Asymmetric two-sided group sequential design with</p>
+<p>80 % power and 2.5 % Type I Error.</p>
+<p>Spending computations assume trial stops</p>
+<p>if a bound is crossed.</p>
+<p>—-Lower bounds—- —-Upper bounds—–</p>
+<p>Analysis N Z Nominal p Spend+ Z Nominal p Spend++</p>
+<p>1 21 -0.86 0.1953 0.0104 4.33 0.0000 0.0000</p>
+<p>2 41 0.56 0.7108 0.0596 2.96 0.0015 0.0015</p>
+<p>3 62 1.34 0.9091 0.0690 2.36 0.0092 0.0081</p>
+<p>4 82 1.93 0.9731 0.0611 1.93 0.0269 0.0154</p>
+<p>Total 0.2000 0.0250</p>
+<ul>
+<li>lower bound beta spending (under H1):</li>
+</ul>
+<p>Lan-DeMets O’Brien-Fleming approximation spending function (no parameters).</p>
+<p>++ alpha spending:</p>
+<p>Lan-DeMets O’Brien-Fleming approximation spending function (no parameters).</p>
+<p>Boundary crossing probabilities and expected sample size</p>
+<p>assume any cross stops the trial</p>
+<p>Upper boundary (power or Type I Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 3 4 Total E{N}</p>
+<p>0.0000 0.000 0.0015 0.0081 0.0154 0.025 44.2</p>
+<p>0.3215 0.002 0.1803 0.3841 0.2336 0.800 62.0</p>
+<p>Lower boundary (futility or Type II Error)</p>
+<p>Analysis</p>
+<p>Theta 1 2 3 4 Total</p>
+<p>0.0000 0.1953 0.5195 0.2021 0.0581 0.975</p>
+<p>0.3215 0.0104 0.0596 0.0690 0.0611 0.200</p>
+<p>T n Events HR futility HR efficacy</p>
+<p>IA 1 1.149 166.1 20.46 1.462 0.147</p>
+<p>IA 2 1.684 216.8 40.91 0.841 0.396</p>
+<p>IA 3 2.268 216.8 61.37 0.711 0.548</p>
+<p>Final 3.000 216.8 81.82 0.653 0.653</p>
+<p>Accrual rates:</p>
+<p>Stratum 1</p>
+<p>0-1.5 144.6</p>
+<p>Control event rates (H1):</p>
+<p>Stratum 1</p>
+<p>0-Inf 0.32</p>
+<p>Censoring rates:</p>
+<p>Stratum 1</p>
+<p>0-Inf 0.08</p>
+<p>R语言rpact包计算结果与之相同。</p>
+<p>结果该研究在第2次期中分析（累积发生43个事件，上文R语言计算结果为42.9）时，单侧P=0.297，大于既定的0.253，研究因无效终止，此时已入组了163例患者。</p>
+<p>ARISTOTLE研究比较了新型口服抗凝药Apixaban与华法林预防非瓣膜病房颤血栓栓塞的效果，主要终点为卒中或全身栓塞，假设事件率为每年1.2%，非劣效界值1.44，要求试验组相对风险99%置信区间上限小于该界值，则448个事件可以提供90%的检验效能。平均随访约2.1年，需要约18000例患者。</p>
+<p>（根据不同地区的监管要求，样本量计算满足两种情形：1）I类错误单侧0.025，非劣效界值1.38；2）I类错误单侧0.005，非劣效界值1.44。选择了要求样本量更大的情形2。）</p>
+<p>（protocol Amendment 07，原先假设事件率为1.67%，样本量为15000，盲态分析显示实际的事件率为1.2%，样本量增加至18000）</p>
+<p>50%终点事件时进行一次期中分析，如Apixaban优于华法林，P&lt;0.0001则终止研究，不进行非劣效检验。</p>
+<p><img src="media/S12_GS/S12_GS_img14.png" class="img-fluid" style="width:6in"> 中位随访时间1.8年，主要终点事件率在试验组为1.27%，对照组1.60%，HR为0.79（95%置信区间0.66~0.95，非劣效P&lt;0.001，优效P=0.01）</p>
+<p>（中国数据质量问题）</p>
+</section>
+</section>
+<section id="讨论" class="level3">
+<h3 class="anchored" data-anchor-id="讨论">讨论</h3>
+<p>成组序贯设计，研究有望提前终止，不论是有效还是无效，可节约不少时间与成本，近年来使用逐渐增多，特别是在一些大型的临床试验中。在PubMed以”group sequential“进行检索，结果见图 12-1，其中2024年达71条记录。</p>
+<p><img src="media/S12_GS/S12_GS_img15.png" class="img-fluid" style="width:6in"> 图 12-1 在PubMed以”group sequential“进行检索的结果</p>
+<p>出于对I类错误膨胀的担心，监管机构倾向于类似O’Brien-Fleming的边界，对于早期的期中分析设定严格的界值，而反对Pocock的边界，特别是在临床关键性研究中。Pocock边界在产品研发的早期有一定的价值。</p>
+<p>期中分析的次数，以1~2次较为常见，尽管也有5次甚至更多的情况，极端情况是每获得一列患者的结果即进行分析，即使所需样本量增加有限（在单侧α=0.025，β=0.1的情况下，经典的O’Brien-Fleming边界，总计10次分析的样本膨胀系数仅为1.037；考虑无效终止，也仅为1.086），但需兼顾可行性。</p>
+<section id="成组序贯设计的适用情况" class="level4">
+<h4 class="anchored" data-anchor-id="成组序贯设计的适用情况">成组序贯设计的适用情况</h4>
+<p>一般来说，对预期结果比较有把握时，可直接采用传统的固定设计；对预期结果没有任何把握时，可开展小样本的预试验；而对预期结果的把握度介于这两者之间时，可考虑成组序贯设计。另外，成组序贯设计增加了研究操作层面的复杂性，也是需要考量的因素。药监局指导原则建议：在确证性试验中，适应性设计的期中分析一般应该由独立的数据监查委员会（Data Monitoring Committee, DMC）及其申办者以外的独立统计支持团队完成，并保证期中分析的结果不被申办者、研究者和受试者所知悉，以免影响后续试验的执行和引入操作偏倚1。</p>
+<p>成组序贯设计适用于入组相对较慢，而获得结果相对较快的情形，比如主要研究终点为急性期终点时，很快可以获得期中分析的结果，决策是否要继续研究。如果获得结果相对较慢，比如需随访1年，而入组相对较快，则在等待先期患者1年的结果时，研究很可能继续入组完了所有的患者，除非事先约定暂停入组，但这两种情况都不能充分体现成组序贯设计的优势。</p>
+<p>References:</p>
+<ol type="1">
+<li><p>国家药品监督管理局. 药物临床试验适应性设计指导原则（试行）; 2021.</p></li>
+<li><p>FDA. Adaptive Designs for Clinical Trials of Drugs and Biologics Guidance for Industry; 2019.</p></li>
+<li><p>FDA. Adaptive Designs for Medical Device Clinical Studies; 2016.</p></li>
+<li><p>Jovin TG, Li C, Wu L, et al.&nbsp;Trial of Thrombectomy 6 to 24 Hours after Stroke Due to Basilar-Artery Occlusion. NEW ENGL J MED 2022;387:1373-84.</p></li>
+</ol>
+
+
+<!-- -->
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./S11 观察性研究.html" class="pagination-link" aria-label="12. 观察性研究">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">12. 观察性研究</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./S13 SSR.html" class="pagination-link" aria-label="13. 样本量重新估计">
+        <span class="nav-page-text"><span class="chapter-title">13. 样本量重新估计</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">源代码</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># 12. 成组序贯设计</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">## 成组序贯设计</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>适应性设计是指按照预先设定的计划，在期中分析时使用试验期间累积的数据对试验做出相应修改的临床试验设计1-3。常见的适应性设计包括：成组序贯设计，样本量重新估计，适应性无缝剂量选择的设计，适应性富集设计，两阶段适应性设计，适应性主方案试验设计，多重适应性设计等。本章重点关注成组序贯设计。</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>成组序贯设计是最早应用于临床试验的适应性设计，指方案中预先计划在试验过程中进行一次或多次期中分析，依据每一次期中分析的结果做出后续试验的决策，决策通常有四种可能：（1）依据优效性终止试验；（2）依据无效性终止试验；（3）依据安全性终止试验；（4）继续试验1。</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>在研究开展的过程中预设若干个节点进行假设检验，有望因结果有效或无效而提前终止研究，提高研究的效率。这增加的期中分析，是一种特殊类型的多重检验，因此研究设计时总的样本量需适当扩增以控制I类错误，尽管成组序贯设计的期望样本量仍然是减少的。</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>调整I类错误率的常见方法有O’Brien-Fleming法，Pocock法及各种α消耗函数法。经典的O’Brien-Fleming方法不考虑无效边界，样本量扩增系数见表 12-1。非绑定（non-binding，期中分析显示无效后仍继续研究）类O’Brien-Fleming法样本量扩增系数见表 12-2，绑定性类O’Brien-Fleming法（期中分析显示无效后终止研究）样本量扩增系数见表 12-3。</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>表 12-1 经典O’Brien-Fleming法样本量扩增系数（k为总检验次数）</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>表 12-2 非绑定类O’Brien-Fleming法样本量扩增系数（k为总检验次数）</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>表 12-3 绑定性类O’Brien-Fleming法样本量扩增系数（k为总检验次数）</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>α消耗函数法不受等间距进行期中分析的束缚，更为灵活。常用的有Lan-Demets及Hwang-Shih函数，也都可以模拟出类似O’Brien-Fleming的情形。</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>Lan-DeMets α消耗函数，当ρ=1时类似O’Brien-Fleming。</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>Hwang-Shih-DeCani α消耗函数，当γ=-4时类似O’Brien-Fleming。</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">### 单组研究的成组序贯设计</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 12-4 某单臂研究评价某心脏康复干预对运动耐量（以6分钟步行距离，6MWD，单位米计）的改善，采用自身前后配对设计（以基线值为对照）。假设干预前均值为290 m，预期干预后提高5 m，差值的个体内标准差（within-subject SD）约为15 m。取单侧α=0.025，检验效能80%，按配对t检验计算固定设计样本量：</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>n = (z_{0.975}+z_{0.8})^2 σ_d^2 / δ^2 = (1.96+0.84)^2 × 15^2 / 5^2 ≈ 71</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>即需71例患者。研究计划在入组约一半（36例）时进行一次期中分析，采用Lan-DeMets O'Brien-Fleming边界（ρ=1，近似O'Brien-Fleming）。R语言gsDesign包计算如下：</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>library(gsDesign)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>x &lt;- gsDesign(</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>k = 2,</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>beta = 0.2,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>test.type = 1,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>timing = c(0.5),</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>sfu = sfLDOF,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>sfl = sfLDOF,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>n.fix = 71</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>x</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>One-sided group sequential design with</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>80 % power and 2.5 % Type I Error.</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>Analysis N   Z   Nominal p  Spend</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>1 36 2.96    0.0015 0.0015</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>2 72 1.97    0.0245 0.0235</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>Total                   0.0250</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>++ alpha spending:</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>Lan-DeMets O'Brien-Fleming approximation spending function (no parameters).</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>Boundary crossing probabilities and expected sample size</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>assume any cross stops the trial</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>Upper boundary (power or Type I Error)</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>Theta      1      2 Total E{N}</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>0.0000 0.0015 0.0235 0.025 71.2</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>0.3325 0.1641 0.6359 0.800 65.4</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>第1次分析（约36例）的疗效界值为Z=2.96（对应单侧P=0.0015），第2次分析（72例）为Z=1.97（对应单侧P=0.0245）。在真实效应δ=5 m时，预期需要的样本量E{N}=65.4，小于固定设计的71例，体现了成组序贯设计在有效时提前终止的优势；若期中分析未达到疗效界值，则继续入组至72例进行最终分析。单组/配对设计常用于单臂器械或自身前后对照研究，此时以单侧检验考察“是否改善”较为常见。</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a><span class="fu">### 两组均数比较的成组序贯设计</span></span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 12-5 某研究比较某降压干预与常规治疗对24小时动态收缩压（mmHg）降低值的影响。假设常规治疗组降低5 mmHg，试验组降低12 mmHg，两组个体内标准差均为12 mmHg。取双侧α=0.05，检验效能80%，按两独立样本均数比较的固定设计，每组需：</span></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a>n = 2(z_{0.975}+z_{0.8})^2 σ^2 / δ^2 = 2×(1.96+0.84)^2×12^2/7^2 ≈ 47</span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a>即每组47例，共94例。研究计划在入组约一半时进行一次期中分析，采用Lan-DeMets O'Brien-Fleming边界。R语言可先按公式求得固定设计样本量，再用gsDesign包进行成组序贯设计：</span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>delta &lt;- 7; sigma &lt;- 12</span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>n_per_group &lt;- 2 * (qnorm(0.975) + qnorm(0.8))^2 * sigma^2 / delta^2</span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a>ceiling(n_per_group)</span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>library(gsDesign)</span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>x &lt;- gsDesign(</span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>k = 2,</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>beta = 0.2,</span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>test.type = 2,</span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a>timing = c(0.5),</span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a>sfu = sfLDOF,</span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a>sfl = sfLDOF,</span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a>n.fix = 94</span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>x</span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>Symmetric two-sided group sequential design with</span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>80 % power and 2.5 % Type I Error.</span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a>Spending computations assume trial stops</span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>if a bound is crossed.</span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>Analysis N   Z   Nominal p  Spend</span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a>1 48 2.96    0.0015 0.0015</span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>2 95 1.97    0.0245 0.0235</span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>Total                   0.0250</span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a>++ alpha spending:</span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a>Lan-DeMets O'Brien-Fleming approximation spending function (no parameters).</span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a>Boundary crossing probabilities and expected sample size</span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a>assume any cross stops the trial</span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a>Upper boundary (power or Type I Error)</span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>Theta      1      2 Total E{N}</span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a>0.000 0.0015 0.0235 0.025 94.2</span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a>0.289 0.1641 0.6359 0.800 86.6</span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a>Lower boundary (futility or Type II Error)</span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a>Theta      1      2 Total</span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a>0.000 0.0015 0.0235 0.025</span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a>0.289 0.0000 0.0000 0.000</span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a>第1次分析（48例）的疗效界值为Z=2.96（双侧P=0.003），第2次分析（95例）为Z=1.97（双侧P=0.049）。在真实效应δ=7 mmHg时，预期样本量E{N}=86.6，小于固定设计的94例。当两组标准差不等或需考虑脱落时，可改用test.type=3（不等方差），或在n.fix中除以（1-脱落率），处理方式与本章“两组率比较”及“生存数据”部分相同。</span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a><span class="fu">### 两组率比较的成组序贯设计</span></span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 12-1 BAOCHE研究4考察血管内血栓切除对基底动脉急性闭塞引起的卒中的疗效。与药物治疗比较，主要终点为90天功能良好率（Rankin评分0~3），假设对照组为0.4，试验组为0.6，双侧α=0.05，β=0.1，固定设计需样本量254。采用Lan-Demets法O’Brien–Fleming成组序贯设计，入组2/3患者时进行一次期中分析，样本量增加至286，考虑10%脱落，样本量定为318，拟在入组212例患者时作一次期中分析。期中分析和最终分析的α水平分别为0.012和0.046。采用PASS 13软件进行样本量计算。</span></span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a>Legacy</span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a>Excel表显示独立方差法的固定样本量为254。</span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a>利用R语言pwrss包计算固定设计的样本量为254，再利用R语言gsDesign包计算脱落前的样本量为269，rpact包结果与之相同。</span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a>x &lt;- gsDesign(</span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a>k = 2,</span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a>timing = c(2/3),</span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a>sfu = sfLDOF,</span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a>sfl = sfLDOF,</span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a>n.fix = 254</span>
+<span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a>X</span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a>Asymmetric two-sided group sequential design with</span>
+<span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a>90 % power and 2.5 % Type I Error.</span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a>Upper bound spending computations assume</span>
+<span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a>trial continues if lower bound is crossed.</span>
+<span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a>----Lower bounds----  ----Upper bounds-----</span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a>Analysis  N   Z   Nominal p Spend+  Z   Nominal p Spend++</span>
+<span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a>1 180 1.02    0.8451  0.044 2.51    0.0060   0.006</span>
+<span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a>2 269 1.99    0.9769  0.056 1.99    0.0231   0.019</span>
+<span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a>Total                    0.1000                 0.0250</span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a><span class="ss">+ </span>lower bound beta spending (under H1):</span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a>Lan-DeMets O'Brien-Fleming approximation spending function (no parameters).</span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a>++ alpha spending:</span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a>Lan-DeMets O'Brien-Fleming approximation spending function (no parameters).</span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-240"><a href="#cb1-240" aria-hidden="true" tabindex="-1"></a>Boundary crossing probabilities and expected sample size</span>
+<span id="cb1-241"><a href="#cb1-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-242"><a href="#cb1-242" aria-hidden="true" tabindex="-1"></a>assume any cross stops the trial</span>
+<span id="cb1-243"><a href="#cb1-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-244"><a href="#cb1-244" aria-hidden="true" tabindex="-1"></a>Upper boundary (power or Type I Error)</span>
+<span id="cb1-245"><a href="#cb1-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-246"><a href="#cb1-246" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-247"><a href="#cb1-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-248"><a href="#cb1-248" aria-hidden="true" tabindex="-1"></a>Theta      1      2  Total  E{N}</span>
+<span id="cb1-249"><a href="#cb1-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-250"><a href="#cb1-250" aria-hidden="true" tabindex="-1"></a>0.0000 0.0060 0.0173 0.0233 192.5</span>
+<span id="cb1-251"><a href="#cb1-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a>0.2034 0.5843 0.3157 0.9000 212.4</span>
+<span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a>Lower boundary (futility or Type II Error)</span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-258"><a href="#cb1-258" aria-hidden="true" tabindex="-1"></a>Theta      1      2  Total</span>
+<span id="cb1-259"><a href="#cb1-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-260"><a href="#cb1-260" aria-hidden="true" tabindex="-1"></a>0.0000 0.8451 0.1316 0.9767</span>
+<span id="cb1-261"><a href="#cb1-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-262"><a href="#cb1-262" aria-hidden="true" tabindex="-1"></a>0.2034 0.0440 0.0560 0.1000</span>
+<span id="cb1-263"><a href="#cb1-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-264"><a href="#cb1-264" aria-hidden="true" tabindex="-1"></a>依次点击Group-Sequential, Two Proportions, Test(Inequality), Group-Sequential Tests for Two Proportions (Legacy)</span>
+<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-266"><a href="#cb1-266" aria-hidden="true" tabindex="-1"></a>选择Legacy的方法，依次点击Group-Sequential, Two Proportions, Test(Inequality), Group-Sequential Tests for Two Proportions (Legacy)，结果脱落前样本量为266。</span>
+<span id="cb1-267"><a href="#cb1-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-268"><a href="#cb1-268" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img1.png)</span>{width="6.0in"}</span>
+<span id="cb1-269"><a href="#cb1-269" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img2.png)</span>{width="6.0in"}</span>
+<span id="cb1-270"><a href="#cb1-270" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img3.emf)</span>{width="6.0in"}</span>
+<span id="cb1-271"><a href="#cb1-271" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img4.png)</span>{width="6.0in"}</span>
+<span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a>Simulation</span>
+<span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a>依次点击Group-Sequential, Two Proportions, Test(Inequality), Group-Sequential Tests for Two Proportions (Simulation)，因系模拟计算，结果难以完全重复，同样的设置下，差异可超过10例。</span>
+<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img5.png)</span>{width="6.0in"}</span>
+<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img6.emf)</span>{width="6.0in"}</span>
+<span id="cb1-278"><a href="#cb1-278" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img7.emf)</span>{width="6.0in"}</span>
+<span id="cb1-279"><a href="#cb1-279" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img8.png)</span>{width="6.0in"}</span>
+<span id="cb1-280"><a href="#cb1-280" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img9.png)</span>{width="6.0in"}</span>
+<span id="cb1-281"><a href="#cb1-281" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img10.png)</span>{width="6.0in"}</span>
+<span id="cb1-282"><a href="#cb1-282" aria-hidden="true" tabindex="-1"></a>该研究对入组的217例患者结果进行了一次期中分析，功能良好率在对照组和试验组分别为24%与46%，P&lt;0.001，研究达成，提前终止。</span>
+<span id="cb1-283"><a href="#cb1-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-284"><a href="#cb1-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-285"><a href="#cb1-285" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 12- TOTAL研究考察了某种胎儿手术的疗效，手术组与对照组比较，主要终点为新生儿出院存活率。假设对照组存活率25%，手术组50%，成组序贯设计，在入组40%，60%，70%，80%及90%时设置了5次期中分析，采用O’Brien–Fleming终止规则，取双侧α=0.05，检验效能80%，需入组116例受试者。</span></span>
+<span id="cb1-286"><a href="#cb1-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-287"><a href="#cb1-287" aria-hidden="true" tabindex="-1"></a>首先计算固定设计时所需样本量为110：</span>
+<span id="cb1-288"><a href="#cb1-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-289"><a href="#cb1-289" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img11.png)</span>{width="6.0in"}</span>
+<span id="cb1-290"><a href="#cb1-290" aria-hidden="true" tabindex="-1"></a>利用R语言pwrss包计算固定设计的样本量为110，再利用gsDesign包进行成组序贯设计：</span>
+<span id="cb1-291"><a href="#cb1-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-292"><a href="#cb1-292" aria-hidden="true" tabindex="-1"></a>library(pwrss)</span>
+<span id="cb1-293"><a href="#cb1-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-294"><a href="#cb1-294" aria-hidden="true" tabindex="-1"></a>pwrss.z.2props(0.25, 0.5, power = 0.8)</span>
+<span id="cb1-295"><a href="#cb1-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-296"><a href="#cb1-296" aria-hidden="true" tabindex="-1"></a>library(gsDesign)</span>
+<span id="cb1-297"><a href="#cb1-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-298"><a href="#cb1-298" aria-hidden="true" tabindex="-1"></a>x &lt;- gsDesign(</span>
+<span id="cb1-299"><a href="#cb1-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-300"><a href="#cb1-300" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-301"><a href="#cb1-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-302"><a href="#cb1-302" aria-hidden="true" tabindex="-1"></a>beta = 0.2,</span>
+<span id="cb1-303"><a href="#cb1-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-304"><a href="#cb1-304" aria-hidden="true" tabindex="-1"></a>k = 6,</span>
+<span id="cb1-305"><a href="#cb1-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-306"><a href="#cb1-306" aria-hidden="true" tabindex="-1"></a>sfu = "OF",</span>
+<span id="cb1-307"><a href="#cb1-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-308"><a href="#cb1-308" aria-hidden="true" tabindex="-1"></a>sfl = "OF",</span>
+<span id="cb1-309"><a href="#cb1-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-310"><a href="#cb1-310" aria-hidden="true" tabindex="-1"></a>timing = c(0.4, 0.6, 0.7, 0.8, 0.9, 1),</span>
+<span id="cb1-311"><a href="#cb1-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-312"><a href="#cb1-312" aria-hidden="true" tabindex="-1"></a>test.type = 2,</span>
+<span id="cb1-313"><a href="#cb1-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-314"><a href="#cb1-314" aria-hidden="true" tabindex="-1"></a>n.fix = 110</span>
+<span id="cb1-315"><a href="#cb1-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-316"><a href="#cb1-316" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-317"><a href="#cb1-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-318"><a href="#cb1-318" aria-hidden="true" tabindex="-1"></a>x</span>
+<span id="cb1-319"><a href="#cb1-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-320"><a href="#cb1-320" aria-hidden="true" tabindex="-1"></a>plot(x)</span>
+<span id="cb1-321"><a href="#cb1-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-322"><a href="#cb1-322" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-323"><a href="#cb1-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-324"><a href="#cb1-324" aria-hidden="true" tabindex="-1"></a>Symmetric two-sided group sequential design with</span>
+<span id="cb1-325"><a href="#cb1-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-326"><a href="#cb1-326" aria-hidden="true" tabindex="-1"></a>80 % power and 2.5 % Type I Error.</span>
+<span id="cb1-327"><a href="#cb1-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-328"><a href="#cb1-328" aria-hidden="true" tabindex="-1"></a>Spending computations assume trial stops</span>
+<span id="cb1-329"><a href="#cb1-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-330"><a href="#cb1-330" aria-hidden="true" tabindex="-1"></a>if a bound is crossed.</span>
+<span id="cb1-331"><a href="#cb1-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-332"><a href="#cb1-332" aria-hidden="true" tabindex="-1"></a>Analysis  N   Z   Nominal p  Spend</span>
+<span id="cb1-333"><a href="#cb1-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-334"><a href="#cb1-334" aria-hidden="true" tabindex="-1"></a>1  46 3.29    0.0005 0.0005</span>
+<span id="cb1-335"><a href="#cb1-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-336"><a href="#cb1-336" aria-hidden="true" tabindex="-1"></a>2  69 2.69    0.0036 0.0033</span>
+<span id="cb1-337"><a href="#cb1-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-338"><a href="#cb1-338" aria-hidden="true" tabindex="-1"></a>3  80 2.49    0.0064 0.0037</span>
+<span id="cb1-339"><a href="#cb1-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-340"><a href="#cb1-340" aria-hidden="true" tabindex="-1"></a>4  92 2.33    0.0099 0.0049</span>
+<span id="cb1-341"><a href="#cb1-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-342"><a href="#cb1-342" aria-hidden="true" tabindex="-1"></a>5 103 2.20    0.0140 0.0059</span>
+<span id="cb1-343"><a href="#cb1-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-344"><a href="#cb1-344" aria-hidden="true" tabindex="-1"></a>6 115 2.08    0.0186 0.0067</span>
+<span id="cb1-345"><a href="#cb1-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-346"><a href="#cb1-346" aria-hidden="true" tabindex="-1"></a>Total                    0.0250</span>
+<span id="cb1-347"><a href="#cb1-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-348"><a href="#cb1-348" aria-hidden="true" tabindex="-1"></a>++ alpha spending:</span>
+<span id="cb1-349"><a href="#cb1-349" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-350"><a href="#cb1-350" aria-hidden="true" tabindex="-1"></a>O'Brien-Fleming boundary.</span>
+<span id="cb1-351"><a href="#cb1-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-352"><a href="#cb1-352" aria-hidden="true" tabindex="-1"></a>Boundary crossing probabilities and expected sample size</span>
+<span id="cb1-353"><a href="#cb1-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-354"><a href="#cb1-354" aria-hidden="true" tabindex="-1"></a>assume any cross stops the trial</span>
+<span id="cb1-355"><a href="#cb1-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-356"><a href="#cb1-356" aria-hidden="true" tabindex="-1"></a>Upper boundary (power or Type I Error)</span>
+<span id="cb1-357"><a href="#cb1-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-358"><a href="#cb1-358" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-359"><a href="#cb1-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-360"><a href="#cb1-360" aria-hidden="true" tabindex="-1"></a>Theta      1      2      3      4      5      6 Total  E{N}</span>
+<span id="cb1-361"><a href="#cb1-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-362"><a href="#cb1-362" aria-hidden="true" tabindex="-1"></a>0.0000 0.0005 0.0033 0.0037 0.0049 0.0059 0.0067 0.025 113.2</span>
+<span id="cb1-363"><a href="#cb1-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-364"><a href="#cb1-364" aria-hidden="true" tabindex="-1"></a>0.2671 0.0683 0.2509 0.1544 0.1343 0.1088 0.0833 0.800  88.5</span>
+<span id="cb1-365"><a href="#cb1-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-366"><a href="#cb1-366" aria-hidden="true" tabindex="-1"></a>Lower boundary (futility or Type II Error)</span>
+<span id="cb1-367"><a href="#cb1-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-368"><a href="#cb1-368" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-369"><a href="#cb1-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-370"><a href="#cb1-370" aria-hidden="true" tabindex="-1"></a>Theta     1      2      3      4      5      6 Total</span>
+<span id="cb1-371"><a href="#cb1-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-372"><a href="#cb1-372" aria-hidden="true" tabindex="-1"></a>0.0000 5e-04 0.0033 0.0037 0.0049 0.0059 0.0067 0.025</span>
+<span id="cb1-373"><a href="#cb1-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-374"><a href="#cb1-374" aria-hidden="true" tabindex="-1"></a>0.2671 0e+00 0.0000 0.0000 0.0000 0.0000 0.0000 0.000</span>
+<span id="cb1-375"><a href="#cb1-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-376"><a href="#cb1-376" aria-hidden="true" tabindex="-1"></a>PASS Group-Sequential Tests for Two Proportions (Legacy)的界面较为简单，计算结果为124，并且其给出的期中分析的P值的界值也与原文不符。可尝试模拟计算Group-Sequential Tests for Two Proportions (Simulation)，此处不做介绍。</span>
+<span id="cb1-377"><a href="#cb1-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-378"><a href="#cb1-378" aria-hidden="true" tabindex="-1"></a>研究在入组了80例产妇时进行了第3次期中分析，手术组存活率40%，对照组16%，P=0.009，研究方案里给出的第3次期中分析的P的界值为单侧0.0064，相当于双侧0.0128，因此宣告手术有效而提前终止了研究。从R语言的结果来看，第3次期中分析的P的界值为也是单侧0.0064，与该研究一致。</span>
+<span id="cb1-379"><a href="#cb1-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-380"><a href="#cb1-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-381"><a href="#cb1-381" aria-hidden="true" tabindex="-1"></a><span class="fu">### 生存数据的成组序贯设计</span></span>
+<span id="cb1-382"><a href="#cb1-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-383"><a href="#cb1-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-384"><a href="#cb1-384" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例 12- 某研究比较了鼻咽癌的两种化疗方案，主要终点为无复发生存率。假设HR=0.52（预期对照组3年无复发生存率为78%，试验组为88%），取双侧α=0.05，检验效能80%，则需要77个事件，452例患者。假设脱落率为5%，样本量扩增至476例。研究计划在记录到一半的事件数时进行一次期中分析，采用Lan-DeMets O’Brien-Fleming边界，期中分析的P要求&lt;0.003，最终分析时的P值为0.049，总的I类错误率控制在0.05。</span></span>
+<span id="cb1-385"><a href="#cb1-385" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-386"><a href="#cb1-386" aria-hidden="true" tabindex="-1"></a>研究在累积了38个主要终点事件后进行了期中分析，建议研究继续。最终入组了480例患者，主要终点在试验组和对照组分别为85.3%和76.5%（HR=0.51，95%置信区间0.34~0.77，P=0.001），研究达成。</span>
+<span id="cb1-387"><a href="#cb1-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-388"><a href="#cb1-388" aria-hidden="true" tabindex="-1"></a>先将生存率0.78和0.88转化为事件率0.22和0.12，Excel表显示此例HR=0.5145（注意不是简单的(1-0.88)/(1-0.78）)，据此再计算出事件数。如果HR取0.52，则Schoenfeld法和Freedman法的事件数分别为74和79。此例未给出入组和随访时间，我们假设患者同时入组，Excel表中Ta给了一个极小值0.001；随访3年，即1个时间单位，Tf填入1。Shoenfeld法事件数为72，根据表 12-2，乘以样本量扩增系数1.056，得76.03，取整为77；样本量相应扩增为442。</span>
+<span id="cb1-389"><a href="#cb1-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-390"><a href="#cb1-390" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img12.png)</span>{width="6.0in"}</span>
+<span id="cb1-391"><a href="#cb1-391" aria-hidden="true" tabindex="-1"></a>R语言gsDesign包计算如下，数值稍有不同，需要77个事件，451例患者：</span>
+<span id="cb1-392"><a href="#cb1-392" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-393"><a href="#cb1-393" aria-hidden="true" tabindex="-1"></a>gsSurv(</span>
+<span id="cb1-394"><a href="#cb1-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-395"><a href="#cb1-395" aria-hidden="true" tabindex="-1"></a>k = 2,</span>
+<span id="cb1-396"><a href="#cb1-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-397"><a href="#cb1-397" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-398"><a href="#cb1-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-399"><a href="#cb1-399" aria-hidden="true" tabindex="-1"></a>beta = 0.2,</span>
+<span id="cb1-400"><a href="#cb1-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-401"><a href="#cb1-401" aria-hidden="true" tabindex="-1"></a>sfu = sfLDOF,</span>
+<span id="cb1-402"><a href="#cb1-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-403"><a href="#cb1-403" aria-hidden="true" tabindex="-1"></a>sfl = sfLDOF,</span>
+<span id="cb1-404"><a href="#cb1-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-405"><a href="#cb1-405" aria-hidden="true" tabindex="-1"></a>lambdaC = -log(0.78),</span>
+<span id="cb1-406"><a href="#cb1-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-407"><a href="#cb1-407" aria-hidden="true" tabindex="-1"></a>hr = log(0.88)/log(0.78),</span>
+<span id="cb1-408"><a href="#cb1-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-409"><a href="#cb1-409" aria-hidden="true" tabindex="-1"></a>T = 1.001,</span>
+<span id="cb1-410"><a href="#cb1-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-411"><a href="#cb1-411" aria-hidden="true" tabindex="-1"></a>minfup = 1</span>
+<span id="cb1-412"><a href="#cb1-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-413"><a href="#cb1-413" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-414"><a href="#cb1-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-415"><a href="#cb1-415" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-416"><a href="#cb1-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-417"><a href="#cb1-417" aria-hidden="true" tabindex="-1"></a>Time to event group sequential design with HR= 0.5145</span>
+<span id="cb1-418"><a href="#cb1-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-419"><a href="#cb1-419" aria-hidden="true" tabindex="-1"></a>Equal randomization:          ratio=1</span>
+<span id="cb1-420"><a href="#cb1-420" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-421"><a href="#cb1-421" aria-hidden="true" tabindex="-1"></a>Asymmetric two-sided group sequential design with</span>
+<span id="cb1-422"><a href="#cb1-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-423"><a href="#cb1-423" aria-hidden="true" tabindex="-1"></a>80 % power and 2.5 % Type I Error.</span>
+<span id="cb1-424"><a href="#cb1-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-425"><a href="#cb1-425" aria-hidden="true" tabindex="-1"></a>Upper bound spending computations assume</span>
+<span id="cb1-426"><a href="#cb1-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-427"><a href="#cb1-427" aria-hidden="true" tabindex="-1"></a>trial continues if lower bound is crossed.</span>
+<span id="cb1-428"><a href="#cb1-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-429"><a href="#cb1-429" aria-hidden="true" tabindex="-1"></a>----Lower bounds----  ----Upper bounds-----</span>
+<span id="cb1-430"><a href="#cb1-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-431"><a href="#cb1-431" aria-hidden="true" tabindex="-1"></a>Analysis N   Z   Nominal p Spend+  Z   Nominal p Spend++</span>
+<span id="cb1-432"><a href="#cb1-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-433"><a href="#cb1-433" aria-hidden="true" tabindex="-1"></a>1 39 0.56    0.7121 0.0699 2.96    0.0015  0.0015</span>
+<span id="cb1-434"><a href="#cb1-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-435"><a href="#cb1-435" aria-hidden="true" tabindex="-1"></a>2 77 1.97    0.9755 0.1301 1.97    0.0245  0.0235</span>
+<span id="cb1-436"><a href="#cb1-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-437"><a href="#cb1-437" aria-hidden="true" tabindex="-1"></a>Total                   0.2000                 0.0250</span>
+<span id="cb1-438"><a href="#cb1-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-439"><a href="#cb1-439" aria-hidden="true" tabindex="-1"></a><span class="ss">+ </span>lower bound beta spending (under H1):</span>
+<span id="cb1-440"><a href="#cb1-440" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-441"><a href="#cb1-441" aria-hidden="true" tabindex="-1"></a>Lan-DeMets O'Brien-Fleming approximation spending function (no parameters).</span>
+<span id="cb1-442"><a href="#cb1-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-443"><a href="#cb1-443" aria-hidden="true" tabindex="-1"></a>++ alpha spending:</span>
+<span id="cb1-444"><a href="#cb1-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-445"><a href="#cb1-445" aria-hidden="true" tabindex="-1"></a>Lan-DeMets O'Brien-Fleming approximation spending function (no parameters).</span>
+<span id="cb1-446"><a href="#cb1-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-447"><a href="#cb1-447" aria-hidden="true" tabindex="-1"></a>Boundary crossing probabilities and expected sample size</span>
+<span id="cb1-448"><a href="#cb1-448" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-449"><a href="#cb1-449" aria-hidden="true" tabindex="-1"></a>assume any cross stops the trial</span>
+<span id="cb1-450"><a href="#cb1-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-451"><a href="#cb1-451" aria-hidden="true" tabindex="-1"></a>Upper boundary (power or Type I Error)</span>
+<span id="cb1-452"><a href="#cb1-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-453"><a href="#cb1-453" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-454"><a href="#cb1-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-455"><a href="#cb1-455" aria-hidden="true" tabindex="-1"></a>Theta      1      2  Total E{N}</span>
+<span id="cb1-456"><a href="#cb1-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-457"><a href="#cb1-457" aria-hidden="true" tabindex="-1"></a>0.0000 0.0015 0.0218 0.0233 49.3</span>
+<span id="cb1-458"><a href="#cb1-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-459"><a href="#cb1-459" aria-hidden="true" tabindex="-1"></a>0.3287 0.1770 0.6230 0.8000 67.2</span>
+<span id="cb1-460"><a href="#cb1-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-461"><a href="#cb1-461" aria-hidden="true" tabindex="-1"></a>Lower boundary (futility or Type II Error)</span>
+<span id="cb1-462"><a href="#cb1-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-463"><a href="#cb1-463" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-464"><a href="#cb1-464" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-465"><a href="#cb1-465" aria-hidden="true" tabindex="-1"></a>Theta      1      2  Total</span>
+<span id="cb1-466"><a href="#cb1-466" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-467"><a href="#cb1-467" aria-hidden="true" tabindex="-1"></a>0.0000 0.7121 0.2646 0.9767</span>
+<span id="cb1-468"><a href="#cb1-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-469"><a href="#cb1-469" aria-hidden="true" tabindex="-1"></a>0.3287 0.0699 0.1301 0.2000</span>
+<span id="cb1-470"><a href="#cb1-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-471"><a href="#cb1-471" aria-hidden="true" tabindex="-1"></a>T   n Events HR futility HR efficacy</span>
+<span id="cb1-472"><a href="#cb1-472" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-473"><a href="#cb1-473" aria-hidden="true" tabindex="-1"></a>IA 1  0.475 451  38.35       0.835       0.384</span>
+<span id="cb1-474"><a href="#cb1-474" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-475"><a href="#cb1-475" aria-hidden="true" tabindex="-1"></a>Final 1.001 451  76.70       0.638       0.638</span>
+<span id="cb1-476"><a href="#cb1-476" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-477"><a href="#cb1-477" aria-hidden="true" tabindex="-1"></a>Accrual rates:</span>
+<span id="cb1-478"><a href="#cb1-478" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-479"><a href="#cb1-479" aria-hidden="true" tabindex="-1"></a>Stratum 1</span>
+<span id="cb1-480"><a href="#cb1-480" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-481"><a href="#cb1-481" aria-hidden="true" tabindex="-1"></a>0-0    450988</span>
+<span id="cb1-482"><a href="#cb1-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-483"><a href="#cb1-483" aria-hidden="true" tabindex="-1"></a>Control event rates (H1):</span>
+<span id="cb1-484"><a href="#cb1-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-485"><a href="#cb1-485" aria-hidden="true" tabindex="-1"></a>Stratum 1</span>
+<span id="cb1-486"><a href="#cb1-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-487"><a href="#cb1-487" aria-hidden="true" tabindex="-1"></a>0-Inf      0.25</span>
+<span id="cb1-488"><a href="#cb1-488" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-489"><a href="#cb1-489" aria-hidden="true" tabindex="-1"></a>Censoring rates:</span>
+<span id="cb1-490"><a href="#cb1-490" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-491"><a href="#cb1-491" aria-hidden="true" tabindex="-1"></a>Stratum 1</span>
+<span id="cb1-492"><a href="#cb1-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-493"><a href="#cb1-493" aria-hidden="true" tabindex="-1"></a>0-Inf         0</span>
+<span id="cb1-494"><a href="#cb1-494" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-495"><a href="#cb1-495" aria-hidden="true" tabindex="-1"></a>结果中的One-sided local significance level为0.0015和0.00245，转换为双侧分别为0.003和0.0049，与原例的要求完全一致。</span>
+<span id="cb1-496"><a href="#cb1-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-497"><a href="#cb1-497" aria-hidden="true" tabindex="-1"></a>R语言rpact包计算需76个事件，442例患者。</span>
+<span id="cb1-498"><a href="#cb1-498" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-499"><a href="#cb1-499" aria-hidden="true" tabindex="-1"></a>PASS软件操作时一次点击Group-Sequential, Survival, Test(Inequality), Group-Sequential Logrank Tests (Legacy)，参数界面较为简陋，计算需事件数71.4，样本量420，可考虑使用模拟法。</span>
+<span id="cb1-500"><a href="#cb1-500" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-501"><a href="#cb1-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-502"><a href="#cb1-502" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 例12- 3 BERLIN VT研究探索预防性室速消融能否降低全因死亡及室速或心衰恶化住院的复合终点。入选缺血性心肌病合并室速拟接受ICD植入的患者，随机分为预防消融组（ICD植入前进行室速消融）和延迟消融组（在3次ICD治疗室速后再进行消融）。O’Brien-Fleming成组序贯设计，预设3次期中分析。假设HR=0.525（预防消融组风险率0.168，延迟消融组为0.320），在检验效能80%，单侧显著性水平0.025时需85个事件。假设入组1.5年，随访1.5年，脱落率8%/年，共需样本量208例。</span></span>
+<span id="cb1-503"><a href="#cb1-503" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-504"><a href="#cb1-504" aria-hidden="true" tabindex="-1"></a>研究在累积了43个主要终点事件后进行了第二次期中分析，P=0.297，大于既定的0.253，故因无效而终止，研究此时已入组163例患者。</span>
+<span id="cb1-505"><a href="#cb1-505" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-506"><a href="#cb1-506" aria-hidden="true" tabindex="-1"></a>Excel表计算固定设计的事件数为76，样本量为202，乘以表 12-3中的样本量扩增系数1.078，得81.9与217.8，向上取整后分别为82与218。</span>
+<span id="cb1-507"><a href="#cb1-507" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-508"><a href="#cb1-508" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img13.emf)</span>{width="6.0in"}</span>
+<span id="cb1-509"><a href="#cb1-509" aria-hidden="true" tabindex="-1"></a>R语言gsDesign计算需要82个事件，216.8例患者（向上取整并保持两组例数相等后为218，与Excel表一致）。</span>
+<span id="cb1-510"><a href="#cb1-510" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-511"><a href="#cb1-511" aria-hidden="true" tabindex="-1"></a>library(gsDesign)</span>
+<span id="cb1-512"><a href="#cb1-512" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-513"><a href="#cb1-513" aria-hidden="true" tabindex="-1"></a>nEvents(hr = 0.525, alpha = 0.025, beta = 0.2)</span>
+<span id="cb1-514"><a href="#cb1-514" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-515"><a href="#cb1-515" aria-hidden="true" tabindex="-1"></a>x&lt;-gsSurv(</span>
+<span id="cb1-516"><a href="#cb1-516" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-517"><a href="#cb1-517" aria-hidden="true" tabindex="-1"></a>k = 4,</span>
+<span id="cb1-518"><a href="#cb1-518" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-519"><a href="#cb1-519" aria-hidden="true" tabindex="-1"></a>test.type = 3,</span>
+<span id="cb1-520"><a href="#cb1-520" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-521"><a href="#cb1-521" aria-hidden="true" tabindex="-1"></a>alpha = 0.025,</span>
+<span id="cb1-522"><a href="#cb1-522" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-523"><a href="#cb1-523" aria-hidden="true" tabindex="-1"></a>beta = 0.2,</span>
+<span id="cb1-524"><a href="#cb1-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-525"><a href="#cb1-525" aria-hidden="true" tabindex="-1"></a>sfu = sfLDOF,</span>
+<span id="cb1-526"><a href="#cb1-526" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-527"><a href="#cb1-527" aria-hidden="true" tabindex="-1"></a>sfl = sfLDOF,</span>
+<span id="cb1-528"><a href="#cb1-528" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-529"><a href="#cb1-529" aria-hidden="true" tabindex="-1"></a>lambdaC = 0.32,</span>
+<span id="cb1-530"><a href="#cb1-530" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-531"><a href="#cb1-531" aria-hidden="true" tabindex="-1"></a>hr = 0.525,</span>
+<span id="cb1-532"><a href="#cb1-532" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-533"><a href="#cb1-533" aria-hidden="true" tabindex="-1"></a>T = 3,</span>
+<span id="cb1-534"><a href="#cb1-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-535"><a href="#cb1-535" aria-hidden="true" tabindex="-1"></a>minfup = 1.5,</span>
+<span id="cb1-536"><a href="#cb1-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-537"><a href="#cb1-537" aria-hidden="true" tabindex="-1"></a>eta = -log(1-0.08)</span>
+<span id="cb1-538"><a href="#cb1-538" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-539"><a href="#cb1-539" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-540"><a href="#cb1-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-541"><a href="#cb1-541" aria-hidden="true" tabindex="-1"></a>x</span>
+<span id="cb1-542"><a href="#cb1-542" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-543"><a href="#cb1-543" aria-hidden="true" tabindex="-1"></a>plot(x)</span>
+<span id="cb1-544"><a href="#cb1-544" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-545"><a href="#cb1-545" aria-hidden="true" tabindex="-1"></a>结果输出：</span>
+<span id="cb1-546"><a href="#cb1-546" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-547"><a href="#cb1-547" aria-hidden="true" tabindex="-1"></a>Time to event group sequential design with HR= 0.525</span>
+<span id="cb1-548"><a href="#cb1-548" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-549"><a href="#cb1-549" aria-hidden="true" tabindex="-1"></a>Equal randomization:          ratio=1</span>
+<span id="cb1-550"><a href="#cb1-550" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-551"><a href="#cb1-551" aria-hidden="true" tabindex="-1"></a>Asymmetric two-sided group sequential design with</span>
+<span id="cb1-552"><a href="#cb1-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-553"><a href="#cb1-553" aria-hidden="true" tabindex="-1"></a>80 % power and 2.5 % Type I Error.</span>
+<span id="cb1-554"><a href="#cb1-554" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-555"><a href="#cb1-555" aria-hidden="true" tabindex="-1"></a>Spending computations assume trial stops</span>
+<span id="cb1-556"><a href="#cb1-556" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-557"><a href="#cb1-557" aria-hidden="true" tabindex="-1"></a>if a bound is crossed.</span>
+<span id="cb1-558"><a href="#cb1-558" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-559"><a href="#cb1-559" aria-hidden="true" tabindex="-1"></a>----Lower bounds----  ----Upper bounds-----</span>
+<span id="cb1-560"><a href="#cb1-560" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-561"><a href="#cb1-561" aria-hidden="true" tabindex="-1"></a>Analysis N    Z   Nominal p Spend+  Z   Nominal p Spend++</span>
+<span id="cb1-562"><a href="#cb1-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-563"><a href="#cb1-563" aria-hidden="true" tabindex="-1"></a>1 21 -0.86    0.1953 0.0104 4.33    0.0000  0.0000</span>
+<span id="cb1-564"><a href="#cb1-564" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-565"><a href="#cb1-565" aria-hidden="true" tabindex="-1"></a>2 41  0.56    0.7108 0.0596 2.96    0.0015  0.0015</span>
+<span id="cb1-566"><a href="#cb1-566" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-567"><a href="#cb1-567" aria-hidden="true" tabindex="-1"></a>3 62  1.34    0.9091 0.0690 2.36    0.0092  0.0081</span>
+<span id="cb1-568"><a href="#cb1-568" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-569"><a href="#cb1-569" aria-hidden="true" tabindex="-1"></a>4 82  1.93    0.9731 0.0611 1.93    0.0269  0.0154</span>
+<span id="cb1-570"><a href="#cb1-570" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-571"><a href="#cb1-571" aria-hidden="true" tabindex="-1"></a>Total                    0.2000                 0.0250</span>
+<span id="cb1-572"><a href="#cb1-572" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-573"><a href="#cb1-573" aria-hidden="true" tabindex="-1"></a><span class="ss">+ </span>lower bound beta spending (under H1):</span>
+<span id="cb1-574"><a href="#cb1-574" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-575"><a href="#cb1-575" aria-hidden="true" tabindex="-1"></a>Lan-DeMets O'Brien-Fleming approximation spending function (no parameters).</span>
+<span id="cb1-576"><a href="#cb1-576" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-577"><a href="#cb1-577" aria-hidden="true" tabindex="-1"></a>++ alpha spending:</span>
+<span id="cb1-578"><a href="#cb1-578" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-579"><a href="#cb1-579" aria-hidden="true" tabindex="-1"></a>Lan-DeMets O'Brien-Fleming approximation spending function (no parameters).</span>
+<span id="cb1-580"><a href="#cb1-580" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-581"><a href="#cb1-581" aria-hidden="true" tabindex="-1"></a>Boundary crossing probabilities and expected sample size</span>
+<span id="cb1-582"><a href="#cb1-582" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-583"><a href="#cb1-583" aria-hidden="true" tabindex="-1"></a>assume any cross stops the trial</span>
+<span id="cb1-584"><a href="#cb1-584" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-585"><a href="#cb1-585" aria-hidden="true" tabindex="-1"></a>Upper boundary (power or Type I Error)</span>
+<span id="cb1-586"><a href="#cb1-586" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-587"><a href="#cb1-587" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-588"><a href="#cb1-588" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-589"><a href="#cb1-589" aria-hidden="true" tabindex="-1"></a>Theta     1      2      3      4 Total E{N}</span>
+<span id="cb1-590"><a href="#cb1-590" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-591"><a href="#cb1-591" aria-hidden="true" tabindex="-1"></a>0.0000 0.000 0.0015 0.0081 0.0154 0.025 44.2</span>
+<span id="cb1-592"><a href="#cb1-592" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-593"><a href="#cb1-593" aria-hidden="true" tabindex="-1"></a>0.3215 0.002 0.1803 0.3841 0.2336 0.800 62.0</span>
+<span id="cb1-594"><a href="#cb1-594" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-595"><a href="#cb1-595" aria-hidden="true" tabindex="-1"></a>Lower boundary (futility or Type II Error)</span>
+<span id="cb1-596"><a href="#cb1-596" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-597"><a href="#cb1-597" aria-hidden="true" tabindex="-1"></a>Analysis</span>
+<span id="cb1-598"><a href="#cb1-598" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-599"><a href="#cb1-599" aria-hidden="true" tabindex="-1"></a>Theta      1      2      3      4 Total</span>
+<span id="cb1-600"><a href="#cb1-600" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-601"><a href="#cb1-601" aria-hidden="true" tabindex="-1"></a>0.0000 0.1953 0.5195 0.2021 0.0581 0.975</span>
+<span id="cb1-602"><a href="#cb1-602" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-603"><a href="#cb1-603" aria-hidden="true" tabindex="-1"></a>0.3215 0.0104 0.0596 0.0690 0.0611 0.200</span>
+<span id="cb1-604"><a href="#cb1-604" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-605"><a href="#cb1-605" aria-hidden="true" tabindex="-1"></a>T     n Events HR futility HR efficacy</span>
+<span id="cb1-606"><a href="#cb1-606" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-607"><a href="#cb1-607" aria-hidden="true" tabindex="-1"></a>IA 1  1.149 166.1  20.46       1.462       0.147</span>
+<span id="cb1-608"><a href="#cb1-608" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-609"><a href="#cb1-609" aria-hidden="true" tabindex="-1"></a>IA 2  1.684 216.8  40.91       0.841       0.396</span>
+<span id="cb1-610"><a href="#cb1-610" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-611"><a href="#cb1-611" aria-hidden="true" tabindex="-1"></a>IA 3  2.268 216.8  61.37       0.711       0.548</span>
+<span id="cb1-612"><a href="#cb1-612" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-613"><a href="#cb1-613" aria-hidden="true" tabindex="-1"></a>Final 3.000 216.8  81.82       0.653       0.653</span>
+<span id="cb1-614"><a href="#cb1-614" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-615"><a href="#cb1-615" aria-hidden="true" tabindex="-1"></a>Accrual rates:</span>
+<span id="cb1-616"><a href="#cb1-616" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-617"><a href="#cb1-617" aria-hidden="true" tabindex="-1"></a>Stratum 1</span>
+<span id="cb1-618"><a href="#cb1-618" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-619"><a href="#cb1-619" aria-hidden="true" tabindex="-1"></a>0-1.5     144.6</span>
+<span id="cb1-620"><a href="#cb1-620" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-621"><a href="#cb1-621" aria-hidden="true" tabindex="-1"></a>Control event rates (H1):</span>
+<span id="cb1-622"><a href="#cb1-622" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-623"><a href="#cb1-623" aria-hidden="true" tabindex="-1"></a>Stratum 1</span>
+<span id="cb1-624"><a href="#cb1-624" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-625"><a href="#cb1-625" aria-hidden="true" tabindex="-1"></a>0-Inf      0.32</span>
+<span id="cb1-626"><a href="#cb1-626" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-627"><a href="#cb1-627" aria-hidden="true" tabindex="-1"></a>Censoring rates:</span>
+<span id="cb1-628"><a href="#cb1-628" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-629"><a href="#cb1-629" aria-hidden="true" tabindex="-1"></a>Stratum 1</span>
+<span id="cb1-630"><a href="#cb1-630" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-631"><a href="#cb1-631" aria-hidden="true" tabindex="-1"></a>0-Inf      0.08</span>
+<span id="cb1-632"><a href="#cb1-632" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-633"><a href="#cb1-633" aria-hidden="true" tabindex="-1"></a>R语言rpact包计算结果与之相同。</span>
+<span id="cb1-634"><a href="#cb1-634" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-635"><a href="#cb1-635" aria-hidden="true" tabindex="-1"></a>结果该研究在第2次期中分析（累积发生43个事件，上文R语言计算结果为42.9）时，单侧P=0.297，大于既定的0.253，研究因无效终止，此时已入组了163例患者。</span>
+<span id="cb1-636"><a href="#cb1-636" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-637"><a href="#cb1-637" aria-hidden="true" tabindex="-1"></a>ARISTOTLE研究比较了新型口服抗凝药Apixaban与华法林预防非瓣膜病房颤血栓栓塞的效果，主要终点为卒中或全身栓塞，假设事件率为每年1.2%，非劣效界值1.44，要求试验组相对风险99%置信区间上限小于该界值，则448个事件可以提供90%的检验效能。平均随访约2.1年，需要约18000例患者。</span>
+<span id="cb1-638"><a href="#cb1-638" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-639"><a href="#cb1-639" aria-hidden="true" tabindex="-1"></a>（根据不同地区的监管要求，样本量计算满足两种情形：1）I类错误单侧0.025，非劣效界值1.38；2）I类错误单侧0.005，非劣效界值1.44。选择了要求样本量更大的情形2。）</span>
+<span id="cb1-640"><a href="#cb1-640" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-641"><a href="#cb1-641" aria-hidden="true" tabindex="-1"></a>（protocol Amendment 07，原先假设事件率为1.67%，样本量为15000，盲态分析显示实际的事件率为1.2%，样本量增加至18000）</span>
+<span id="cb1-642"><a href="#cb1-642" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-643"><a href="#cb1-643" aria-hidden="true" tabindex="-1"></a>50%终点事件时进行一次期中分析，如Apixaban优于华法林，P&lt;0.0001则终止研究，不进行非劣效检验。</span>
+<span id="cb1-644"><a href="#cb1-644" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-645"><a href="#cb1-645" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img14.png)</span>{width="6.0in"}</span>
+<span id="cb1-646"><a href="#cb1-646" aria-hidden="true" tabindex="-1"></a>中位随访时间1.8年，主要终点事件率在试验组为1.27%，对照组1.60%，HR为0.79（95%置信区间0.66~0.95，非劣效P&lt;0.001，优效P=0.01）</span>
+<span id="cb1-647"><a href="#cb1-647" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-648"><a href="#cb1-648" aria-hidden="true" tabindex="-1"></a>（中国数据质量问题）</span>
+<span id="cb1-649"><a href="#cb1-649" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-650"><a href="#cb1-650" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-651"><a href="#cb1-651" aria-hidden="true" tabindex="-1"></a><span class="fu">### 讨论</span></span>
+<span id="cb1-652"><a href="#cb1-652" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-653"><a href="#cb1-653" aria-hidden="true" tabindex="-1"></a>成组序贯设计，研究有望提前终止，不论是有效还是无效，可节约不少时间与成本，近年来使用逐渐增多，特别是在一些大型的临床试验中。在PubMed以”group sequential“进行检索，结果见图 12-1，其中2024年达71条记录。</span>
+<span id="cb1-654"><a href="#cb1-654" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-655"><a href="#cb1-655" aria-hidden="true" tabindex="-1"></a><span class="al">![](media/S12_GS/S12_GS_img15.png)</span>{width="6.0in"}</span>
+<span id="cb1-656"><a href="#cb1-656" aria-hidden="true" tabindex="-1"></a>图 12-1 在PubMed以”group sequential“进行检索的结果</span>
+<span id="cb1-657"><a href="#cb1-657" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-658"><a href="#cb1-658" aria-hidden="true" tabindex="-1"></a>出于对I类错误膨胀的担心，监管机构倾向于类似O’Brien-Fleming的边界，对于早期的期中分析设定严格的界值，而反对Pocock的边界，特别是在临床关键性研究中。Pocock边界在产品研发的早期有一定的价值。</span>
+<span id="cb1-659"><a href="#cb1-659" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-660"><a href="#cb1-660" aria-hidden="true" tabindex="-1"></a>期中分析的次数，以1~2次较为常见，尽管也有5次甚至更多的情况，极端情况是每获得一列患者的结果即进行分析，即使所需样本量增加有限（在单侧α=0.025，β=0.1的情况下，经典的O’Brien-Fleming边界，总计10次分析的样本膨胀系数仅为1.037；考虑无效终止，也仅为1.086），但需兼顾可行性。</span>
+<span id="cb1-661"><a href="#cb1-661" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-662"><a href="#cb1-662" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-663"><a href="#cb1-663" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 成组序贯设计的适用情况</span></span>
+<span id="cb1-664"><a href="#cb1-664" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-665"><a href="#cb1-665" aria-hidden="true" tabindex="-1"></a>一般来说，对预期结果比较有把握时，可直接采用传统的固定设计；对预期结果没有任何把握时，可开展小样本的预试验；而对预期结果的把握度介于这两者之间时，可考虑成组序贯设计。另外，成组序贯设计增加了研究操作层面的复杂性，也是需要考量的因素。药监局指导原则建议：在确证性试验中，适应性设计的期中分析一般应该由独立的数据监查委员会（Data Monitoring Committee, DMC）及其申办者以外的独立统计支持团队完成，并保证期中分析的结果不被申办者、研究者和受试者所知悉，以免影响后续试验的执行和引入操作偏倚1。</span>
+<span id="cb1-666"><a href="#cb1-666" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-667"><a href="#cb1-667" aria-hidden="true" tabindex="-1"></a>成组序贯设计适用于入组相对较慢，而获得结果相对较快的情形，比如主要研究终点为急性期终点时，很快可以获得期中分析的结果，决策是否要继续研究。如果获得结果相对较慢，比如需随访1年，而入组相对较快，则在等待先期患者1年的结果时，研究很可能继续入组完了所有的患者，除非事先约定暂停入组，但这两种情况都不能充分体现成组序贯设计的优势。</span>
+<span id="cb1-668"><a href="#cb1-668" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-669"><a href="#cb1-669" aria-hidden="true" tabindex="-1"></a>References:</span>
+<span id="cb1-670"><a href="#cb1-670" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-671"><a href="#cb1-671" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>国家药品监督管理局. 药物临床试验适应性设计指导原则（试行）; 2021.</span>
+<span id="cb1-672"><a href="#cb1-672" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-673"><a href="#cb1-673" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>FDA. Adaptive Designs for Clinical Trials of Drugs and Biologics Guidance for Industry; 2019.</span>
+<span id="cb1-674"><a href="#cb1-674" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-675"><a href="#cb1-675" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>FDA. Adaptive Designs for Medical Device Clinical Studies; 2016.</span>
+<span id="cb1-676"><a href="#cb1-676" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-677"><a href="#cb1-677" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>Jovin TG, Li C, Wu L, et al. Trial of Thrombectomy 6 to 24 Hours after Stroke Due to Basilar-Artery Occlusion. NEW ENGL J MED 2022;387:1373-84.</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
