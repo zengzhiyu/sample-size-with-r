@@ -1,9 +1,177 @@
 # 附录
 
-**pwrss**
+本附录介绍本书中使用的 R 包及其主要功能。
 
-**clusterPower**
+## pwrss
 
-cpa.normal
+`pwrss` 包提供了基于效应量的样本量计算功能，支持多种研究设计：
 
-cpa.binary
+- **单样本检验**：单样本 t 检验、单样本比例检验
+- **两样本检验**：独立样本 t 检验、配对 t 检验、两样本比例检验
+- **方差分析**：单因素方差分析、重复测量方差分析
+- **回归分析**：线性回归、逻辑回归
+- **相关性检验**：Pearson 相关系数
+
+安装方式：
+```r
+install.packages("pwrss")
+```
+
+主要函数：
+- `pwrss.t.one()`：单样本 t 检验
+- `pwrss.t.two()`：两独立样本 t 检验
+- `pwrss.z.two()`：两独立样本 z 检验（大样本）
+- `pwrss.chisq.gofit()`：卡方拟合优度检验
+- `pwrss.chisq.gofit()`：卡方独立性检验
+
+## clusterPower
+
+`clusterPower` 包专门用于整群随机试验的样本量计算：
+
+- **连续结局**：`cpa.normal()`
+- **二分类结局**：`cpa.binary()`
+- **计数结局**：`cpa.count()`
+- **生存结局**：`cpa.survival()`
+
+安装方式：
+```r
+install.packages("clusterPower")
+```
+
+### cpa.normal
+
+用于整群随机设计中连续型结局的样本量计算：
+
+```r
+cpa.normal(alpha = 0.05, power = 0.80, m = 10, 
+           n = NULL, d = 0.5, ICC = 0.05, 
+           varw = 1, method = "taylor")
+```
+
+参数说明：
+- `m`：每群个体数
+- `n`：群数（若设为 NULL 则计算所需群数）
+- `d`：效应量（组间差异）
+- `ICC`：组内相关系数
+- `varw`：组内方差
+
+### cpa.binary
+
+用于整群随机设计中二分类结局的样本量计算：
+
+```r
+cpa.binary(alpha = 0.05, power = 0.80, m = 10,
+           n = NULL, p1 = 0.2, p2 = 0.3, ICC = 0.05,
+           pooled = TRUE, method = "taylor")
+```
+
+参数说明：
+- `p1`：对照组事件发生率
+- `p2`：试验组事件发生率
+- `pooled`：是否使用合并方差
+
+## gsDesign
+
+`gsDesign` 包用于成组序贯设计的样本量计算和边界确定：
+
+- **经典设计**：O'Brien-Fleming、Pocock、Haybittle-Peto 边界
+- **自定义设计**：用户自定义消耗函数
+- **非劣效/优效设计**：支持非劣效和优效性检验
+
+安装方式：
+```r
+install.packages("gsDesign")
+```
+
+主要函数：
+- `gsDesign()`：创建成组序贯设计
+- `gsProbability()`：计算设计特征（I/II 类错误）
+- `gsBound()`：计算边界值
+
+示例：
+```r
+library(gsDesign)
+# O'Brien-Fleming 设计，3 次期中分析
+gsDesign(k = 3, test.type = 2, alpha = 0.025, 
+         beta = 0.1, sfu = "OF")
+```
+
+## simtrial
+
+`simtrial` 包用于通过蒙特卡洛模拟进行样本量计算和检验效能评估：
+
+- **二分类结局**：`simBinomial()`
+- **生存结局**：`simPWSurv()`
+- **自定义模拟**：灵活的模拟框架
+
+安装方式：
+```r
+install.packages("simtrial")
+```
+
+主要函数：
+- `simBinomial()`：二分类结局模拟
+- `simPWSurv()`：分段指数生存模拟
+- `simfix()`：固定设计模拟
+- `sim_gs_n()`：成组序贯设计模拟
+
+## pwr
+
+`pwr` 包是经典的样本量计算包，提供基于效应量的功效分析：
+
+- **t 检验**：`pwr.t.test()`
+- **方差分析**：`pwr.anova.test()`
+- **相关性**：`pwr.r.test()`
+- **比例检验**：`pwr.p.test()`
+- **卡方检验**：`pwr.chisq.test()`
+
+安装方式：
+```r
+install.packages("pwr")
+```
+
+## samplesize4surveys
+
+专门用于复杂抽样设计（整群、分层）的样本量计算：
+
+- **简单随机抽样**
+- **整群抽样**
+- **分层抽样**
+- **多阶段抽样**
+
+安装方式：
+```r
+install.packages("samplesize4surveys")
+```
+
+## Hmisc
+
+`Hmisc` 包中的 `bsamsize` 函数可用于诊断试验的样本量计算：
+
+```r
+library(Hmisc)
+bsamsize(p1, p2, fraction = 0.5, alpha = 0.05, power = 0.8)
+```
+
+用于计算比较两个比例（如灵敏度、特异度）所需的样本量。
+
+## 其他专用包
+
+### epiR
+
+流行病学研究专用包：
+- `epi.sscohortc()`：队列研究样本量
+- `epi.sscc()`：病例对照研究样本量
+- `epi.ssxsectn()`：横断面研究样本量
+
+### TrialSize
+
+临床试验样本量计算包，涵盖多种设计类型。
+
+### PowerTOST
+
+生物等效性试验的样本量计算。
+
+---
+
+**提示**：在使用任何包之前，建议先查阅其官方文档和 vignettes，了解函数的适用条件和参数设置。
