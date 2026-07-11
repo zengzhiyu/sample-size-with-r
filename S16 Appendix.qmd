@@ -1,9 +1,0 @@
-# 附录
-
-**pwrss**
-
-**clusterPower**
-
-cpa.normal
-
-cpa.binary
