@@ -1,10 +1,18 @@
-# 16. 样本量模拟计算
+# S15. 样本量模拟计算
 
-Testing at each analysis can be performed using the Miettinen and Nurminen ([Miettinen and Nurminen 1985](https://keaven.github.io/gsd-tech-manual/references.html#ref-MandN)) method.
 
-\# Show that power is 90% using simulation
+## 样本量模拟计算
 
-Z \<- [simBinomial](https://keaven.github.io/gsDesign/reference/varBinomial.html)(
+计算机模拟（蒙特卡洛模拟）法是样本量计算的重要补充手段。当研究设计复杂（如多个终点、相依的删失与结局、非标准检验统计量，或难以解析推导检验效能）时，解析公式或近似方法可能不可靠或不便使用；此时可在设定的参数与随机机制下大量重复生成数据集，对每个数据集按既定分析计划进行检验，统计达到显著的比例来估计检验效能，并在期望效能下反推所需样本量。模拟的基本要素包括：生成机制（如两组率的二项分布、生存过程）、分析计划（如采用的检验方法）以及重复次数（nsim）。重复次数越多，效能估计越精确，但计算时间越长。本章以二分类终点与生存终点为例说明。
+
+Testing at each analysis can be performed using the Miettinen and Nurminen (Miettinen and Nurminen 1985) method.
+
+
+#### 例 15-1 某研究比较两种术式的12个月无事件生存率，假设对照组事件率p2=0.125，试验组事件率p1=0.10（或0.15），取单侧α=0.025（等价于双侧0.05），检验效能90%，按公式需总样本量1836例（每组918例）。下面用simtrial包的simBinomial函数通过模拟验证其检验效能与I类错误率：
+
+# Show that power is 90% using simulation
+
+Z <- simBinomial(
 
 nsim = 100000,
 
@@ -18,15 +26,15 @@ n2 = 1836 / 2
 
 )
 
-[mean](https://rdrr.io/r/base/mean.html)(Z \>= [qnorm](https://rdrr.io/r/stats/Normal.html)(0.975))
+mean(Z >= qnorm(0.975))
 
-#\> \[1\] 0.90258
+#> [1] 0.90258
 
 Under the null hypothesis, we have:
 
-\# Show that Type I error is 2.5%
+# Show that Type I error is 2.5%
 
-Z \<- [simBinomial](https://keaven.github.io/gsDesign/reference/varBinomial.html)(
+Z <- simBinomial(
 
 nsim = 100000,
 
@@ -40,17 +48,22 @@ n2 = 1836 / 2
 
 )
 
-[mean](https://rdrr.io/r/base/mean.html)(Z \>= [qnorm](https://rdrr.io/r/stats/Normal.html)(0.975))
+mean(Z >= qnorm(0.975))
 
-#\> \[1\] 0.02416
+#> [1] 0.02416
 
-[1  Introduction -- gsDesign Technical Manual](https://keaven.github.io/gsd-tech-manual/intro.html)
+模拟显示，在备择假设（p1=0.15，p2=0.10）下检验效能约为90.3%，在零假设（p1=p2=0.125）下I类错误率约为2.4%，与解析公式结果一致。该例说明，当检验方法确定（此处为Miettinen–Nurminen法）时，模拟可以方便地验证解析样本量公式的准确性。
 
-[**library**](https://rdrr.io/r/base/library.html)([simtrial](https://merck.github.io/simtrial/))
 
-[**library**](https://rdrr.io/r/base/library.html)([dplyr](https://dplyr.tidyverse.org/))
+#### 例 15-2 某生存终点研究计划入组12362例、目标事件数617例，总观察期6年，预期风险比HR=1.3，脱落对应每年15%的保留率，取单侧α=0.025，检验效能约90%。下面用simtrial包的simfix函数模拟1000次，估计其检验效能：
 
-xx \<- simfix(
+1  Introduction – gsDesign Technical Manual
+
+library(simtrial)
+
+library(dplyr)
+
+xx <- simfix(
 
 nsim = 1000,
 
@@ -60,7 +73,7 @@ targetEvents = 617,
 
 totalDuration = 6,
 
-enrollRates = tibble::[tibble](https://tibble.tidyverse.org/reference/tibble.html)(
+enrollRates = tibble::tibble(
 
 duration = 2,
 
@@ -68,17 +81,17 @@ rate = 12362 / 2
 
 ),
 
-failRates = tibble::[tibble](https://tibble.tidyverse.org/reference/tibble.html)(
+failRates = tibble::tibble(
 
-Stratum = \"All\",
+Stratum = "All",
 
 duration = 6,
 
-failRate = -[log](https://rdrr.io/r/base/Log.html)(1 - 0.015),
+failRate = -log(1 - 0.015),
 
 hr = 1,
 
-dropoutRate = -[log](https://rdrr.io/r/base/Log.html)(0.85)
+dropoutRate = -log(0.85)
 
 ),
 
@@ -86,25 +99,31 @@ timingType = 3
 
 )
 
-xx [%\>%](https://magrittr.tidyverse.org/reference/pipe.html)
+xx %>%
 
-[mutate](https://dplyr.tidyverse.org/reference/mutate.html)(se = [sqrt](https://rdrr.io/r/base/MathFun.html)(4 / Events)) [%\>%](https://magrittr.tidyverse.org/reference/pipe.html)
+mutate(se = sqrt(4 / Events)) %>%
 
-[summarize](https://dplyr.tidyverse.org/reference/summarise.html)(
+summarize(
 
-Events = [mean](https://rdrr.io/r/base/mean.html)(Events),
+Events = mean(Events),
 
-Duration = [mean](https://rdrr.io/r/base/mean.html)(Duration),
+Duration = mean(Duration),
 
-Power = [mean](https://rdrr.io/r/base/mean.html)(lnhr + [qnorm](https://rdrr.io/r/stats/Normal.html)(0.975) \* se \< [log](https://rdrr.io/r/base/Log.html)(1.3))
+Power = mean(lnhr + qnorm(0.975) * se < log(1.3))
 
 )
 
-#\> Events Duration Power
+#>   Events Duration Power
 
-#\> 617.53 6.000395 0.907
+#>   617.53 6.000395 0.907
 
-例2-9 脉冲电场消融（PFA）治疗房颤的PULSED AF研究^1^，用了计算机模拟的方法计算样本量。主要有效性终点为12个月消融成功率，阵发性房颤组的目标值50%，预期值68%，持续性房颤组的目标值40%，预期值54%，检验效能90%，单侧α=0.025，每组各需90例和150例患者；主要安全性终点为无严重不良事件率，目标值13%，预期值5%，检验效能90%，单侧α=0.025，每组需138例患者。最终研究的样本量确定为阵发性房颤和持续性房颤各150例。
+模拟得到平均事件数约618例、平均观察期6.0年、检验效能约0.907（90.7%），与预期接近。当生存数据的入组速率、脱落与事件过程较复杂时，此类基于模拟的样本量估计比单纯解析公式更贴近实际试验进程。
+
+
+#### 例 15-3（参见第2章例2-9） PULSED AF研究1评价脉冲电场消融（PFA）治疗心房颤动（AF）病房患者的安全性，采用计算机模拟的方法计算样本量。
+
+
+#### 例2-9 脉冲电场消融（PFA）治疗房颤的PULSED AF研究1，用了计算机模拟的方法计算样本量。主要有效性终点为12个月消融成功率，阵发性房颤组的目标值50%，预期值68%，持续性房颤组的目标值40%，预期值54%，检验效能90%，单侧α=0.025，每组各需90例和150例患者；主要安全性终点为无严重不良事件率，目标值13%，预期值5%，检验效能90%，单侧α=0.025，每组需138例患者。最终研究的样本量确定为阵发性房颤和持续性房颤各150例。
 
 该例采用了计算机模拟的方法估计样本量，正态近似法计算的结果为针对有效性终点，阵发性房颤组77例，持续性房颤组例131例，针对安全性终点每组138例；而确切最小值分别为：81，139，138；确切保守法分别为86，139，147。
 
@@ -128,6 +147,8 @@ conservative = FALSE
 
 )
 
-**References:**
+上述代码利用gsDesign的nBinomial1Sample函数，在给定目标值p0=0.9、预期值p1=0.95、单侧α=0.025时，于样本量200~250之间搜索满足检验效能的例数；结果可见约217例时检验效能达到约80%（具体数值随精确边界略有波动）。
 
-1\. Verma A, Haines DE, Boersma LV, et al. Pulsed Field Ablation for the Treatment of Atrial Fibrillation: PULSED AF Pivotal Trial. CIRCULATION 2023.
+References:
+
+1.	Verma A, Haines DE, Boersma LV, et al. Pulsed Field Ablation for the Treatment of Atrial Fibrillation: PULSED AF Pivotal  Trial. CIRCULATION 2023.

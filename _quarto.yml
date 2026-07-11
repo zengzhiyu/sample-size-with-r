@@ -1,4 +1,4 @@
-project:
+﻿project:
   type: book
 
 book:
@@ -24,9 +24,10 @@ book:
     - "S13 SSR.qmd"
     - "S14 Multiplicityfactorial.qmd"
     - "S15 simulation.qmd"
+    - "S16 WinRatio.qmd"
 
   appendices:
-    - "S16 Appendix.qmd"
+    - "S17 Appendix.qmd"
 
 format:
   html:
